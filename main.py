@@ -8,27 +8,27 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from generate import build
+from generate import build, total_days
 from post import build_caption, post_reel
 
 load_dotenv()
 
 ROOT = Path(__file__).parent
-TOTAL_DAYS = 49  # 1 intro + 48 laws
 
 
 def current_day() -> int:
-    """Day 1 on START_DATE; clamps at TOTAL_DAYS."""
+    """Day 1 on START_DATE; clamps at total_days() (computed from quotes.json)."""
     start = os.environ.get("START_DATE")
     if not start:
         raise RuntimeError("START_DATE not set (format YYYY-MM-DD)")
     start_d = datetime.strptime(start, "%Y-%m-%d").date()
     today = date.today()
     n = (today - start_d).days + 1
+    total = total_days()
     if n < 1:
         raise RuntimeError(f"Today is before START_DATE ({start_d}); nothing to post")
-    if n > TOTAL_DAYS:
-        raise SystemExit(f"Series complete (day {n} > {TOTAL_DAYS}). Nothing to post.")
+    if n > total:
+        raise SystemExit(f"Series complete (day {n} > {total}). Nothing to post.")
     return n
 
 
@@ -61,7 +61,7 @@ def upload_to_public_url(local_video: Path) -> str:
 
 def main() -> int:
     day_num = current_day()
-    print(f"==> Day {day_num}/{TOTAL_DAYS}")
+    print(f"==> Day {day_num}/{total_days()}")
 
     result = build(day_num)
     print(f"  built video: {result['video']}")

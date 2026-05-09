@@ -28,8 +28,18 @@ def load_day(day_num: int) -> dict:
     data = json.loads(QUOTES.read_text(encoding="utf-8"))
     for d in data["days"]:
         if d["day"] == day_num:
-            return {**d, "book": data["book"], "author": data["author"]}
+            result = dict(d)
+            # Per-day book/author wins over the top-level default (lets us mix multiple books)
+            result.setdefault("book", data["book"])
+            result.setdefault("author", data["author"])
+            result["total_days"] = len(data["days"])
+            return result
     raise ValueError(f"No entry for day {day_num}")
+
+
+def total_days() -> int:
+    data = json.loads(QUOTES.read_text(encoding="utf-8"))
+    return len(data["days"])
 
 
 def pick_font(preferred: list[str], size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
@@ -129,8 +139,8 @@ def render_image(day: dict, out_path: Path) -> None:
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    # Top: "LAW N · DAY M OF 49" (or "INTRODUCTION · DAY 1 OF 49" for day 1)
-    top_label = f"{day['title'].upper()}  ·  DAY {day['day']} OF 49"
+    # Top: "LAW N · DAY M OF X" — total comes from quotes.json so it auto-updates as books are added
+    top_label = f"{day['title'].upper()}  ·  DAY {day['day']} OF {day['total_days']}"
     bbox = draw.textbbox((0, 0), top_label, font=font_title)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 180), top_label, fill=GOLD, font=font_title)
 

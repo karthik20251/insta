@@ -34,7 +34,17 @@ def main() -> int:
         print(f"  [FAIL] Token is INVALID: {r.json()}"); return 1
     print(f"  [OK] Token is valid")
     print(f"    type:    {data.get('type')}")
-    print(f"    expires: {data.get('expires_at')} (0 = never; long-lived ~ 60 days)")
+    expires_at = data.get('expires_at', 0)
+    if expires_at == 0:
+        print(f"    expires: never")
+    else:
+        from datetime import datetime, timezone
+        exp_utc = datetime.fromtimestamp(expires_at, tz=timezone.utc)
+        now_utc = datetime.now(timezone.utc)
+        days_left = (exp_utc - now_utc).total_seconds() / 86400
+        print(f"    expires: {exp_utc.isoformat()}  ({days_left:.1f} days from now)")
+        if days_left < 50:
+            print(f"    [WARN] expected ~60 days for a long-lived token. This may not be a true long-lived token.")
     scopes = data.get("scopes", [])
     print(f"    scopes:  {', '.join(scopes)}")
     needed = {"instagram_basic", "instagram_content_publish", "pages_show_list"}

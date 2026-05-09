@@ -16,6 +16,12 @@ GRAPH = "https://graph.facebook.com/v21.0"
 
 
 def build_caption(day: dict) -> str:
+    total = day.get("total_days", 79)
+    # Hashtags adjust to which book this day belongs to
+    if "atomic habits" in day["book"].lower():
+        tags = "#atomichabits #jamesclear #habits #mindset #selfimprovement #productivity #discipline #identity #books #dailyquotes"
+    else:
+        tags = "#48lawsofpower #robertgreene #power #wisdom #mindset #selfimprovement #strategy #philosophy #books #dailyquotes"
     parts = [
         day["headline"],
         "",
@@ -23,11 +29,11 @@ def build_caption(day: dict) -> str:
         "",
         f"— {day['author']}, {day['book']}",
         "",
-        f"Day {day['day']} of 49 · The 48 Laws of Power series",
+        f"Day {day['day']} of {total}",
         "",
         "Music: Kevin MacLeod (incompetech.com), CC-BY 4.0",
         "",
-        "#48lawsofpower #robertgreene #power #wisdom #mindset #selfimprovement #strategy #philosophy #books #dailyquotes",
+        tags,
     ]
     return "\n".join(parts)
 
