@@ -1,0 +1,29 @@
+name: Refresh IG Access Token
+
+on:
+  schedule:
+    # Mondays at 06:00 UTC (~11:30 AM IST). Refreshes ~weekly so the token
+    # never gets close to its 60-day expiry.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install requests
+
+      - name: Refresh long-lived token + update GitHub Secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          APP_SECRET: ${{ secrets.APP_SECRET }}
+          CURRENT_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python scripts/refresh_token.py
