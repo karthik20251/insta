@@ -27,3 +27,33 @@ jobs:
           CURRENT_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: python scripts/refresh_token.py
+
+      - name: Email — token refresh FAILED
+        if: failure() && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_APP_PASSWORD }}
+          from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: "[URGENT] IG token refresh failed — daily posts will stop in <60 days"
+          body: |
+            The weekly Meta token refresh FAILED.
+
+            If this is not fixed, IG_ACCESS_TOKEN will expire and daily posts
+            will stop. The current token expires within 60 days of its last
+            successful refresh.
+
+            Run logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Common causes + fixes:
+            - APP_SECRET wrong → regenerate at developers.facebook.com
+            - GH_TOKEN expired → regenerate the GitHub PAT and update the secret
+            - IG_ACCESS_TOKEN already expired → manually re-run the bootstrap
+              flow (see README) and update IG_ACCESS_TOKEN secret

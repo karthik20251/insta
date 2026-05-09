@@ -59,12 +59,32 @@ def upload_to_public_url(local_video: Path) -> str:
     raise RuntimeError(f"Unknown UPLOAD_BACKEND: {backend}")
 
 
+def write_github_output(**kv) -> None:
+    """Expose values to subsequent workflow steps via $GITHUB_OUTPUT."""
+    path = os.environ.get("GITHUB_OUTPUT")
+    if not path:
+        return
+    with open(path, "a", encoding="utf-8") as f:
+        for k, v in kv.items():
+            f.write(f"{k}={v}\n")
+
+
 def main() -> int:
     day_num = current_day()
     print(f"==> Day {day_num}/{total_days()}")
 
     result = build(day_num)
+    day = result["day"]
     print(f"  built video: {result['video']}")
+
+    write_github_output(
+        day_num=day_num,
+        title=day["title"],
+        headline=day["headline"],
+        book=day["book"],
+        book_day=day["book_day"],
+        book_total=day["book_total"],
+    )
 
     if "--dry-run" in sys.argv:
         print("  --dry-run: skipping upload + post")
@@ -73,9 +93,10 @@ def main() -> int:
     video_url = upload_to_public_url(result["video"])
     print(f"  public url: {video_url}")
 
-    caption = build_caption(result["day"])
+    caption = build_caption(day)
     media_id = post_reel(video_url, caption)
     print(f"  posted: media_id={media_id}")
+    write_github_output(media_id=media_id)
     return 0
 
 

@@ -39,6 +39,7 @@ jobs:
           git push
 
       - name: Post to Instagram
+        id: post
         env:
           START_DATE: ${{ vars.START_DATE }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
@@ -46,3 +47,60 @@ jobs:
           UPLOAD_BACKEND: github
           GITHUB_RAW_BASE: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/output
         run: python main.py
+
+      - name: Email — success
+        if: success() && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_APP_PASSWORD }}
+          from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: "[OK] Day ${{ steps.post.outputs.day_num }} posted — ${{ steps.post.outputs.title }}: ${{ steps.post.outputs.headline }}"
+          body: |
+            Posted successfully to @nandetroll_
+
+            Day ${{ steps.post.outputs.day_num }} of 92 (overall series)
+            Book: ${{ steps.post.outputs.book }}
+            Book Day: ${{ steps.post.outputs.book_day }} of ${{ steps.post.outputs.book_total }}
+            Title: ${{ steps.post.outputs.title }}
+            Headline: ${{ steps.post.outputs.headline }}
+
+            IG Media ID: ${{ steps.post.outputs.media_id }}
+            View on Instagram: https://www.instagram.com/nandetroll_/
+
+            Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Email — failure
+        if: failure() && env.MAIL_USERNAME != ''
+        uses: dawidd6/action-send-mail@v3
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_APP_PASSWORD }}
+          from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: "[FAIL] Daily post FAILED for Day ${{ steps.post.outputs.day_num }}"
+          body: |
+            The daily post workflow FAILED.
+
+            Day attempted: ${{ steps.post.outputs.day_num }} (book day ${{ steps.post.outputs.book_day }} / ${{ steps.post.outputs.book_total }} — ${{ steps.post.outputs.book }})
+            Title: ${{ steps.post.outputs.title }}
+            Headline: ${{ steps.post.outputs.headline }}
+
+            Check the run logs:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            Common causes:
+            - IG_ACCESS_TOKEN expired (re-run "Refresh IG Access Token" workflow)
+            - GitHub raw URL not yet propagated for the just-built video (re-run this workflow)
+            - Meta API rate-limited (wait, retry)
