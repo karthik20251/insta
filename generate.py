@@ -93,9 +93,25 @@ def draw_gradient(img: Image.Image) -> None:
             px[x, y] = (r, g, b)
 
 
-def make_background(day_num: int) -> Image.Image:
-    """Pick a (deterministic-per-day) background painting; fall back to gradient."""
-    backgrounds = sorted(BG_DIR.glob("*.jpg")) + sorted(BG_DIR.glob("*.png"))
+def book_slug(book_name: str) -> str:
+    """Map a book name to its asset subfolder."""
+    b = book_name.lower()
+    if "atomic" in b:
+        return "atomic"
+    if "12 rules" in b or "jordan peterson" in b:
+        return "rules"
+    return "48laws"
+
+
+def make_background(day_num: int, book: str = "") -> Image.Image:
+    """Pick a (deterministic-per-day) background painting from the book's subfolder.
+
+    Falls back to top-level backgrounds/ then gradient if subfolder is empty."""
+    slug = book_slug(book) if book else "48laws"
+    book_dir = BG_DIR / slug
+    backgrounds = sorted(book_dir.glob("*.jpg")) + sorted(book_dir.glob("*.png"))
+    if not backgrounds:
+        backgrounds = sorted(BG_DIR.glob("*.jpg")) + sorted(BG_DIR.glob("*.png"))
     if not backgrounds:
         img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
         draw_gradient(img)
@@ -109,13 +125,15 @@ def make_background(day_num: int) -> Image.Image:
 
     # Build a single-row darkening mask (white where we want darker, black where we want lighter)
     # Then stretch it to full image and use as opacity mask blending bg with black.
+    # Slightly lighter overlay for Atomic Habits so the brighter paintings show through.
+    base_dark = 0.55 if slug == "atomic" else 0.62
+    edge_dark = 0.20 if slug == "atomic" else 0.22
     mask_col = Image.new("L", (1, HEIGHT))
     mp = mask_col.load()
     for y in range(HEIGHT):
         t = y / (HEIGHT - 1)
         bell = abs(t - 0.5) * 2  # 1 at edges, 0 at center
-        # darken_amount in [0..1]; higher = darker
-        darken = 0.62 + 0.22 * bell
+        darken = base_dark + edge_dark * bell
         mp[0, y] = int(darken * 255)
     mask = mask_col.resize((WIDTH, HEIGHT))
     black = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
@@ -141,7 +159,7 @@ def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[s
 
 
 def render_image(day: dict, out_path: Path) -> None:
-    img = make_background(day["day"])
+    img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
     font_title = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 56, weight=700)
@@ -185,8 +203,13 @@ def render_image(day: dict, out_path: Path) -> None:
     img.save(out_path, "PNG", optimize=True)
 
 
-def pick_music() -> Path | None:
-    tracks = list(MUSIC_DIR.glob("*.mp3")) + list(MUSIC_DIR.glob("*.m4a")) + list(MUSIC_DIR.glob("*.wav"))
+def pick_music(book: str = "") -> Path | None:
+    """Pick a track from the book's subfolder, falling back to top-level music/."""
+    slug = book_slug(book) if book else "48laws"
+    book_dir = MUSIC_DIR / slug
+    tracks = list(book_dir.glob("*.mp3")) + list(book_dir.glob("*.m4a")) + list(book_dir.glob("*.wav"))
+    if not tracks:
+        tracks = list(MUSIC_DIR.glob("*.mp3")) + list(MUSIC_DIR.glob("*.m4a")) + list(MUSIC_DIR.glob("*.wav"))
     return random.choice(tracks) if tracks else None
 
 
@@ -222,7 +245,7 @@ def build(day_num: int) -> dict:
     image_path = OUT_DIR / f"day_{day_num:02d}.png"
     video_path = OUT_DIR / f"day_{day_num:02d}.mp4"
     render_image(day, image_path)
-    music = pick_music()
+    music = pick_music(day.get("book", ""))
     make_video(image_path, music, video_path)
     return {
         "day": day,
