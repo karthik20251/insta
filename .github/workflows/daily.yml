@@ -2,8 +2,8 @@ name: Daily 48 Laws Post
 
 on:
   schedule:
-    # 03:30 UTC = 09:00 IST. Adjust if you want a different time.
-    - cron: "30 3 * * *"
+    # 13:45 UTC = 19:15 IST (7:15 PM India time)
+    - cron: "45 13 * * *"
   workflow_dispatch:
 
 permissions:
