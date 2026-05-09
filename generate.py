@@ -31,16 +31,28 @@ def load_day(day_num: int) -> dict:
     raise ValueError(f"No entry for day {day_num}")
 
 
-def pick_font(preferred: list[str], size: int) -> ImageFont.FreeTypeFont:
+def pick_font(preferred: list[str], size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
+    """Load the first font in `preferred` that exists. If `weight` is given and the font
+    is a variable font with a 'wght' axis, set the weight (e.g. 700 for bold)."""
+    chosen: Path | None = None
     for name in preferred:
         p = FONTS_DIR / name
         if p.exists():
-            return ImageFont.truetype(str(p), size)
-    # fall back to any .ttf in fonts/, else PIL default
-    any_ttf = sorted(FONTS_DIR.glob("*.ttf")) + sorted(FONTS_DIR.glob("*.otf"))
-    if any_ttf:
-        return ImageFont.truetype(str(any_ttf[0]), size)
-    return ImageFont.load_default()
+            chosen = p
+            break
+    if chosen is None:
+        any_ttf = sorted(FONTS_DIR.glob("*.ttf")) + sorted(FONTS_DIR.glob("*.otf"))
+        if any_ttf:
+            chosen = any_ttf[0]
+    if chosen is None:
+        return ImageFont.load_default()
+    font = ImageFont.truetype(str(chosen), size)
+    if weight is not None:
+        try:
+            font.set_variation_by_axes([weight])
+        except Exception:
+            pass
+    return font
 
 
 def draw_gradient(img: Image.Image) -> None:
@@ -80,16 +92,16 @@ def render_image(day: dict, out_path: Path) -> None:
     draw_gradient(img)
     draw = ImageDraw.Draw(img)
 
-    font_title = pick_font(["Cinzel-Bold.ttf", "PlayfairDisplay-Bold.ttf"], 64)
-    font_head = pick_font(["Cinzel-Bold.ttf", "PlayfairDisplay-Bold.ttf"], 84)
-    font_body = pick_font(["PlayfairDisplay-Regular.ttf", "Cinzel-Regular.ttf"], 52)
-    font_foot = pick_font(["PlayfairDisplay-Italic.ttf", "Cinzel-Regular.ttf"], 38)
+    font_title = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 56, weight=700)
+    font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 78, weight=900)
+    font_body = pick_font(["PlayfairDisplay.ttf", "PlayfairDisplay-Regular.ttf"], 50, weight=500)
+    font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
 
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    # Top: "Day N · The 48 Laws of Power"
-    top_label = f"DAY {day['day']}  ·  THE 48 LAWS OF POWER"
+    # Top: "LAW N · DAY M OF 49" (or "INTRODUCTION · DAY 1 OF 49" for day 1)
+    top_label = f"{day['title'].upper()}  ·  DAY {day['day']} OF 49"
     bbox = draw.textbbox((0, 0), top_label, font=font_title)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 180), top_label, fill=GOLD, font=font_title)
 
