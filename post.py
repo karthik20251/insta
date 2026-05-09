@@ -25,6 +25,8 @@ def build_caption(day: dict) -> str:
         "",
         f"Day {day['day']} of 49 · The 48 Laws of Power series",
         "",
+        "Music: Kevin MacLeod (incompetech.com), CC-BY 4.0",
+        "",
         "#48lawsofpower #robertgreene #power #wisdom #mindset #selfimprovement #strategy #philosophy #books #dailyquotes",
     ]
     return "\n".join(parts)

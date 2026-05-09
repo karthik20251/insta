@@ -12,6 +12,7 @@ ROOT = Path(__file__).parent
 QUOTES = ROOT / "quotes.json"
 MUSIC_DIR = ROOT / "music"
 FONTS_DIR = ROOT / "fonts"
+BG_DIR = ROOT / "backgrounds"
 OUT_DIR = ROOT / "output"
 OUT_DIR.mkdir(exist_ok=True)
 
@@ -69,6 +70,35 @@ def draw_gradient(img: Image.Image) -> None:
             px[x, y] = (r, g, b)
 
 
+def make_background(day_num: int) -> Image.Image:
+    """Pick a (deterministic-per-day) background painting; fall back to gradient."""
+    backgrounds = sorted(BG_DIR.glob("*.jpg")) + sorted(BG_DIR.glob("*.png"))
+    if not backgrounds:
+        img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
+        draw_gradient(img)
+        return img
+
+    # Deterministic per day so re-renders look identical
+    bg_path = backgrounds[(day_num * 7 + 3) % len(backgrounds)]
+    bg = Image.open(bg_path).convert("RGB")
+    if bg.size != (WIDTH, HEIGHT):
+        bg = bg.resize((WIDTH, HEIGHT), Image.LANCZOS)
+
+    # Build a single-row darkening mask (white where we want darker, black where we want lighter)
+    # Then stretch it to full image and use as opacity mask blending bg with black.
+    mask_col = Image.new("L", (1, HEIGHT))
+    mp = mask_col.load()
+    for y in range(HEIGHT):
+        t = y / (HEIGHT - 1)
+        bell = abs(t - 0.5) * 2  # 1 at edges, 0 at center
+        # darken_amount in [0..1]; higher = darker
+        darken = 0.62 + 0.22 * bell
+        mp[0, y] = int(darken * 255)
+    mask = mask_col.resize((WIDTH, HEIGHT))
+    black = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
+    return Image.composite(black, bg, mask)
+
+
 def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[str]:
     words = text.split()
     lines, line = [], ""
@@ -88,8 +118,7 @@ def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[s
 
 
 def render_image(day: dict, out_path: Path) -> None:
-    img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
-    draw_gradient(img)
+    img = make_background(day["day"])
     draw = ImageDraw.Draw(img)
 
     font_title = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 56, weight=700)
