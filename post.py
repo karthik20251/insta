@@ -16,10 +16,13 @@ GRAPH = "https://graph.facebook.com/v21.0"
 
 
 def build_caption(day: dict) -> str:
-    total = day.get("total_days", 79)
+    total = day.get("total_days", 92)
     # Hashtags adjust to which book this day belongs to
-    if "atomic habits" in day["book"].lower():
+    book_lower = day["book"].lower()
+    if "atomic habits" in book_lower:
         tags = "#atomichabits #jamesclear #habits #mindset #selfimprovement #productivity #discipline #identity #books #dailyquotes"
+    elif "12 rules" in book_lower or "jordan peterson" in book_lower:
+        tags = "#12rulesforlife #jordanpeterson #meaning #responsibility #philosophy #stoic #mindset #selfimprovement #books #dailyquotes"
     else:
         tags = "#48lawsofpower #robertgreene #power #wisdom #mindset #selfimprovement #strategy #philosophy #books #dailyquotes"
     parts = [
