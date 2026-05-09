@@ -26,13 +26,26 @@ DIM = (170, 170, 170)
 
 def load_day(day_num: int) -> dict:
     data = json.loads(QUOTES.read_text(encoding="utf-8"))
+    default_book = data["book"]
+    default_author = data["author"]
+
+    # Compute book_day (position within book) and book_total (size of book) for every day
+    by_book: dict[str, list[dict]] = {}
+    for d in data["days"]:
+        bk = d.get("book", default_book)
+        by_book.setdefault(bk, []).append(d)
+
     for d in data["days"]:
         if d["day"] == day_num:
+            book = d.get("book", default_book)
+            day_list = by_book[book]
+            book_day = next(i for i, x in enumerate(day_list) if x["day"] == day_num) + 1
             result = dict(d)
-            # Per-day book/author wins over the top-level default (lets us mix multiple books)
-            result.setdefault("book", data["book"])
-            result.setdefault("author", data["author"])
+            result.setdefault("book", default_book)
+            result.setdefault("author", default_author)
             result["total_days"] = len(data["days"])
+            result["book_day"] = book_day
+            result["book_total"] = len(day_list)
             return result
     raise ValueError(f"No entry for day {day_num}")
 
@@ -139,8 +152,8 @@ def render_image(day: dict, out_path: Path) -> None:
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    # Top: "LAW N · DAY M OF X" — total comes from quotes.json so it auto-updates as books are added
-    top_label = f"{day['title'].upper()}  ·  DAY {day['day']} OF {day['total_days']}"
+    # Top: "LAW N · DAY M OF X" — M and X are per-book (each book restarts at Day 1)
+    top_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
     bbox = draw.textbbox((0, 0), top_label, font=font_title)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 180), top_label, fill=GOLD, font=font_title)
 

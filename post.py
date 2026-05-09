@@ -16,7 +16,8 @@ GRAPH = "https://graph.facebook.com/v21.0"
 
 
 def build_caption(day: dict) -> str:
-    total = day.get("total_days", 92)
+    book_day = day.get("book_day", day["day"])
+    book_total = day.get("book_total", day.get("total_days", 92))
     # Hashtags adjust to which book this day belongs to
     book_lower = day["book"].lower()
     if "atomic habits" in book_lower:
@@ -32,7 +33,7 @@ def build_caption(day: dict) -> str:
         "",
         f"— {day['author']}, {day['book']}",
         "",
-        f"Day {day['day']} of {total}",
+        f"Day {book_day} of {book_total} · {day['book']}",
         "",
         "Music: Kevin MacLeod (incompetech.com), CC-BY 4.0",
         "",
