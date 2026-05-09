@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+# keep output/ tracked so GitHub Actions can host it via raw URL

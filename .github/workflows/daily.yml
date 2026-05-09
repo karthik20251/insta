@@ -1,0 +1,48 @@
+name: Daily 48 Laws Post
+
+on:
+  schedule:
+    # 03:30 UTC = 09:00 IST. Adjust if you want a different time.
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Build today's video
+        env:
+          START_DATE: ${{ vars.START_DATE }}
+        run: python -c "from generate import build; from main import current_day; build(current_day())"
+
+      - name: Commit output so it's reachable via raw URL
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add output/
+          git commit -m "build: day video [skip ci]" || echo "no changes"
+          git push
+
+      - name: Post to Instagram
+        env:
+          START_DATE: ${{ vars.START_DATE }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          UPLOAD_BACKEND: github
+          GITHUB_RAW_BASE: https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/output
+        run: python main.py
