@@ -1,0 +1,47 @@
+{
+  "_comment": "Mood tags for each music track. Moods: dark, tense, regal, contemplative, energetic, mysterious. Used by generate.pick_music() to prefer tracks that match the day's mood.",
+  "48laws": {
+    "Kevin_MacLeod_-_04_-_Dark_Times.mp3": "dark",
+    "Kevin_MacLeod_-_05_-_Darkest_Child.mp3": "dark",
+    "Kevin_MacLeod_-_07_-_Epic_Unease.mp3": "tense",
+    "Kevin_MacLeod_-_09_-_Gagool.mp3": "mysterious",
+    "Kevin_MacLeod_-_14_-_Phantasm.mp3": "dark",
+    "Kevin_MacLeod_-_15_-_Power_Restored.mp3": "regal",
+    "Kevin_MacLeod_-_16_-_Shamanistic.mp3": "mysterious",
+    "Kevin_MacLeod_-_23_-_The_Chamber.mp3": "regal",
+    "Kevin_MacLeod_-_24_-_The_Reveal.mp3": "tense",
+    "Kevin_MacLeod_-_02_-_Action.mp3": "energetic",
+    "Kevin_MacLeod_-_04_-_Black_Vortex.mp3": "tense",
+    "Kevin_MacLeod_-_12_-_Heroic_Age.mp3": "regal",
+    "Kevin_MacLeod_-_19_-_Noble_Race.mp3": "regal",
+    "Kevin_MacLeod_-_24_-_The_Complex.mp3": "tense",
+    "7OOP3D_-_Feeling_Dark.mp3": "dark",
+    "cdk_-_Silence_Await.mp3": "mysterious"
+  },
+  "atomic": {
+    "Kevin_MacLeod_-_02_-_Canon_in_D_Major.mp3": "contemplative",
+    "Kevin_MacLeod_-_03_-_Cello_Suite_#1_in_G_-_Prelude.mp3": "contemplative",
+    "Kevin_MacLeod_-_06_-_Dance_of_the_Sugar_Plum_Fairies.mp3": "regal",
+    "Kevin_MacLeod_-_07_-_Divertimento_K131.mp3": "regal",
+    "Kevin_MacLeod_-_08_-_Divertissement.mp3": "regal",
+    "Kevin_MacLeod_-_09_-_Jesu,_Joy_of_Mans_Desiring.mp3": "contemplative",
+    "Kevin_MacLeod_-_16_-_Mighty_and_Meek.mp3": "energetic",
+    "Kevin_MacLeod_-_18_-_Movement_Proposition.mp3": "energetic",
+    "Kevin_MacLeod_-_20_-_Plans_in_Motion.mp3": "regal",
+    "Kevin_MacLeod_-_25_-_Unity.mp3": "regal",
+    "AlexBeroza_-_Drive.mp3": "energetic",
+    "AlexBeroza_-_Spinnin.mp3": "energetic",
+    "mindmapthat_-_Pulse_of_the_Party.mp3": "energetic"
+  },
+  "rules": {
+    "Kevin_MacLeod_-_Also_Sprach_Zarathustra.mp3": "regal",
+    "Kevin_MacLeod_-_Brandenburg_Concerto_No4-1_BWV1049.mp3": "regal",
+    "Kevin_MacLeod_-_Canon_in_D_Major.mp3": "contemplative",
+    "Kevin_MacLeod_-_Danse_Macabre.mp3": "dark",
+    "Kevin_MacLeod_-_Funeral_March_for_Brass.mp3": "dark",
+    "Kevin_MacLeod_-_Ghost_Dance.mp3": "mysterious",
+    "oldDog_-_too_quiet_piano.mp3": "contemplative",
+    "zeos_-_Photo_theme.mp3": "contemplative",
+    "doxent_-_Forgotten_Land.mp3": "contemplative"
+  }
+}
