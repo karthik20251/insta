@@ -69,7 +69,7 @@ def build_caption(day: dict) -> str:
         f"📖 {day['author']} · {day['book']} · Day {book_day}/{book_total}",
         "",
         f"💬 {cta}",
-        "🎵 Kevin MacLeod (CC-BY)",
+        "🎵 Kevin MacLeod + ccMixter artists (CC-BY)",
         "",
         tags,
     ]
