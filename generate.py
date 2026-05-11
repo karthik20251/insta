@@ -172,32 +172,50 @@ def render_image(day: dict, out_path: Path) -> None:
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    # Top: "LAW N · DAY M OF X" — M and X are per-book (each book restarts at Day 1)
     top_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
-    bbox = draw.textbbox((0, 0), top_label, font=font_title)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 180), top_label, fill=GOLD, font=font_title)
-
-    # Headline (the law)
     head_lines = wrap_text(day["headline"].upper(), font_head, max_w)
-    y = 360
+    body_lines = wrap_text(day["body"], font_body, max_w)
+
+    # ── Pre-pass: measure total height of the main text block so we can center it
+    def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        return bbox[3] - bbox[1]
+
+    h_title = line_h(font_title)
+    gap_title_to_head = 100              # space between top label and headline
+    h_head = sum(line_h(font_head, l) + 18 for l in head_lines) - 18
+    gap_head_to_divider = 30
+    h_divider = 3
+    gap_divider_to_body = 60
+    h_body = sum(line_h(font_body, l) + 14 for l in body_lines) - 14
+    total = h_title + gap_title_to_head + h_head + gap_head_to_divider + h_divider + gap_divider_to_body + h_body
+
+    # Reserve top + bottom margins (bottom margin includes footer attribution zone)
+    top_margin = 240
+    footer_zone = 280
+    available = HEIGHT - top_margin - footer_zone
+    y = top_margin + max(0, (available - total) // 2)
+
+    # ── Draw pass ─────────────────────────────────────────────────────────────
+    bbox = draw.textbbox((0, 0), top_label, font=font_title)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), top_label, fill=GOLD, font=font_title)
+    y += h_title + gap_title_to_head
+
     for line in head_lines:
         bbox = draw.textbbox((0, 0), line, font=font_head)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_head)
-        y += (bbox[3] - bbox[1]) + 18
+        y += line_h(font_head, line) + 18
 
-    # Divider
-    y += 30
-    draw.line([(WIDTH / 2 - 80, y), (WIDTH / 2 + 80, y)], fill=GOLD, width=3)
-    y += 60
+    y += gap_head_to_divider - 18  # offset the trailing 18 from headline loop
+    draw.line([(WIDTH / 2 - 80, y), (WIDTH / 2 + 80, y)], fill=GOLD, width=h_divider)
+    y += gap_divider_to_body
 
-    # Body
-    body_lines = wrap_text(day["body"], font_body, max_w)
     for line in body_lines:
         bbox = draw.textbbox((0, 0), line, font=font_body)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
-        y += (bbox[3] - bbox[1]) + 14
+        y += line_h(font_body, line) + 14
 
-    # Footer
+    # Footer pinned to bottom
     foot = f"— {day['author']}, {day['book']}"
     bbox = draw.textbbox((0, 0), foot, font=font_foot)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 200), foot, fill=DIM, font=font_foot)
