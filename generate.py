@@ -18,6 +18,8 @@ OUT_DIR.mkdir(exist_ok=True)
 
 WIDTH, HEIGHT = 1080, 1920
 DURATION_SEC = 12
+END_FRAME_SEC = 3      # last 3 seconds of every Reel show the CTA + tomorrow teaser
+MAIN_FRAME_SEC = DURATION_SEC - END_FRAME_SEC
 
 GOLD = (212, 175, 55)
 WHITE = (240, 240, 240)
@@ -203,6 +205,74 @@ def render_image(day: dict, out_path: Path) -> None:
     img.save(out_path, "PNG", optimize=True)
 
 
+def render_end_frame(day: dict, out_path: Path) -> None:
+    """Render the last-3-second 'COMMENT BELOW + TOMORROW teaser' frame.
+
+    Cross-book transitions are handled automatically: if the next day belongs to
+    a different book, the teaser shows the new book's title. If there is no next
+    day (final post), shows 'SERIES COMPLETE'."""
+    img = make_background(day["day"], day.get("book", ""))
+    draw = ImageDraw.Draw(img)
+
+    font_cta = pick_font(["Cinzel.ttf"], 76, weight=900)
+    font_label = pick_font(["Cinzel.ttf"], 44, weight=600)
+    font_next = pick_font(["PlayfairDisplay.ttf"], 60, weight=700)
+    font_arrow = pick_font(["PlayfairDisplay.ttf"], 80, weight=700)
+    font_follow = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
+
+    margin = 90
+    max_w = WIDTH - 2 * margin
+
+    # Top: big CTA
+    cta_main = "COMMENT BELOW"
+    cta_sub = "Save · Share · Tag a friend"
+    bbox = draw.textbbox((0, 0), cta_main, font=font_cta)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 400), cta_main, fill=GOLD, font=font_cta)
+    bbox = draw.textbbox((0, 0), cta_sub, font=font_label)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 520), cta_sub, fill=WHITE, font=font_label)
+    draw.line([(WIDTH / 2 - 100, 660), (WIDTH / 2 + 100, 660)], fill=GOLD, width=4)
+
+    # Look up tomorrow's content for the teaser
+    next_day = None
+    if day["day"] < total_days():
+        try:
+            next_day = load_day(day["day"] + 1)
+        except ValueError:
+            next_day = None
+
+    if next_day:
+        label = "TOMORROW"
+        bbox = draw.textbbox((0, 0), label, font=font_label)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 760), label, fill=GOLD, font=font_label)
+
+        title_line = next_day["title"].upper()
+        bbox = draw.textbbox((0, 0), title_line, font=font_next)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 840), title_line, fill=WHITE, font=font_next)
+
+        y = 930
+        for line in wrap_text(next_day["headline"], font_next, max_w):
+            bbox = draw.textbbox((0, 0), line, font=font_next)
+            draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_next)
+            y += (bbox[3] - bbox[1]) + 12
+
+        chevron = "» » »"
+        bbox = draw.textbbox((0, 0), chevron, font=font_arrow)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y + 50), chevron, fill=GOLD, font=font_arrow)
+
+        follow = "follow @nandetroll_ for daily"
+        bbox = draw.textbbox((0, 0), follow, font=font_follow)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 200), follow, fill=DIM, font=font_follow)
+    else:
+        label = "SERIES COMPLETE"
+        bbox = draw.textbbox((0, 0), label, font=font_label)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 800), label, fill=GOLD, font=font_label)
+        thanks = "Thank you for following along"
+        bbox = draw.textbbox((0, 0), thanks, font=font_next)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 900), thanks, fill=WHITE, font=font_next)
+
+    img.save(out_path, "PNG", optimize=True)
+
+
 def pick_music(book: str = "") -> Path | None:
     """Pick a track from the book's subfolder, falling back to top-level music/."""
     slug = book_slug(book) if book else "48laws"
@@ -213,28 +283,45 @@ def pick_music(book: str = "") -> Path | None:
     return random.choice(tracks) if tracks else None
 
 
-def make_video(image_path: Path, music_path: Path | None, out_path: Path) -> None:
+def make_video(image_path: Path, end_image_path: Path, music_path: Path | None, out_path: Path) -> None:
+    """Build a 12-sec Reel: 9 sec of quote frame → crossfade → 3 sec of end frame.
+
+    A 0.5-sec crossfade smooths the transition. Audio (if present) plays under
+    both frames and gets a fade-out at the end."""
+    # Filter graph:
+    #   [0:v] = main frame, looped to MAIN_FRAME_SEC + crossfade-buffer
+    #   [1:v] = end frame, looped to END_FRAME_SEC
+    #   xfade joins them at MAIN_FRAME_SEC - 0.5 with 0.5-sec crossfade
+    xfade_offset = MAIN_FRAME_SEC - 0.5
+    vfilter = (
+        f"[0:v]trim=duration={MAIN_FRAME_SEC},setpts=PTS-STARTPTS[v0];"
+        f"[1:v]trim=duration={END_FRAME_SEC + 0.5},setpts=PTS-STARTPTS[v1];"
+        f"[v0][v1]xfade=transition=fade:duration=0.5:offset={xfade_offset}[outv]"
+    )
+
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1",
-        "-i", str(image_path),
+        "-loop", "1", "-t", str(MAIN_FRAME_SEC + 1), "-i", str(image_path),
+        "-loop", "1", "-t", str(END_FRAME_SEC + 1), "-i", str(end_image_path),
     ]
     if music_path:
         cmd += ["-i", str(music_path)]
         cmd += [
+            "-filter_complex", vfilter + f";[2:a]afade=t=out:st={DURATION_SEC - 1}:d=1[outa]",
+            "-map", "[outv]", "-map", "[outa]",
             "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "192k", "-shortest",
+            "-c:a", "aac", "-b:a", "192k",
             "-t", str(DURATION_SEC),
             "-r", "30",
-            "-vf", f"scale={WIDTH}:{HEIGHT}",
             str(out_path),
         ]
     else:
         cmd += [
+            "-filter_complex", vfilter,
+            "-map", "[outv]",
             "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
             "-t", str(DURATION_SEC),
             "-r", "30",
-            "-vf", f"scale={WIDTH}:{HEIGHT}",
             str(out_path),
         ]
     subprocess.run(cmd, check=True)
@@ -243,13 +330,16 @@ def make_video(image_path: Path, music_path: Path | None, out_path: Path) -> Non
 def build(day_num: int) -> dict:
     day = load_day(day_num)
     image_path = OUT_DIR / f"day_{day_num:02d}.png"
+    end_image_path = OUT_DIR / f"day_{day_num:02d}_end.png"
     video_path = OUT_DIR / f"day_{day_num:02d}.mp4"
     render_image(day, image_path)
+    render_end_frame(day, end_image_path)
     music = pick_music(day.get("book", ""))
-    make_video(image_path, music, video_path)
+    make_video(image_path, end_image_path, music, video_path)
     return {
         "day": day,
         "image": image_path,
+        "end_image": end_image_path,
         "video": video_path,
         "music": music,
     }
