@@ -15,11 +15,26 @@ import requests
 GRAPH = "https://graph.facebook.com/v21.0"
 
 
+# Rotating CTAs — variety keeps captions feeling fresh and tests which style drives engagement.
+CTAS = [
+    "Share your thoughts ⬇️",
+    "Drop your take in the comments 👇",
+    "Tag someone who needs this 🙏",
+    "Save this for later 📌",
+    "Which resonates? Comment below 💬",
+    "Double tap if this hits 💯",
+    "What would you add? 💭",
+    "Send to a friend who needs it 📤",
+    "Bookmark and reread tomorrow 📍",
+    "Follow for daily wisdom 🌅",
+    "Curious — drop a 🔥 if this rings true",
+    "Your turn — share your story below 👇",
+]
+
+
 def build_caption(day: dict) -> str:
     book_day = day.get("book_day", day["day"])
     book_total = day.get("book_total", day.get("total_days", 92))
-    # Hashtags = book-specific niche tags + reach/growth/engagement tags
-    # Total stays at IG's 30-hashtag cap to avoid penalties.
     book_lower = day["book"].lower()
     if "atomic habits" in book_lower:
         niche = "#atomichabits #jamesclear #habits #discipline #productivity #identity #books #booksofinstagram"
@@ -30,24 +45,31 @@ def build_caption(day: dict) -> str:
 
     reach = "#viral #reels #trending #fyp #explorepage #foryourpage #reachmore #getnoticed"
     growth = "#growthmindset #successmindset #keepgrowing #goalsetter #motivation #mindset #selfimprovement"
-    engage = "#dailyquotes #likeforlikes #doubletap #engagementboost"  # 4 — keeps total at 30
+    engage = "#dailyquotes #likeforlikes #doubletap #engagementboost"
     tags = f"{niche}\n.\n{reach}\n.\n{growth}\n.\n{engage}"
 
-    # Hook leads (above-the-fold), then title + body, attribution, hashtags
     hook = day.get("caption_hook", "")
+    cta = CTAS[day["day"] % len(CTAS)]
+
+    # Book-specific leading emoji so the title line matches the book's mood
+    if "atomic habits" in book_lower:
+        book_emoji = "🌱"
+    elif "12 rules" in book_lower or "jordan peterson" in book_lower:
+        book_emoji = "⚖️"
+    else:
+        book_emoji = "⚔️"
+
+    # Lean caption: hook leads, then a single-line title block, CTA, music credit, hashtags.
+    # The full body text is already rendered on the video itself, so we don't repeat it here.
     parts = []
     if hook:
         parts += [hook, ""]
     parts += [
-        f"{day['title'].upper()}: {day['headline']}",
+        f"{book_emoji} {day['title'].upper()} · {day['headline'].upper()}",
+        f"📖 {day['author']} · {day['book']} · Day {book_day}/{book_total}",
         "",
-        day["body"],
-        "",
-        f"— {day['author']}, {day['book']}",
-        "",
-        f"Day {book_day} of {book_total} · {day['book']}",
-        "",
-        "Music: Kevin MacLeod (incompetech.com), CC-BY 4.0",
+        f"💬 {cta}",
+        "🎵 Kevin MacLeod (CC-BY)",
         "",
         tags,
     ]
