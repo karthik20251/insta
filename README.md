@@ -1,8 +1,10 @@
 # instaautomatic
 
-A fully autonomous daily Instagram Reel bot. Builds a video each day from a book quote, picks a fitting royalty-free track, posts it via the Instagram Graph API, cross-shares to Stories, and emails you the result. Runs on GitHub Actions — no server, no maintenance.
+A fully autonomous daily multi-platform content bot. Builds a video each day from a book quote, picks a fitting royalty-free track, publishes to **Instagram Reels + Stories + YouTube Shorts**, and emails you both URLs. Runs on GitHub Actions — no server, no maintenance.
 
-Currently queued: **92 days** of content across 3 books → posts daily at **6:30 PM IST** (lands 6:30–7:00 PM with GitHub Actions delay) to **@nandetroll_**.
+Currently queued: **92 days** of content across 3 books → posts daily at **6:30 PM IST** (lands 6:30–7:00 PM with GitHub Actions delay) to:
+- Instagram → **@nandetroll_**
+- YouTube → **@nandetroll_gk**
 
 ---
 
@@ -25,6 +27,31 @@ Schedule (with `START_DATE = 2026-05-09`):
 
 ---
 
+## Video format (12 sec, 1080×1920, two frames)
+
+```
+Second:     0     3     6     9   9.5   12
+            │─────────────────│xxxx│─────│
+            │   QUOTE FRAME   │fade│ END │
+            │ • law title     │ 0.5│ • COMMENT BELOW
+            │ • headline      │ sec│ • Save·Share·Tag
+            │ • body          │xfade • TOMORROW: next title
+            │ • attribution   │    │ • » » »
+            │                 │    │ • follow handle
+            │ background:     │    │
+            │ classical art   │    │
+            │ + dark overlay  │    │
+            │                 │    │
+            │ music: random   │    │ music fades out
+            │ track from      │    │ last 1 sec
+            │ per-book pool   │    │
+            └─────────────────┴────┴─────┘
+```
+
+The text block is **vertically centered** on the canvas (no empty gap). Cross-book transitions are handled automatically: Day 49 end-frame teases Atomic Habits, Day 79 teases 12 Rules, Day 92 shows "SERIES COMPLETE".
+
+---
+
 ## Caption format
 
 ```
@@ -41,10 +68,10 @@ Schedule (with `START_DATE = 2026-05-09`):
 
 - **Hook** comes from `caption_hook` field in `quotes.json` — short question-led line with emoji.
 - **Book emoji**: ⚔️ for 48 Laws, 🌱 for Atomic Habits, ⚖️ for 12 Rules.
-- **CTA** rotates daily through a 12-item pool (Tag someone / Save / Double tap / Bookmark / Send to a friend / etc.).
-- **Hashtags**: capped at Instagram's 30/post limit. Book-specific niche tags + high-reach + growth-mindset + engagement.
+- **CTA** rotates daily through a 12-item pool (Tag someone / Save / Double tap / Bookmark / etc.).
+- **Hashtags**: capped at Instagram's 30/post limit. Book-specific niche + high-reach + growth-mindset + engagement.
 
-The full body text is rendered on the video itself, not duplicated in the caption (keeps the caption scannable on mobile).
+YouTube video uses the same content but reformatted for Shorts (title ≤ 100 chars, description ≤ 5000 chars, `#Shorts` tag for discoverability).
 
 ---
 
@@ -63,31 +90,27 @@ The full body text is rendered on the video itself, not duplicated in the captio
     │   • computes today's day from START_DATE     │
     │   • generate.build(day_num)                  │
     │   • upload_to_public_url() — github raw URL  │
-    │   • post_reel()  → Graph API (REELS)         │
-    │   • post_story() → Graph API (STORIES)       │
+    │   • post_reel()    → Graph API (REELS)       │
+    │   • post_story()   → Graph API (STORIES)     │
+    │   • upload_short() → YouTube Data API v3     │
     │   • writes day metadata to $GITHUB_OUTPUT    │
     └───────────────┬──────────────────────────────┘
                     │
-        ┌───────────┴────────────┐
-        │                        │
-        ▼                        ▼
-  ┌──────────────┐      ┌──────────────────┐
-  │ generate.py  │      │ post.py          │
-  │ • PIL render │      │ • Graph API call │
-  │ • ffmpeg mp4 │      │ • Reel + Story   │
-  │ • per-book   │      │ • hide likes     │
-  │   assets     │      │ • 30 hashtags    │
-  └──────────────┘      └──────────────────┘
-                    │
-                    ▼
-        ┌───────────────────────┐
-        │  Email notification   │
-        │  · success: post info │
-        │  · failure: run logs  │
-        └───────────────────────┘
+        ┌───────────┼────────────┬─────────────────┐
+        ▼           ▼            ▼                 ▼
+  ┌──────────┐ ┌──────────┐ ┌──────────┐  ┌──────────┐
+  │generate  │ │post.py   │ │post_     │  │ Email    │
+  │  .py     │ │ • Reel + │ │youtube.py│  │ notif    │
+  │ • two-   │ │   Story  │ │ • Shorts │  │ · OK     │
+  │   frame  │ │ • hide   │ │   upload │  │ · FAIL   │
+  │   video  │ │   likes  │ │ • OAuth2 │  │          │
+  │ • per-   │ │ • 30     │ │   refresh│  │          │
+  │   book   │ │   tags   │ │   tokens │  │          │
+  │   assets │ │ • CTA    │ │          │  │          │
+  └──────────┘ └──────────┘ └──────────┘  └──────────┘
 ```
 
-Day → content lookup happens via [quotes.json](quotes.json), grouped by book. `load_day()` computes the per-book day index (e.g. *Atomic Habits Day 11 of 30*) and propagates a `caption_hook` to `build_caption()`.
+Day → content lookup happens via [quotes.json](quotes.json), grouped by book. `load_day()` computes the per-book day index (e.g. *Atomic Habits Day 11 of 30*) and propagates `caption_hook` to caption + YouTube description builders.
 
 ---
 
@@ -95,13 +118,14 @@ Day → content lookup happens via [quotes.json](quotes.json), grouped by book. 
 
 ```
 ├── quotes.json              # 92 days × {day, title, headline, body, caption_hook, book, author}
-├── generate.py              # Pillow render → ffmpeg → 1080x1920 mp4 (book-aware assets)
-├── post.py                  # IG Graph API: Reel + Story publish + caption builder
-├── main.py                  # daily orchestrator
+├── generate.py              # Pillow render → ffmpeg → 1080x1920 two-frame mp4 (book-aware assets)
+├── post.py                  # IG Graph API: Reel + Story publish + caption builder + 30 hashtags
+├── post_youtube.py          # YouTube Data API v3 uploader (Shorts)
+├── main.py                  # daily orchestrator (IG + YT in one pass)
 ├── requirements.txt
 │
 ├── .github/workflows/
-│   ├── daily.yml            # 13:00 UTC = 18:30 IST — posts the day's Reel
+│   ├── daily.yml            # 13:00 UTC = 18:30 IST — IG Reel + Story + YouTube Short
 │   └── refresh_token.yml    # Mondays 06:00 UTC — refreshes long-lived IG token
 │
 ├── backgrounds/
@@ -115,25 +139,32 @@ Day → content lookup happens via [quotes.json](quotes.json), grouped by book. 
 │   └── rules/               # 9:  Classical Sampler (6) + ccMixter (3)
 │
 ├── fonts/
-│   ├── Cinzel.ttf           # variable font — regal headline
+│   ├── Cinzel.ttf
 │   ├── PlayfairDisplay.ttf
 │   └── PlayfairDisplay-Italic.ttf
 │
-├── output/                  # built videos (auto-committed by workflow)
+├── output/                  # built videos + end-frames (auto-committed by workflow)
+│   ├── day_NN.png           # main quote frame
+│   ├── day_NN_end.png       # CTA + tomorrow teaser frame
+│   └── day_NN.mp4           # 12-sec stitched video
 │
 └── scripts/
-    ├── verify_token.py      # check current IG token validity + expiry (human-readable)
-    ├── refresh_token.py     # used by refresh_token.yml workflow
-    ├── fetch_backgrounds.py # downloader for 48 Laws backgrounds
-    ├── fetch_book_assets.py # downloader for atomic + rules backgrounds & music
-    ├── fetch_music.py       # downloader for Kevin MacLeod Darkness album
-    ├── fetch_ccmixter.py    # downloader for ccMixter tracks (uses curl)
-    ├── list_ccmixter.py     # browse ccMixter tracks by tag/mood
-    ├── add_caption_hooks.py # one-time migration that injected caption_hook into quotes.json
-    ├── audit_quotes.py      # validates quotes.json structure (sequence, fields, books)
-    ├── list_days.py         # prints all queued days
-    └── make_music.ps1       # legacy synth music generator (unused)
+    ├── verify_token.py          # check current IG token validity + expiry
+    ├── refresh_token.py         # used by refresh_token.yml workflow
+    ├── yt_auth_bootstrap.py     # one-time YouTube OAuth flow (prints 3 secrets)
+    ├── backfill_youtube.py      # upload arbitrary day numbers to YouTube
+    ├── fetch_backgrounds.py     # downloader for 48 Laws backgrounds
+    ├── fetch_book_assets.py     # downloader for atomic + rules backgrounds & music
+    ├── fetch_music.py           # downloader for Kevin MacLeod Darkness album
+    ├── fetch_ccmixter.py        # downloader for ccMixter tracks (uses curl)
+    ├── list_ccmixter.py         # browse ccMixter tracks by tag/mood
+    ├── add_caption_hooks.py     # one-time migration that injected caption_hook
+    ├── audit_quotes.py          # validates quotes.json structure
+    ├── list_days.py             # prints all queued days
+    └── preview_end_frame.py     # generates standalone end-frame PNGs for design previews
 ```
+
+Gitignored (never committed): `.env`, `client_secret*.json`, `yt_token.json`, `.venv/`.
 
 ---
 
@@ -141,15 +172,18 @@ Day → content lookup happens via [quotes.json](quotes.json), grouped by book. 
 
 ### GitHub Secrets — repo Settings → Secrets and variables → Actions
 
-| Name | Value | Purpose |
+| Name | Source | Purpose |
 |---|---|---|
 | `IG_USER_ID` | numeric Instagram Business Account ID | identifies which IG to post to |
-| `IG_ACCESS_TOKEN` | long-lived Meta user token (60 days) | authenticates Graph API calls |
+| `IG_ACCESS_TOKEN` | long-lived Meta user token (60 days) | authenticates IG Graph API calls |
 | `APP_SECRET` | Meta app secret | used by refresh workflow to mint new tokens |
 | `GH_TOKEN` | GitHub fine-grained PAT (Secrets read+write on this repo) | lets refresh workflow update IG_ACCESS_TOKEN |
 | `MAIL_USERNAME` | Gmail address that sends notifications | SMTP auth |
 | `MAIL_APP_PASSWORD` | Gmail 16-char App Password | SMTP auth |
 | `MAIL_TO` | comma-separated recipient emails | who gets the daily success/failure email |
+| `YT_CLIENT_ID` | Google OAuth2 client ID from `client_secret.json` | YouTube API auth |
+| `YT_CLIENT_SECRET` | Google OAuth2 client secret | YouTube API auth |
+| `YT_REFRESH_TOKEN` | Refresh token from `yt_auth_bootstrap.py` | YouTube API auth (long-lived) |
 
 ### GitHub Variables — same page, Variables tab
 
@@ -159,39 +193,66 @@ Day → content lookup happens via [quotes.json](quotes.json), grouped by book. 
 
 ### Local `.env` (only for local dry-runs, never committed)
 
-Mirror the secrets above plus:
+Mirror the IG secrets above plus:
 ```env
 UPLOAD_BACKEND=github
 GITHUB_RAW_BASE=https://raw.githubusercontent.com/karthik20251/insta/master/output
 ```
 
+For local YouTube uploads (backfill), `yt_token.json` at the project root is sufficient (created by `yt_auth_bootstrap.py`).
+
+---
+
+## YouTube setup (one-time, ~10 min)
+
+1. Create a Google Cloud project at https://console.cloud.google.com
+2. Enable **YouTube Data API v3** in the API library
+3. Configure **Google Auth Platform** (the new name for OAuth Consent Screen):
+   - App type: External
+   - Add your Gmail as a Test User
+   - Add the `.../auth/youtube.upload` scope
+4. Create an **OAuth 2.0 Client ID** — type: Desktop app
+5. Download the JSON, save as `client_secret.json` at project root
+6. Run the bootstrap:
+   ```powershell
+   .\.venv\Scripts\python.exe scripts\yt_auth_bootstrap.py
+   ```
+7. Browser opens, you approve, PowerShell prints 3 values → add to GitHub Secrets:
+   - `YT_CLIENT_ID`, `YT_CLIENT_SECRET`, `YT_REFRESH_TOKEN`
+
+The refresh token stays valid as long as you don't change your Google password or revoke access. Daily usage keeps it alive indefinitely.
+
 ---
 
 ## Token lifecycle (zero maintenance)
 
-The Meta long-lived token expires every 60 days, but the `refresh_token.yml` workflow runs **every Monday 06:00 UTC** and exchanges the current token for a fresh one — resetting the 60-day clock. As long as that workflow keeps running, the token never expires.
+The **Meta long-lived token** expires every 60 days, but the `refresh_token.yml` workflow runs **every Monday 06:00 UTC** and exchanges the current token for a fresh one — resetting the 60-day clock. As long as that workflow keeps running, the token never expires.
 
-If the refresh ever fails, you get an urgent email so you can fix it before posts stop.
+The **YouTube refresh token** doesn't expire (only invalidated by password change or revoke). No maintenance.
 
-The only manual step that may eventually be needed:
-- **GitHub PAT renewal** — if the `GH_TOKEN` was created with a 1-year expiry, regenerate it yearly. If created with "No expiration", never.
+If either refresh ever fails, you get an urgent email.
+
+Manual annual chore (only if you set a 1-year expiry on the GitHub PAT):
+- **GitHub PAT renewal** — regenerate the `GH_TOKEN` PAT. If created with "No expiration", never.
 
 ---
 
 ## Email notifications
 
-Both workflows send Gmail (SMTP) emails via [dawidd6/action-send-mail](https://github.com/dawidd6/action-send-mail). Setup is silent — if `MAIL_USERNAME` secret is empty, the email steps no-op.
+Both workflows send Gmail (SMTP) emails via [dawidd6/action-send-mail](https://github.com/dawidd6/action-send-mail).
 
 **Daily post success email:**
 ```
 Subject: [OK] Day N posted — Title: Headline
-Body: book + per-book day + headline + IG Media ID + workflow run link
+
+Body: book + per-book day + headline + IG Media ID +
+      Instagram URL + YouTube Short URL + workflow run link
 ```
 
 **Daily post failure email:**
 ```
 Subject: [FAIL] Daily post FAILED for Day N
-Body: last-known day metadata + run logs + common causes (token, propagation, rate limit)
+Body: last-known day metadata + run logs + common causes
 ```
 
 **Token refresh failure email:**
@@ -215,14 +276,20 @@ start output/day_50.png
 # Audit quotes.json
 python scripts/audit_quotes.py
 
-# Verify the local token in .env is still valid (human-readable expiry)
+# Verify the local Meta token in .env is still valid
 python scripts/verify_token.py
 
-# Re-download all backgrounds (Wikimedia)
+# Re-run YouTube bootstrap (only if token gets revoked)
+python scripts/yt_auth_bootstrap.py
+
+# Backfill specific days to YouTube (uploads existing local mp4 files)
+python scripts/backfill_youtube.py 4 5 6
+
+# Re-download backgrounds (Wikimedia)
 python scripts/fetch_backgrounds.py
 python scripts/fetch_book_assets.py
 
-# Re-download all music (Internet Archive + ccMixter)
+# Re-download music (Internet Archive + ccMixter)
 python scripts/fetch_music.py
 python scripts/fetch_book_assets.py
 python scripts/fetch_ccmixter.py
@@ -250,22 +317,25 @@ python -c "from generate import load_day; from post import build_caption; print(
 2. Drop ~5–10 backgrounds into `backgrounds/<slug>/` and ~5 music tracks into `music/<slug>/`.
 3. Update `generate.py::book_slug()` to map the new book name to its folder slug.
 4. Update `post.py::build_caption()` to add a hashtag branch and book emoji.
-5. Commit and push. The bot picks up automatically on the right day.
+5. Update `post_youtube.py::build_youtube_metadata()` to add the corresponding YouTube tags.
+6. Commit and push. The bot picks up automatically on the right day.
 
 ---
 
 ## Limits and notes
 
-- Instagram Graph API allows **25 posts / 24h per account** — way more than we need.
+- **Instagram Graph API**: 25 posts / 24h per account — way more than we need.
+- **YouTube Data API v3**: 10,000 quota units/day free tier. Each upload costs ~1,600 units → we use ~16% of daily quota.
 - Repo must be **public** for `raw.githubusercontent.com` URLs to be reachable by Meta's ingester.
 - IG's built-in music library (Bollywood / TikTok-style trending audio) is **not** accessible via API — all music must be royalty-free files we host.
 - Reels publish with `like_and_views_counts_disabled=true` so the public post hides like/view counts.
+- YouTube Shorts qualify automatically: video is 1080×1920 (9:16), 12 sec (under 60 sec), and `#Shorts` is in the title.
 - GitHub Actions cron is best-effort under load: scheduled runs typically fire on time but can be delayed 5–30 minutes. The 13:00 UTC schedule was chosen to land in the 6:30–7:00 PM IST evening window.
-- Story cross-post is best-effort: if it fails, the Reel post is unaffected.
-- Music attribution: Kevin MacLeod tracks (incompetech.com, CC-BY 4.0), ccMixter artists (CC-BY / CC-BY-NC). Attribution included in every caption.
+- Story cross-post and YouTube upload are best-effort: if either fails, the Reel still posts and you get a warning in the email.
+- Music attribution: Kevin MacLeod tracks (incompetech.com, CC-BY 4.0), ccMixter artists (CC-BY / CC-BY-NC). Attribution included in every caption + YouTube description.
 
 ---
 
 ## Cost
 
-**₹0.** Everything (Python, ffmpeg, GitHub Actions free tier, Meta Graph API, Wikimedia Commons, Internet Archive, ccMixter, Gmail SMTP) is free. Estimated usage on GitHub Actions free tier: ~60 of the 2,000 free minutes/month.
+**₹0.** Everything (Python, ffmpeg, GitHub Actions free tier, Meta Graph API, YouTube Data API v3 free tier, Wikimedia Commons, Internet Archive, ccMixter, Gmail SMTP) is free. Estimated usage on GitHub Actions free tier: ~60 of the 2,000 free minutes/month.
