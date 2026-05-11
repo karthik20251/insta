@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from generate import build, total_days
 from post import build_caption, post_reel, post_story
+from post_youtube import build_youtube_metadata, upload_short, short_url
 
 load_dotenv()
 
@@ -105,6 +106,16 @@ def main() -> int:
         write_github_output(story_id=story_id)
     except Exception as e:
         print(f"  WARN: story share failed (non-fatal): {e}")
+
+    # Cross-post to YouTube as a Short — also best-effort
+    try:
+        yt_meta = build_youtube_metadata(day)
+        yt_id = upload_short(result["video"], yt_meta["title"], yt_meta["description"], yt_meta["tags"])
+        yt_url = short_url(yt_id)
+        print(f"  uploaded to youtube: {yt_url}")
+        write_github_output(youtube_id=yt_id, youtube_url=yt_url)
+    except Exception as e:
+        print(f"  WARN: youtube upload failed (non-fatal): {e}")
 
     return 0
 

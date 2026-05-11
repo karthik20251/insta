@@ -3,4 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+# Google OAuth credentials (never commit these — they grant write access to your YT channel)
+client_secret*.json
+yt_token.json
 # keep output/ tracked so GitHub Actions can host it via raw URL
