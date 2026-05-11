@@ -32,8 +32,14 @@ def build_caption(day: dict) -> str:
     growth = "#growthmindset #successmindset #keepgrowing #goalsetter #motivation #mindset #selfimprovement"
     engage = "#dailyquotes #likeforlikes #doubletap #engagementboost"  # 4 — keeps total at 30
     tags = f"{niche}\n.\n{reach}\n.\n{growth}\n.\n{engage}"
-    parts = [
-        day["headline"],
+
+    # Hook leads (above-the-fold), then title + body, attribution, hashtags
+    hook = day.get("caption_hook", "")
+    parts = []
+    if hook:
+        parts += [hook, ""]
+    parts += [
+        f"{day['title'].upper()}: {day['headline']}",
         "",
         day["body"],
         "",

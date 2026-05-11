@@ -6,105 +6,731 @@
       "day": 1,
       "title": "Introduction",
       "headline": "The 48 Laws of Power",
-      "body": "Power is a game. The skillful player observes, plans, and acts with patience. Over the next 48 days, we walk through each law — not to manipulate, but to recognize the moves being played around us, and to walk through life with our eyes open."
+      "body": "Power is a game. The skillful player observes, plans, and acts with patience. Over the next 48 days, we walk through each law — not to manipulate, but to recognize the moves being played around us, and to walk through life with our eyes open.",
+      "caption_hook": "Power is a game 🎯 Who's playing — and who's being played?"
     },
-    { "day": 2,  "title": "Law 1",  "headline": "Never Outshine the Master",                                  "body": "Always make those above you feel comfortably superior. In your desire to please and impress them, do not go too far in displaying your talents, or you might accomplish the opposite — inspire fear and insecurity." },
-    { "day": 3,  "title": "Law 2",  "headline": "Never Put Too Much Trust in Friends; Learn How to Use Enemies", "body": "Be wary of friends — they will betray you more quickly, for they are easily aroused to envy. Hire a former enemy and they will be more loyal than a friend, because they have more to prove." },
-    { "day": 4,  "title": "Law 3",  "headline": "Conceal Your Intentions",                                     "body": "Keep people off-balance and in the dark by never revealing the purpose behind your actions. If they have no clue what you are up to, they cannot prepare a defense." },
-    { "day": 5,  "title": "Law 4",  "headline": "Always Say Less Than Necessary",                              "body": "When you are trying to impress people with words, the more you say, the more common you appear, and the less in control. Powerful people impress and intimidate by saying less." },
-    { "day": 6,  "title": "Law 5",  "headline": "So Much Depends on Reputation — Guard It With Your Life",     "body": "Reputation is the cornerstone of power. Through reputation alone you can intimidate and win. Once it slips, however, you are vulnerable and will be attacked on all sides." },
-    { "day": 7,  "title": "Law 6",  "headline": "Court Attention at All Costs",                                 "body": "Everything is judged by its appearance; what is unseen counts for nothing. Never let yourself get lost in the crowd. Be conspicuous at all costs. Make yourself a magnet of attention." },
-    { "day": 8,  "title": "Law 7",  "headline": "Get Others to Do the Work for You, but Always Take the Credit", "body": "Use the wisdom, knowledge, and legwork of other people to further your own cause. Such assistance saves you valuable time and energy and gives you a godlike aura of efficiency and speed." },
-    { "day": 9,  "title": "Law 8",  "headline": "Make Other People Come to You — Use Bait if Necessary",        "body": "When you force the other person to act, you are the one in control. It is always better to make your opponent come to you, abandoning his own plans in the process. Lure him with fabulous gains, then attack." },
-    { "day": 10, "title": "Law 9",  "headline": "Win Through Your Actions, Never Through Argument",            "body": "Any momentary triumph you think you have gained through argument is really a Pyrrhic victory: the resentment and ill will you stir up is stronger and lasts longer than any momentary change of opinion. Demonstrate, do not explicate." },
-    { "day": 11, "title": "Law 10", "headline": "Infection: Avoid the Unhappy and Unlucky",                    "body": "You can die from someone else's misery — emotional states are as infectious as diseases. The unfortunate sometimes draw misfortune on themselves; they will also draw it on you. Associate with the happy and fortunate instead." },
-    { "day": 12, "title": "Law 11", "headline": "Learn to Keep People Dependent on You",                       "body": "To maintain your independence you must always be needed and wanted. The more you are relied on, the more freedom you have. Make people depend on you for their happiness and prosperity, and you have nothing to fear." },
-    { "day": 13, "title": "Law 12", "headline": "Use Selective Honesty and Generosity to Disarm Your Victim",   "body": "One sincere and honest move will cover over dozens of dishonest ones. Open-hearted gestures of honesty and generosity bring down the guard of even the most suspicious people." },
-    { "day": 14, "title": "Law 13", "headline": "When Asking for Help, Appeal to Self-Interest, Never to Mercy or Gratitude", "body": "If you need to turn to an ally for help, do not bother to remind him of your past assistance and good deeds. He will find a way to ignore you. Instead, uncover something in your request that will benefit him, and emphasize it out of all proportion." },
-    { "day": 15, "title": "Law 14", "headline": "Pose as a Friend, Work as a Spy",                              "body": "Knowing about your rival is critical. Use spies to gather valuable information that will keep you a step ahead. Better still: play the spy yourself. In polite social encounters, learn to probe — ask indirect questions to get people to reveal their weaknesses and intentions." },
-    { "day": 16, "title": "Law 15", "headline": "Crush Your Enemy Totally",                                     "body": "More is lost through stopping halfway than through total annihilation: the enemy will recover, and will seek revenge. Crush him, not only in body but in spirit." },
-    { "day": 17, "title": "Law 16", "headline": "Use Absence to Increase Respect and Honor",                    "body": "Too much circulation makes the price go down: the more you are seen and heard from, the more common you appear. Withdraw for a while, and you will be talked about, even admired. You must learn when to leave." },
-    { "day": 18, "title": "Law 17", "headline": "Keep Others in Suspended Terror: Cultivate Unpredictability",  "body": "Humans are creatures of habit with an insatiable need to see familiarity in others' actions. Your predictability gives them a sense of control. Turn the tables: be deliberately unpredictable. Behavior that seems to have no consistency or purpose will keep them off-balance." },
-    { "day": 19, "title": "Law 18", "headline": "Do Not Build Fortresses to Protect Yourself — Isolation Is Dangerous", "body": "The world is dangerous and enemies are everywhere — everyone has to protect themselves. A fortress seems the safest. But isolation exposes you to more dangers than it protects you from — it cuts you off from valuable information, it makes you conspicuous and an easy target. Better to circulate among people." },
-    { "day": 20, "title": "Law 19", "headline": "Know Who You're Dealing With — Do Not Offend the Wrong Person", "body": "There are many different kinds of people in the world, and you can never assume that everyone will react to your strategies in the same way. Deceive or outmaneuver some people and they will spend the rest of their lives seeking revenge. Choose your victims and opponents carefully." },
-    { "day": 21, "title": "Law 20", "headline": "Do Not Commit to Anyone",                                      "body": "It is the fool who always rushes to take sides. Do not commit to any side or cause but yourself. By maintaining your independence, you become the master of others — playing people against one another, making them pursue you." },
-    { "day": 22, "title": "Law 21", "headline": "Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark",  "body": "No one likes feeling stupider than the next person. The trick is to make your victims feel smart — and not just smart, but smarter than you are. Once convinced of this, they will never suspect that you may have ulterior motives." },
-    { "day": 23, "title": "Law 22", "headline": "Use the Surrender Tactic: Transform Weakness Into Power",       "body": "When you are weaker, never fight for honor's sake; choose surrender instead. Surrender gives you time to recover, time to torment and irritate your conqueror, time to wait for his power to wane. Turn the cheek and infuriate him." },
-    { "day": 24, "title": "Law 23", "headline": "Concentrate Your Forces",                                       "body": "Conserve your forces and energies by keeping them concentrated at their strongest point. You gain more by finding a rich mine and mining it deeper than by flitting from one shallow mine to another — intensity defeats extensity every time." },
-    { "day": 25, "title": "Law 24", "headline": "Play the Perfect Courtier",                                     "body": "The perfect courtier thrives in a world where everything revolves around power and political dexterity. He has mastered the art of indirection; he flatters, yields to superiors, and asserts power over others in the most oblique and graceful manner." },
-    { "day": 26, "title": "Law 25", "headline": "Re-Create Yourself",                                            "body": "Do not accept the roles that society foists on you. Re-create yourself by forging a new identity, one that commands attention and never bores the audience. Be the master of your own image rather than letting others define it for you." },
-    { "day": 27, "title": "Law 26", "headline": "Keep Your Hands Clean",                                         "body": "You must seem a paragon of civility and efficiency: your hands are never soiled by mistakes and nasty deeds. Maintain such a spotless appearance by using others as scapegoats and cat's-paws to disguise your involvement." },
-    { "day": 28, "title": "Law 27", "headline": "Play on People's Need to Believe to Create a Cultlike Following","body": "People have an overwhelming desire to believe in something. Become the focal point of such desire by offering them a cause, a new faith to follow. Promise the moon but keep your words vague yet full of promise; emphasize enthusiasm over rationality." },
-    { "day": 29, "title": "Law 28", "headline": "Enter Action With Boldness",                                    "body": "If you are unsure of a course of action, do not attempt it. Your doubts and hesitations will infect your execution. Timidity is dangerous: better to enter with boldness. Any mistakes you commit through audacity are easily corrected with more audacity." },
-    { "day": 30, "title": "Law 29", "headline": "Plan All the Way to the End",                                   "body": "The ending is everything. Plan all the way to it, taking into account all the possible consequences, obstacles, and twists of fortune that might reverse your hard work. By planning to the end, you will not be overwhelmed by circumstances." },
-    { "day": 31, "title": "Law 30", "headline": "Make Your Accomplishments Seem Effortless",                     "body": "Your actions must seem natural and executed with ease. All the toil and practice that go into them, and also all the clever tricks, must be concealed. When you act, act effortlessly, as if you could do much more." },
-    { "day": 32, "title": "Law 31", "headline": "Control the Options: Get Others to Play With the Cards You Deal","body": "The best deceptions are the ones that seem to give the other person a choice: your victims feel they are in control, but are actually your puppets. Give people options that come out in your favor whichever one they choose." },
-    { "day": 33, "title": "Law 32", "headline": "Play to People's Fantasies",                                    "body": "The truth is often avoided because it is ugly and unpleasant. Never appeal to truth and reality unless you are prepared for the anger that comes from disenchantment. Life is so harsh and distressing that those who can manufacture romance or conjure up fantasy are like oases in the desert." },
-    { "day": 34, "title": "Law 33", "headline": "Discover Each Man's Thumbscrew",                                "body": "Everyone has a weakness, a gap in the castle wall. That weakness is usually an insecurity, an uncontrollable emotion or need. Once found, it is a thumbscrew you can turn to your advantage." },
-    { "day": 35, "title": "Law 34", "headline": "Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One", "body": "The way you carry yourself will often determine how you are treated: in the long run, appearing vulgar or common will make people disrespect you. A king respects himself and inspires the same sentiment in others." },
-    { "day": 36, "title": "Law 35", "headline": "Master the Art of Timing",                                     "body": "Never seem to be in a hurry — hurrying betrays a lack of control over yourself, and over time. Always seem patient, as if you know that everything will come to you eventually. Become a detective of the right moment." },
-    { "day": 37, "title": "Law 36", "headline": "Disdain Things You Cannot Have: Ignoring Them Is the Best Revenge", "body": "By acknowledging a petty problem you give it existence and credibility. The more attention you pay an enemy, the stronger you make him; and a small mistake is often made worse and more visible when you try to fix it." },
-    { "day": 38, "title": "Law 37", "headline": "Create Compelling Spectacles",                                  "body": "Striking imagery and grand symbolic gestures create the aura of power — everyone responds to them. Stage spectacles for those around you, then, full of arresting visuals and radiant symbols that heighten your presence." },
-    { "day": 39, "title": "Law 38", "headline": "Think as You Like but Behave Like Others",                      "body": "If you make a show of going against the times, flaunting your unconventional ideas and unorthodox ways, people will think that you only want attention and that you look down upon them. They will find a way to punish you. Far safer to blend in and nurture the common touch." },
-    { "day": 40, "title": "Law 39", "headline": "Stir Up Waters to Catch Fish",                                  "body": "Anger and emotion are strategically counterproductive. You must always stay calm and objective. But if you can make your enemies angry while staying calm yourself, you gain a decided advantage. Put your enemies off-balance: find the chink in their vanity." },
-    { "day": 41, "title": "Law 40", "headline": "Despise the Free Lunch",                                        "body": "What is offered for free is dangerous — it usually involves either a trick or a hidden obligation. What has worth is worth paying for. By paying your own way you stay clear of gratitude, guilt, and deceit." },
-    { "day": 42, "title": "Law 41", "headline": "Avoid Stepping Into a Great Man's Shoes",                        "body": "What happens first always appears better and more original than what comes after. If you succeed a great man or have a famous parent, you will have to accomplish double their achievements to outshine them. Do not get lost in their shadow — establish your own name." },
-    { "day": 43, "title": "Law 42", "headline": "Strike the Shepherd and the Sheep Will Scatter",                "body": "Trouble can often be traced to a single strong individual — the stirrer, the arrogant underling, the poisoner of goodwill. If you allow such people room to operate, others will succumb to their influence. Do not wait for the troubles they cause to multiply; strike at their source." },
-    { "day": 44, "title": "Law 43", "headline": "Work on the Hearts and Minds of Others",                        "body": "Coercion creates a reaction that will eventually work against you. You must seduce others into wanting to move in your direction. The way to seduce others is to operate on their individual psychologies and weaknesses. Soften up the resistant by working on their emotions." },
-    { "day": 45, "title": "Law 44", "headline": "Disarm and Infuriate With the Mirror Effect",                   "body": "The mirror reflects reality, but it is also the perfect tool for deception. When you mirror your enemies, doing exactly as they do, they cannot figure out your strategy. The mirror mocks and humiliates them, making them overreact." },
-    { "day": 46, "title": "Law 45", "headline": "Preach the Need for Change, but Never Reform Too Much at Once",  "body": "Everyone understands the need for change in the abstract, but on the day-to-day level people are creatures of habit. Too much innovation is traumatic, and will lead to revolt. If you are new to a position of power, show that you respect the old ways." },
-    { "day": 47, "title": "Law 46", "headline": "Never Appear Too Perfect",                                       "body": "Appearing better than others is always dangerous, but most dangerous of all is to appear to have no faults or weaknesses. Envy creates silent enemies. It is smart to occasionally display defects, and admit to harmless vices, to deflect envy and appear more human and approachable." },
-    { "day": 48, "title": "Law 47", "headline": "Do Not Go Past the Mark You Aimed For; In Victory, Learn When to Stop", "body": "The moment of victory is often the moment of greatest peril. In the heat of victory, arrogance and overconfidence can push you past the goal you had aimed for, and by going too far, you make more enemies than you defeat. Set a goal, and when you reach it, stop." },
-    { "day": 49, "title": "Law 48", "headline": "Assume Formlessness",                                            "body": "By taking a shape, by having a visible plan, you open yourself to attack. Instead of taking a form for your enemy to grasp, keep yourself adaptable and on the move. Accept that nothing is certain and no law is fixed. The best way to protect yourself is to be as fluid and formless as water." },
-
-    { "day": 50, "title": "Atomic Habits",          "book": "Atomic Habits", "author": "James Clear", "headline": "Tiny Changes, Remarkable Results",                "body": "The aggregation of marginal gains shapes who you become. A 1% improvement every day compounds to a 37x improvement over a year. Habits are the compound interest of self-improvement — small actions, repeated, become extraordinary." },
-    { "day": 51, "title": "Compound Effect",        "book": "Atomic Habits", "author": "James Clear", "headline": "1% Better Every Day",                            "body": "Small habits don't add up — they compound. Results lag behind effort. The valley of disappointment is real, but breakthrough moments are usually the result of many previous actions building up potential. Trust the process." },
-    { "day": 52, "title": "Systems",                "book": "Atomic Habits", "author": "James Clear", "headline": "Forget Goals, Focus on Systems",                 "body": "Goals are about the results you want; systems are about the processes that lead there. You do not rise to the level of your goals — you fall to the level of your systems. Build the system, the goals follow." },
-    { "day": 53, "title": "The Plateau",            "book": "Atomic Habits", "author": "James Clear", "headline": "The Plateau of Latent Potential",                "body": "An ice cube doesn't melt at 30°F or 31°F — it melts at 32°F. Habits often appear ineffective because results are delayed. Don't quit at the moment your work was about to pay off. The breakthrough is just past the plateau." },
-    { "day": 54, "title": "Identity",               "book": "Atomic Habits", "author": "James Clear", "headline": "Be the Person, Not the Result",                  "body": "True behavior change is identity change. Don't focus on what you want to achieve — focus on who you wish to become. Each action is a vote cast for the type of person you are becoming. Win the votes, become the person." },
-    { "day": 55, "title": "Habit Loop",             "book": "Atomic Habits", "author": "James Clear", "headline": "Cue, Craving, Response, Reward",                 "body": "Every habit follows the same four-step pattern. A cue triggers a craving, which motivates a response, which delivers a reward. Master this loop and you can engineer any habit you want — or dismantle one you don't." },
-
-    { "day": 56, "title": "1st Law",                "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Obvious",                                "body": "You can't change what you don't notice. Awareness comes before action. The greatest predictor of behavior is environment — make the cues for good habits visible, and the cues for bad habits invisible." },
-    { "day": 57, "title": "Scorecard",              "book": "Atomic Habits", "author": "James Clear", "headline": "Become the Observer",                            "body": "List your daily habits and rate each as positive, negative, or neutral. Don't judge — just notice. Awareness creates the gap between stimulus and response, and in that gap lies your power to choose differently." },
-    { "day": 58, "title": "Intentions",             "book": "Atomic Habits", "author": "James Clear", "headline": "I Will [X] at [Time] in [Place]",                "body": "Vague intentions die. Specific ones survive. Naming exactly when and where you'll act increases follow-through dramatically. 'I will exercise for 30 minutes at 6 PM in the living room.' Decide once, execute always." },
-    { "day": 59, "title": "Habit Stacking",         "book": "Atomic Habits", "author": "James Clear", "headline": "After [Habit], I Will [New Habit]",              "body": "The best way to build a new habit is to attach it to an existing one. The current habit becomes the cue. After my morning coffee, I will write three sentences. Chain them together; the existing routine pulls the new one into place." },
-    { "day": 60, "title": "Environment",            "book": "Atomic Habits", "author": "James Clear", "headline": "Shape the Spaces You Inhabit",                   "body": "Behavior is a function of person plus environment. You can rely on willpower, or you can design your surroundings. Put the book on your pillow. Hide the phone in another room. The environment does the work for you." },
-
-    { "day": 61, "title": "2nd Law",                "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Attractive",                             "body": "We are drawn to behaviors that anticipate reward. Dopamine drives action — we act because we anticipate pleasure, not because we receive it. Make good habits more appealing than the alternative, and the brain follows." },
-    { "day": 62, "title": "Temptation Bundling",    "book": "Atomic Habits", "author": "James Clear", "headline": "Pair What You Want with What You Need",          "body": "Bundle a habit you want to build with one you already enjoy. Only watch your favorite show while exercising. Only listen to that podcast while commuting. The pleasure of one transfers to the other." },
-    { "day": 63, "title": "Culture",                "book": "Atomic Habits", "author": "James Clear", "headline": "Join a Tribe Where Your Habits Are Normal",      "body": "We imitate three groups: the close, the many, and the powerful. Surround yourself with people for whom your desired behavior is the default. Their normal becomes your normal. Belonging is the strongest motivator." },
-    { "day": 64, "title": "Reframe",                "book": "Atomic Habits", "author": "James Clear", "headline": "I Get To, Not I Have To",                        "body": "Highlight the benefit of doing the hard thing rather than the cost. Anticipation, not achievement, drives behavior. Reframe the work in terms of the identity you're building — and the chore becomes a privilege." },
-
-    { "day": 65, "title": "3rd Law",                "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Easy",                                   "body": "Habits form based on frequency, not time. The most effective form of learning is practice, not planning. Reduce the friction associated with good behaviors. Lower the barrier to entry, and you'll cross it more often." },
-    { "day": 66, "title": "Motion vs Action",       "book": "Atomic Habits", "author": "James Clear", "headline": "Walk Slowly, but Never Backward",                "body": "Motion lets you feel like you're making progress without taking risk; action produces a result. Reading a book about exercise is motion. Going to the gym is action. Be honest with yourself about which one you're doing." },
-    { "day": 67, "title": "Two-Minute Rule",        "book": "Atomic Habits", "author": "James Clear", "headline": "Scale Down Your Habits",                         "body": "Any habit can be scaled to two minutes. Read for two minutes. Write one sentence. Do one push-up. Master showing up first; optimization comes later. A habit must be established before it can be improved." },
-    { "day": 68, "title": "Friction",               "book": "Atomic Habits", "author": "James Clear", "headline": "Make the Path Easy",                             "body": "When friction is low, habits are easy. Want to read more? Put a book on your pillow. Want to eat healthier? Pre-cut fruit at eye level. Want to skip a workout? Don't lay out your gear. Engineer the path you want." },
-    { "day": 69, "title": "Commitment",             "book": "Atomic Habits", "author": "James Clear", "headline": "Make Bad Habits Hard",                           "body": "Use future-you's preferences against present-you's impulses. Cancel the streaming service. Don't buy the snacks. Set automatic transfers to savings. The best decision is the one you don't have to make in the moment." },
-
-    { "day": 70, "title": "4th Law",                "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Satisfying",                             "body": "What is rewarded is repeated; what is punished is avoided. Immediate rewards reinforce habits; delayed ones don't move the needle. Find a way to make good habits feel rewarding right now, not someday." },
-    { "day": 71, "title": "Cardinal Rule",          "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Immediately Satisfying",                 "body": "The brain prioritizes immediate rewards over delayed ones — every time. Build habits that have a small but immediate satisfaction baked in. Even a tiny win, felt now, beats a big win promised later." },
-    { "day": 72, "title": "Tracking",               "book": "Atomic Habits", "author": "James Clear", "headline": "Don't Break the Chain",                          "body": "Tracking a habit is satisfying — it makes progress visible. The simple act of marking an X on a calendar reinforces identity. The chain becomes its own reward; you do it not to break what you've built." },
-    { "day": 73, "title": "Never Miss Twice",       "book": "Atomic Habits", "author": "James Clear", "headline": "One Slip Is Human, Two Is the Start of a Habit", "body": "Missing one day is an accident. Missing two is the beginning of a new habit you don't want. The first mistake rarely ruins you — it's the spiral after that does damage. Get back on the next day, no matter what." },
-    { "day": 74, "title": "Accountability",         "book": "Atomic Habits", "author": "James Clear", "headline": "Make It Public",                                 "body": "We care intensely about what others think. A single accountability partner can transform behavior. Write down your commitment, tell someone, raise the cost of slipping. Public stakes change private behavior." },
-
-    { "day": 75, "title": "Goldilocks",             "book": "Atomic Habits", "author": "James Clear", "headline": "Stay on the Edge of Your Ability",               "body": "Peak motivation comes from working on tasks just beyond current abilities — not too hard, not too easy. Boredom and overwhelm both kill habits. Calibrate the challenge so that it pulls you forward without breaking you." },
-    { "day": 76, "title": "Reflection",             "book": "Atomic Habits", "author": "James Clear", "headline": "Review and Refine",                              "body": "What gets measured gets improved. Review your habits regularly — what's working, what isn't, what needs adjusting. Periodic reflection ensures you spend time on the right things, not just the easy things." },
-    { "day": 77, "title": "Mindfulness",            "book": "Atomic Habits", "author": "James Clear", "headline": "Don't Stop Thinking",                            "body": "The danger of habits: they can make you mindless. Established routines should be a foundation for active practice, not a substitute for it. Habits + deliberate practice = mastery. Habits alone = stagnation." },
-    { "day": 78, "title": "Synthesis",              "book": "Atomic Habits", "author": "James Clear", "headline": "Small Habits, Remarkable Results",               "body": "The full system: cue, craving, response, reward — made obvious, attractive, easy, and satisfying. Don't try to be remarkable today. Just do something today that makes tomorrow's choice slightly easier." },
-    { "day": 79, "title": "Closing",                "book": "Atomic Habits", "author": "James Clear", "headline": "You Are What You Do, Repeatedly",                "body": "Excellence is not an act, but a habit. Every system you build is a vote for the person you're becoming. The journey of a thousand miles begins with one step — and continues with another, and another. Make today's vote count." },
-
-    { "day": 80, "title": "12 Rules for Life",      "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "An Antidote to Chaos",                                  "body": "Order alone is tyranny; chaos alone is destruction. Life is lived on the border between them. These are not rules to constrain you — they are rules to help you bear the weight of being, and to act meaningfully despite it." },
-    { "day": 81, "title": "Rule 1",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Stand Up Straight With Your Shoulders Back",            "body": "Posture is more than physical — it is a stance toward life. Confront the world with confidence, not because you are unafraid, but because you choose to face it. Voluntary courage signals to your brain that you can bear what comes." },
-    { "day": 82, "title": "Rule 2",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Treat Yourself Like Someone You Are Responsible for Helping", "body": "You would give a friend the medicine they need. Why not yourself? Aim at your own well-being as if it mattered — because it does. Stop punishing yourself for being human and start tending to your future self with care." },
-    { "day": 83, "title": "Rule 3",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Make Friends With People Who Want the Best for You",     "body": "Surround yourself with those who pull you upward, not those who drag you down to comfort their own failure. A true friend will not enable your decline. Choose them deliberately; they shape who you become." },
-    { "day": 84, "title": "Rule 4",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Compare Yourself to Who You Were Yesterday",             "body": "Not to who someone else is today. The internal critic should help you, not destroy you. Aim at incremental improvement against your own past — that is a comparison you can win, and the only one that matters." },
-    { "day": 85, "title": "Rule 5",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Do Not Let Children Do Things That Make You Dislike Them","body": "Discipline is love. Children act to discover the limits of acceptable behavior. Without limits, they cannot find safe ground. Set the boundary clearly; the resentment of unset limits is far worse than the friction of setting them." },
-    { "day": 86, "title": "Rule 6",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Set Your House in Order Before You Criticize the World", "body": "Before you blame society, examine your own life. Have you done what you know you should be doing? Fix what's within your power before turning your judgment outward. Humility precedes credibility." },
-    { "day": 87, "title": "Rule 7",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Pursue What Is Meaningful, Not What Is Expedient",       "body": "Expediency is the easy path; meaning is the hard one. Sacrifice the present for the future. Choose responsibility over impulse. Meaning emerges when you bear voluntary burdens that are worth bearing." },
-    { "day": 88, "title": "Rule 8",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Tell the Truth — or, at Least, Don't Lie",               "body": "Lying corrupts the speaker as much as the listener. Each falsehood weakens you. Speak what you believe, even when it costs you. Truth is the foundation upon which a life of meaning is built — without it, nothing stable stands." },
-    { "day": 89, "title": "Rule 9",                 "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Assume the Person You Are Listening To Knows Something You Don't", "body": "Listening — really listening — is rare. Assume your conversation partner holds a piece of the truth you lack. Approach them with curiosity, not the urge to win. You'll learn more, and they'll feel seen." },
-    { "day": 90, "title": "Rule 10",                "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Be Precise in Your Speech",                              "body": "Vague problems remain unsolvable. Name what is wrong, exactly. Specify what you want, exactly. Imprecise speech allows monsters to grow in the shadows. The act of articulation is itself the act of confronting." },
-    { "day": 91, "title": "Rule 11",                "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Do Not Bother Children When They Are Skateboarding",     "body": "Risk is not the enemy of growth — it is the path to it. To shield young people from danger is to keep them weak. Allow striving against difficulty. Competence is forged in voluntary discomfort, not protected from it." },
-    { "day": 92, "title": "Rule 12",                "book": "12 Rules for Life", "author": "Jordan Peterson", "headline": "Pet a Cat When You Encounter One on the Street",         "body": "Life contains tragedy beyond what we can fix. When you can, stop to notice the small wonders — the cat, the leaf, the moment. They will not solve your problems. They will remind you that beauty exists alongside suffering." }
+    {
+      "day": 2,
+      "title": "Law 1",
+      "headline": "Never Outshine the Master",
+      "body": "Always make those above you feel comfortably superior. In your desire to please and impress them, do not go too far in displaying your talents, or you might accomplish the opposite — inspire fear and insecurity.",
+      "caption_hook": "Know when to step back 🚀 How do you balance confidence and humility?"
+    },
+    {
+      "day": 3,
+      "title": "Law 2",
+      "headline": "Never Put Too Much Trust in Friends; Learn How to Use Enemies",
+      "body": "Be wary of friends — they will betray you more quickly, for they are easily aroused to envy. Hire a former enemy and they will be more loyal than a friend, because they have more to prove.",
+      "caption_hook": "Loyal or liable? 🤔 Who's your go-to advisor?"
+    },
+    {
+      "day": 4,
+      "title": "Law 3",
+      "headline": "Conceal Your Intentions",
+      "body": "Keep people off-balance and in the dark by never revealing the purpose behind your actions. If they have no clue what you are up to, they cannot prepare a defense.",
+      "caption_hook": "Keep your plans close 👀 What's your biggest secret?"
+    },
+    {
+      "day": 5,
+      "title": "Law 4",
+      "headline": "Always Say Less Than Necessary",
+      "body": "When you are trying to impress people with words, the more you say, the more common you appear, and the less in control. Powerful people impress and intimidate by saying less.",
+      "caption_hook": "Silence is power 🔇 When was the last time you bit your tongue?"
+    },
+    {
+      "day": 6,
+      "title": "Law 5",
+      "headline": "So Much Depends on Reputation — Guard It With Your Life",
+      "body": "Reputation is the cornerstone of power. Through reputation alone you can intimidate and win. Once it slips, however, you are vulnerable and will be attacked on all sides.",
+      "caption_hook": "Reputation is everything 💼 How do you protect yours?"
+    },
+    {
+      "day": 7,
+      "title": "Law 6",
+      "headline": "Court Attention at All Costs",
+      "body": "Everything is judged by its appearance; what is unseen counts for nothing. Never let yourself get lost in the crowd. Be conspicuous at all costs. Make yourself a magnet of attention.",
+      "caption_hook": "Be seen, be heard 🚀 What's your spotlight moment?"
+    },
+    {
+      "day": 8,
+      "title": "Law 7",
+      "headline": "Get Others to Do the Work for You, but Always Take the Credit",
+      "body": "Use the wisdom, knowledge, and legwork of other people to further your own cause. Such assistance saves you valuable time and energy and gives you a godlike aura of efficiency and speed.",
+      "caption_hook": "Work smarter, not harder 💡 How do you delegate effectively?"
+    },
+    {
+      "day": 9,
+      "title": "Law 8",
+      "headline": "Make Other People Come to You — Use Bait if Necessary",
+      "body": "When you force the other person to act, you are the one in control. It is always better to make your opponent come to you, abandoning his own plans in the process. Lure him with fabulous gains, then attack.",
+      "caption_hook": "Draw them in 🧲 What's your irresistible offer?"
+    },
+    {
+      "day": 10,
+      "title": "Law 9",
+      "headline": "Win Through Your Actions, Never Through Argument",
+      "body": "Any momentary triumph you think you have gained through argument is really a Pyrrhic victory: the resentment and ill will you stir up is stronger and lasts longer than any momentary change of opinion. Demonstrate, do not explicate.",
+      "caption_hook": "Actions speak louder 💪 What's your latest win?"
+    },
+    {
+      "day": 11,
+      "title": "Law 10",
+      "headline": "Infection: Avoid the Unhappy and Unlucky",
+      "body": "You can die from someone else's misery — emotional states are as infectious as diseases. The unfortunate sometimes draw misfortune on themselves; they will also draw it on you. Associate with the happy and fortunate instead.",
+      "caption_hook": "Energy is contagious ⚡️ Who uplifts you?"
+    },
+    {
+      "day": 12,
+      "title": "Law 11",
+      "headline": "Learn to Keep People Dependent on You",
+      "body": "To maintain your independence you must always be needed and wanted. The more you are relied on, the more freedom you have. Make people depend on you for their happiness and prosperity, and you have nothing to fear.",
+      "caption_hook": "Be the solution 🔑 How do you add value?"
+    },
+    {
+      "day": 13,
+      "title": "Law 12",
+      "headline": "Use Selective Honesty and Generosity to Disarm Your Victim",
+      "body": "One sincere and honest move will cover over dozens of dishonest ones. Open-hearted gestures of honesty and generosity bring down the guard of even the most suspicious people.",
+      "caption_hook": "Honesty can be strategic 🤝 When was a time it paid off?"
+    },
+    {
+      "day": 14,
+      "title": "Law 13",
+      "headline": "When Asking for Help, Appeal to Self-Interest, Never to Mercy or Gratitude",
+      "body": "If you need to turn to an ally for help, do not bother to remind him of your past assistance and good deeds. He will find a way to ignore you. Instead, uncover something in your request that will benefit him, and emphasize it out of all proportion.",
+      "caption_hook": "What's in it for them? 💰 How do you make requests effective?"
+    },
+    {
+      "day": 15,
+      "title": "Law 14",
+      "headline": "Pose as a Friend, Work as a Spy",
+      "body": "Knowing about your rival is critical. Use spies to gather valuable information that will keep you a step ahead. Better still: play the spy yourself. In polite social encounters, learn to probe — ask indirect questions to get people to reveal their weaknesses and intentions.",
+      "caption_hook": "Listen more than you talk 🗣️ What's the hidden agenda?"
+    },
+    {
+      "day": 16,
+      "title": "Law 15",
+      "headline": "Crush Your Enemy Totally",
+      "body": "More is lost through stopping halfway than through total annihilation: the enemy will recover, and will seek revenge. Crush him, not only in body but in spirit.",
+      "caption_hook": "Finish strong 💥 How do you handle competition?"
+    },
+    {
+      "day": 17,
+      "title": "Law 16",
+      "headline": "Use Absence to Increase Respect and Honor",
+      "body": "Too much circulation makes the price go down: the more you are seen and heard from, the more common you appear. Withdraw for a while, and you will be talked about, even admired. You must learn when to leave.",
+      "caption_hook": "Out of sight, in mind 👀 When did absence boost your value?"
+    },
+    {
+      "day": 18,
+      "title": "Law 17",
+      "headline": "Keep Others in Suspended Terror: Cultivate Unpredictability",
+      "body": "Humans are creatures of habit with an insatiable need to see familiarity in others' actions. Your predictability gives them a sense of control. Turn the tables: be deliberately unpredictable. Behavior that seems to have no consistency or purpose will keep them off-balance.",
+      "caption_hook": "Expect the unexpected 🔮 How do you keep them guessing?"
+    },
+    {
+      "day": 19,
+      "title": "Law 18",
+      "headline": "Do Not Build Fortresses to Protect Yourself — Isolation Is Dangerous",
+      "body": "The world is dangerous and enemies are everywhere — everyone has to protect themselves. A fortress seems the safest. But isolation exposes you to more dangers than it protects you from — it cuts you off from valuable information, it makes you conspicuous and an easy target. Better to circulate among people.",
+      "caption_hook": "Connections are key 🌐 Who's in your network?"
+    },
+    {
+      "day": 20,
+      "title": "Law 19",
+      "headline": "Know Who You're Dealing With — Do Not Offend the Wrong Person",
+      "body": "There are many different kinds of people in the world, and you can never assume that everyone will react to your strategies in the same way. Deceive or outmaneuver some people and they will spend the rest of their lives seeking revenge. Choose your victims and opponents carefully.",
+      "caption_hook": "Read the room 👀 Who's got your back?"
+    },
+    {
+      "day": 21,
+      "title": "Law 20",
+      "headline": "Do Not Commit to Anyone",
+      "body": "It is the fool who always rushes to take sides. Do not commit to any side or cause but yourself. By maintaining your independence, you become the master of others — playing people against one another, making them pursue you.",
+      "caption_hook": "Keep your options open 🚪 What's your exit strategy?"
+    },
+    {
+      "day": 22,
+      "title": "Law 21",
+      "headline": "Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark",
+      "body": "No one likes feeling stupider than the next person. The trick is to make your victims feel smart — and not just smart, but smarter than you are. Once convinced of this, they will never suspect that you may have ulterior motives.",
+      "caption_hook": "Sometimes less is more 🤑 When did playing dumb work?"
+    },
+    {
+      "day": 23,
+      "title": "Law 22",
+      "headline": "Use the Surrender Tactic: Transform Weakness Into Power",
+      "body": "When you are weaker, never fight for honor's sake; choose surrender instead. Surrender gives you time to recover, time to torment and irritate your conqueror, time to wait for his power to wane. Turn the cheek and infuriate him.",
+      "caption_hook": "Surrender to win 🤝 When did you last yield?"
+    },
+    {
+      "day": 24,
+      "title": "Law 23",
+      "headline": "Concentrate Your Forces",
+      "body": "Conserve your forces and energies by keeping them concentrated at their strongest point. You gain more by finding a rich mine and mining it deeper than by flitting from one shallow mine to another — intensity defeats extensity every time.",
+      "caption_hook": "Focus is power 🔍 What's your target?"
+    },
+    {
+      "day": 25,
+      "title": "Law 24",
+      "headline": "Play the Perfect Courtier",
+      "body": "The perfect courtier thrives in a world where everything revolves around power and political dexterity. He has mastered the art of indirection; he flatters, yields to superiors, and asserts power over others in the most oblique and graceful manner.",
+      "caption_hook": "Tact is key 🕺 How do you navigate tricky situations?"
+    },
+    {
+      "day": 26,
+      "title": "Law 25",
+      "headline": "Re-Create Yourself",
+      "body": "Do not accept the roles that society foists on you. Re-create yourself by forging a new identity, one that commands attention and never bores the audience. Be the master of your own image rather than letting others define it for you.",
+      "caption_hook": "Reinvention is power 🔄 What's your next chapter?"
+    },
+    {
+      "day": 27,
+      "title": "Law 26",
+      "headline": "Keep Your Hands Clean",
+      "body": "You must seem a paragon of civility and efficiency: your hands are never soiled by mistakes and nasty deeds. Maintain such a spotless appearance by using others as scapegoats and cat's-paws to disguise your involvement.",
+      "caption_hook": "Accountability is key 🚿 How do you stay above the fray?"
+    },
+    {
+      "day": 28,
+      "title": "Law 27",
+      "headline": "Play on People's Need to Believe to Create a Cultlike Following",
+      "body": "People have an overwhelming desire to believe in something. Become the focal point of such desire by offering them a cause, a new faith to follow. Promise the moon but keep your words vague yet full of promise; emphasize enthusiasm over rationality.",
+      "caption_hook": "Belief is power ✨ What's your magic trick?"
+    },
+    {
+      "day": 29,
+      "title": "Law 28",
+      "headline": "Enter Action With Boldness",
+      "body": "If you are unsure of a course of action, do not attempt it. Your doubts and hesitations will infect your execution. Timidity is dangerous: better to enter with boldness. Any mistakes you commit through audacity are easily corrected with more audacity.",
+      "caption_hook": "Courage is contagious 💥 What's holding you back?"
+    },
+    {
+      "day": 30,
+      "title": "Law 29",
+      "headline": "Plan All the Way to the End",
+      "body": "The ending is everything. Plan all the way to it, taking into account all the possible consequences, obstacles, and twists of fortune that might reverse your hard work. By planning to the end, you will not be overwhelmed by circumstances.",
+      "caption_hook": "Plan, execute, win 🎯 What's your endgame?"
+    },
+    {
+      "day": 31,
+      "title": "Law 30",
+      "headline": "Make Your Accomplishments Seem Effortless",
+      "body": "Your actions must seem natural and executed with ease. All the toil and practice that go into them, and also all the clever tricks, must be concealed. When you act, act effortlessly, as if you could do much more.",
+      "caption_hook": "Effortless mastery 🌊 How do you make it look easy?"
+    },
+    {
+      "day": 32,
+      "title": "Law 31",
+      "headline": "Control the Options: Get Others to Play With the Cards You Deal",
+      "body": "The best deceptions are the ones that seem to give the other person a choice: your victims feel they are in control, but are actually your puppets. Give people options that come out in your favor whichever one they choose.",
+      "caption_hook": "The house always wins 🃏 How do you set the game?"
+    },
+    {
+      "day": 33,
+      "title": "Law 32",
+      "headline": "Play to People's Fantasies",
+      "body": "The truth is often avoided because it is ugly and unpleasant. Never appeal to truth and reality unless you are prepared for the anger that comes from disenchantment. Life is so harsh and distressing that those who can manufacture romance or conjure up fantasy are like oases in the desert.",
+      "caption_hook": "Dreams are powerful 💫 What's yours?"
+    },
+    {
+      "day": 34,
+      "title": "Law 33",
+      "headline": "Discover Each Man's Thumbscrew",
+      "body": "Everyone has a weakness, a gap in the castle wall. That weakness is usually an insecurity, an uncontrollable emotion or need. Once found, it is a thumbscrew you can turn to your advantage.",
+      "caption_hook": "What's their weakness 🔓 How do you leverage it?"
+    },
+    {
+      "day": 35,
+      "title": "Law 34",
+      "headline": "Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One",
+      "body": "The way you carry yourself will often determine how you are treated: in the long run, appearing vulgar or common will make people disrespect you. A king respects himself and inspires the same sentiment in others.",
+      "caption_hook": "Own it 👑 How do you embody confidence?"
+    },
+    {
+      "day": 36,
+      "title": "Law 35",
+      "headline": "Master the Art of Timing",
+      "body": "Never seem to be in a hurry — hurrying betrays a lack of control over yourself, and over time. Always seem patient, as if you know that everything will come to you eventually. Become a detective of the right moment.",
+      "caption_hook": "Timing is everything ⏰ What's your cue?"
+    },
+    {
+      "day": 37,
+      "title": "Law 36",
+      "headline": "Disdain Things You Cannot Have: Ignoring Them Is the Best Revenge",
+      "body": "By acknowledging a petty problem you give it existence and credibility. The more attention you pay an enemy, the stronger you make him; and a small mistake is often made worse and more visible when you try to fix it.",
+      "caption_hook": "Let go to win 🙅‍♂️ What are you ignoring for peace?"
+    },
+    {
+      "day": 38,
+      "title": "Law 37",
+      "headline": "Create Compelling Spectacles",
+      "body": "Striking imagery and grand symbolic gestures create the aura of power — everyone responds to them. Stage spectacles for those around you, then, full of arresting visuals and radiant symbols that heighten your presence.",
+      "caption_hook": "Make it memorable 🎉 What's your showstopper?"
+    },
+    {
+      "day": 39,
+      "title": "Law 38",
+      "headline": "Think as You Like but Behave Like Others",
+      "body": "If you make a show of going against the times, flaunting your unconventional ideas and unorthodox ways, people will think that you only want attention and that you look down upon them. They will find a way to punish you. Far safer to blend in and nurture the common touch.",
+      "caption_hook": "Fit in to stand out 🐝 When did blending work?"
+    },
+    {
+      "day": 40,
+      "title": "Law 39",
+      "headline": "Stir Up Waters to Catch Fish",
+      "body": "Anger and emotion are strategically counterproductive. You must always stay calm and objective. But if you can make your enemies angry while staying calm yourself, you gain a decided advantage. Put your enemies off-balance: find the chink in their vanity.",
+      "caption_hook": "Create movement 🌊 How do you shake things up?"
+    },
+    {
+      "day": 41,
+      "title": "Law 40",
+      "headline": "Despise the Free Lunch",
+      "body": "What is offered for free is dangerous — it usually involves either a trick or a hidden obligation. What has worth is worth paying for. By paying your own way you stay clear of gratitude, guilt, and deceit.",
+      "caption_hook": "Nothing's free 💸 What's the real cost?"
+    },
+    {
+      "day": 42,
+      "title": "Law 41",
+      "headline": "Avoid Stepping Into a Great Man's Shoes",
+      "body": "What happens first always appears better and more original than what comes after. If you succeed a great man or have a famous parent, you will have to accomplish double their achievements to outshine them. Do not get lost in their shadow — establish your own name.",
+      "caption_hook": "Carve your path 🛤️ Who's your role model?"
+    },
+    {
+      "day": 43,
+      "title": "Law 42",
+      "headline": "Strike the Shepherd and the Sheep Will Scatter",
+      "body": "Trouble can often be traced to a single strong individual — the stirrer, the arrogant underling, the poisoner of goodwill. If you allow such people room to operate, others will succumb to their influence. Do not wait for the troubles they cause to multiply; strike at their source.",
+      "caption_hook": "Target the source 🎯 How do you handle hierarchy?"
+    },
+    {
+      "day": 44,
+      "title": "Law 43",
+      "headline": "Work on the Hearts and Minds of Others",
+      "body": "Coercion creates a reaction that will eventually work against you. You must seduce others into wanting to move in your direction. The way to seduce others is to operate on their individual psychologies and weaknesses. Soften up the resistant by working on their emotions.",
+      "caption_hook": "Emotions drive decisions ❤️ What's their motivation?"
+    },
+    {
+      "day": 45,
+      "title": "Law 44",
+      "headline": "Disarm and Infuriate With the Mirror Effect",
+      "body": "The mirror reflects reality, but it is also the perfect tool for deception. When you mirror your enemies, doing exactly as they do, they cannot figure out your strategy. The mirror mocks and humiliates them, making them overreact.",
+      "caption_hook": "Reflect their moves 🔮 How do you handle conflict?"
+    },
+    {
+      "day": 46,
+      "title": "Law 45",
+      "headline": "Preach the Need for Change, but Never Reform Too Much at Once",
+      "body": "Everyone understands the need for change in the abstract, but on the day-to-day level people are creatures of habit. Too much innovation is traumatic, and will lead to revolt. If you are new to a position of power, show that you respect the old ways.",
+      "caption_hook": "Baby steps 🐾 How do you implement change?"
+    },
+    {
+      "day": 47,
+      "title": "Law 46",
+      "headline": "Never Appear Too Perfect",
+      "body": "Appearing better than others is always dangerous, but most dangerous of all is to appear to have no faults or weaknesses. Envy creates silent enemies. It is smart to occasionally display defects, and admit to harmless vices, to deflect envy and appear more human and approachable.",
+      "caption_hook": "Flaws are human 💔 How do you show vulnerability?"
+    },
+    {
+      "day": 48,
+      "title": "Law 47",
+      "headline": "Do Not Go Past the Mark You Aimed For; In Victory, Learn When to Stop",
+      "body": "The moment of victory is often the moment of greatest peril. In the heat of victory, arrogance and overconfidence can push you past the goal you had aimed for, and by going too far, you make more enemies than you defeat. Set a goal, and when you reach it, stop.",
+      "caption_hook": "Know when to stop 🏁 What's your limit?"
+    },
+    {
+      "day": 49,
+      "title": "Law 48",
+      "headline": "Assume Formlessness",
+      "body": "By taking a shape, by having a visible plan, you open yourself to attack. Instead of taking a form for your enemy to grasp, keep yourself adaptable and on the move. Accept that nothing is certain and no law is fixed. The best way to protect yourself is to be as fluid and formless as water.",
+      "caption_hook": "Adapt to win 🌊 How do you stay flexible?"
+    },
+    {
+      "day": 50,
+      "title": "Atomic Habits",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Tiny Changes, Remarkable Results",
+      "body": "The aggregation of marginal gains shapes who you become. A 1% improvement every day compounds to a 37x improvement over a year. Habits are the compound interest of self-improvement — small actions, repeated, become extraordinary.",
+      "caption_hook": "Tiny changes, big results 🌱 What's your 1% today?"
+    },
+    {
+      "day": 51,
+      "title": "Compound Effect",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "1% Better Every Day",
+      "body": "Small habits don't add up — they compound. Results lag behind effort. The valley of disappointment is real, but breakthrough moments are usually the result of many previous actions building up potential. Trust the process.",
+      "caption_hook": "1% every day 📈 What are you compounding?"
+    },
+    {
+      "day": 52,
+      "title": "Systems",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Forget Goals, Focus on Systems",
+      "body": "Goals are about the results you want; systems are about the processes that lead there. You do not rise to the level of your goals — you fall to the level of your systems. Build the system, the goals follow.",
+      "caption_hook": "Goals fade, systems win 🎯 What's your daily process?"
+    },
+    {
+      "day": 53,
+      "title": "The Plateau",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "The Plateau of Latent Potential",
+      "body": "An ice cube doesn't melt at 30°F or 31°F — it melts at 32°F. Habits often appear ineffective because results are delayed. Don't quit at the moment your work was about to pay off. The breakthrough is just past the plateau.",
+      "caption_hook": "Growth is silent before it explodes 🌋 What plateau are you pushing through?"
+    },
+    {
+      "day": 54,
+      "title": "Identity",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Be the Person, Not the Result",
+      "body": "True behavior change is identity change. Don't focus on what you want to achieve — focus on who you wish to become. Each action is a vote cast for the type of person you are becoming. Win the votes, become the person.",
+      "caption_hook": "Who do you wish to become? 🦋 Vote for it daily."
+    },
+    {
+      "day": 55,
+      "title": "Habit Loop",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Cue, Craving, Response, Reward",
+      "body": "Every habit follows the same four-step pattern. A cue triggers a craving, which motivates a response, which delivers a reward. Master this loop and you can engineer any habit you want — or dismantle one you don't.",
+      "caption_hook": "Cue → craving → response → reward 🔁 Which loop runs your life?"
+    },
+    {
+      "day": 56,
+      "title": "1st Law",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Obvious",
+      "body": "You can't change what you don't notice. Awareness comes before action. The greatest predictor of behavior is environment — make the cues for good habits visible, and the cues for bad habits invisible.",
+      "caption_hook": "You can't change what you don't see 👀 What habit do you need to notice?"
+    },
+    {
+      "day": 57,
+      "title": "Scorecard",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Become the Observer",
+      "body": "List your daily habits and rate each as positive, negative, or neutral. Don't judge — just notice. Awareness creates the gap between stimulus and response, and in that gap lies your power to choose differently.",
+      "caption_hook": "Track your habits 📋 What does yours reveal?"
+    },
+    {
+      "day": 58,
+      "title": "Intentions",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "I Will [X] at [Time] in [Place]",
+      "body": "Vague intentions die. Specific ones survive. Naming exactly when and where you'll act increases follow-through dramatically. 'I will exercise for 30 minutes at 6 PM in the living room.' Decide once, execute always.",
+      "caption_hook": "I will [X] at [time] in [place] 📍 What's your plan?"
+    },
+    {
+      "day": 59,
+      "title": "Habit Stacking",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "After [Habit], I Will [New Habit]",
+      "body": "The best way to build a new habit is to attach it to an existing one. The current habit becomes the cue. After my morning coffee, I will write three sentences. Chain them together; the existing routine pulls the new one into place.",
+      "caption_hook": "Stack the new on the old 🔗 What can you attach?"
+    },
+    {
+      "day": 60,
+      "title": "Environment",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Shape the Spaces You Inhabit",
+      "body": "Behavior is a function of person plus environment. You can rely on willpower, or you can design your surroundings. Put the book on your pillow. Hide the phone in another room. The environment does the work for you.",
+      "caption_hook": "Your space shapes you 🏠 What needs redesigning?"
+    },
+    {
+      "day": 61,
+      "title": "2nd Law",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Attractive",
+      "body": "We are drawn to behaviors that anticipate reward. Dopamine drives action — we act because we anticipate pleasure, not because we receive it. Make good habits more appealing than the alternative, and the brain follows.",
+      "caption_hook": "Dopamine drives action ⚡ What makes your habit appealing?"
+    },
+    {
+      "day": 62,
+      "title": "Temptation Bundling",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Pair What You Want with What You Need",
+      "body": "Bundle a habit you want to build with one you already enjoy. Only watch your favorite show while exercising. Only listen to that podcast while commuting. The pleasure of one transfers to the other.",
+      "caption_hook": "Pair pleasure with progress 🎧 What bundles for you?"
+    },
+    {
+      "day": 63,
+      "title": "Culture",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Join a Tribe Where Your Habits Are Normal",
+      "body": "We imitate three groups: the close, the many, and the powerful. Surround yourself with people for whom your desired behavior is the default. Their normal becomes your normal. Belonging is the strongest motivator.",
+      "caption_hook": "You become your tribe 👥 Who surrounds you?"
+    },
+    {
+      "day": 64,
+      "title": "Reframe",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "I Get To, Not I Have To",
+      "body": "Highlight the benefit of doing the hard thing rather than the cost. Anticipation, not achievement, drives behavior. Reframe the work in terms of the identity you're building — and the chore becomes a privilege.",
+      "caption_hook": "I get to, not I have to 💪 What feels like a chore?"
+    },
+    {
+      "day": 65,
+      "title": "3rd Law",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Easy",
+      "body": "Habits form based on frequency, not time. The most effective form of learning is practice, not planning. Reduce the friction associated with good behaviors. Lower the barrier to entry, and you'll cross it more often.",
+      "caption_hook": "Lower the barrier 🚪 What's stopping you?"
+    },
+    {
+      "day": 66,
+      "title": "Motion vs Action",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Walk Slowly, but Never Backward",
+      "body": "Motion lets you feel like you're making progress without taking risk; action produces a result. Reading a book about exercise is motion. Going to the gym is action. Be honest with yourself about which one you're doing.",
+      "caption_hook": "Motion ≠ action 🚶 Which one are you doing?"
+    },
+    {
+      "day": 67,
+      "title": "Two-Minute Rule",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Scale Down Your Habits",
+      "body": "Any habit can be scaled to two minutes. Read for two minutes. Write one sentence. Do one push-up. Master showing up first; optimization comes later. A habit must be established before it can be improved.",
+      "caption_hook": "Start with 2 minutes ⏱️ What's the smallest version?"
+    },
+    {
+      "day": 68,
+      "title": "Friction",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make the Path Easy",
+      "body": "When friction is low, habits are easy. Want to read more? Put a book on your pillow. Want to eat healthier? Pre-cut fruit at eye level. Want to skip a workout? Don't lay out your gear. Engineer the path you want.",
+      "caption_hook": "Make it easy on future you 🪂 What can you pre-decide?"
+    },
+    {
+      "day": 69,
+      "title": "Commitment",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make Bad Habits Hard",
+      "body": "Use future-you's preferences against present-you's impulses. Cancel the streaming service. Don't buy the snacks. Set automatic transfers to savings. The best decision is the one you don't have to make in the moment.",
+      "caption_hook": "Make bad habits hard 🔒 What's your commitment device?"
+    },
+    {
+      "day": 70,
+      "title": "4th Law",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Satisfying",
+      "body": "What is rewarded is repeated; what is punished is avoided. Immediate rewards reinforce habits; delayed ones don't move the needle. Find a way to make good habits feel rewarding right now, not someday.",
+      "caption_hook": "What's rewarded gets repeated 🎉 How do you celebrate?"
+    },
+    {
+      "day": 71,
+      "title": "Cardinal Rule",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Immediately Satisfying",
+      "body": "The brain prioritizes immediate rewards over delayed ones — every time. Build habits that have a small but immediate satisfaction baked in. Even a tiny win, felt now, beats a big win promised later.",
+      "caption_hook": "Reward now, not later 🍎 What's your immediate win?"
+    },
+    {
+      "day": 72,
+      "title": "Tracking",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Don't Break the Chain",
+      "body": "Tracking a habit is satisfying — it makes progress visible. The simple act of marking an X on a calendar reinforces identity. The chain becomes its own reward; you do it not to break what you've built.",
+      "caption_hook": "Don't break the chain ⛓️ What streak are you building?"
+    },
+    {
+      "day": 73,
+      "title": "Never Miss Twice",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "One Slip Is Human, Two Is the Start of a Habit",
+      "body": "Missing one day is an accident. Missing two is the beginning of a new habit you don't want. The first mistake rarely ruins you — it's the spiral after that does damage. Get back on the next day, no matter what.",
+      "caption_hook": "One slip is human, two starts a pattern 🔁 How do you recover?"
+    },
+    {
+      "day": 74,
+      "title": "Accountability",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Make It Public",
+      "body": "We care intensely about what others think. A single accountability partner can transform behavior. Write down your commitment, tell someone, raise the cost of slipping. Public stakes change private behavior.",
+      "caption_hook": "Tell someone 📢 Who's your accountability partner?"
+    },
+    {
+      "day": 75,
+      "title": "Goldilocks",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Stay on the Edge of Your Ability",
+      "body": "Peak motivation comes from working on tasks just beyond current abilities — not too hard, not too easy. Boredom and overwhelm both kill habits. Calibrate the challenge so that it pulls you forward without breaking you.",
+      "caption_hook": "Just right difficulty 🎯 Are you bored or overwhelmed?"
+    },
+    {
+      "day": 76,
+      "title": "Reflection",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Review and Refine",
+      "body": "What gets measured gets improved. Review your habits regularly — what's working, what isn't, what needs adjusting. Periodic reflection ensures you spend time on the right things, not just the easy things.",
+      "caption_hook": "Review, refine, repeat 🔍 What's working?"
+    },
+    {
+      "day": 77,
+      "title": "Mindfulness",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Don't Stop Thinking",
+      "body": "The danger of habits: they can make you mindless. Established routines should be a foundation for active practice, not a substitute for it. Habits + deliberate practice = mastery. Habits alone = stagnation.",
+      "caption_hook": "Habits + thinking = mastery 🧠 What needs your attention?"
+    },
+    {
+      "day": 78,
+      "title": "Synthesis",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "Small Habits, Remarkable Results",
+      "body": "The full system: cue, craving, response, reward — made obvious, attractive, easy, and satisfying. Don't try to be remarkable today. Just do something today that makes tomorrow's choice slightly easier.",
+      "caption_hook": "Small habits, remarkable results ✨ What's compounding?"
+    },
+    {
+      "day": 79,
+      "title": "Closing",
+      "book": "Atomic Habits",
+      "author": "James Clear",
+      "headline": "You Are What You Do, Repeatedly",
+      "body": "Excellence is not an act, but a habit. Every system you build is a vote for the person you're becoming. The journey of a thousand miles begins with one step — and continues with another, and another. Make today's vote count.",
+      "caption_hook": "You are what you do, repeatedly 🌟 Make today's vote count."
+    },
+    {
+      "day": 80,
+      "title": "12 Rules for Life",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "An Antidote to Chaos",
+      "body": "Order alone is tyranny; chaos alone is destruction. Life is lived on the border between them. These are not rules to constrain you — they are rules to help you bear the weight of being, and to act meaningfully despite it.",
+      "caption_hook": "Order or chaos — where do you live? ⚖️"
+    },
+    {
+      "day": 81,
+      "title": "Rule 1",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Stand Up Straight With Your Shoulders Back",
+      "body": "Posture is more than physical — it is a stance toward life. Confront the world with confidence, not because you are unafraid, but because you choose to face it. Voluntary courage signals to your brain that you can bear what comes.",
+      "caption_hook": "Posture is a stance toward life 🦅 How do you carry yourself?"
+    },
+    {
+      "day": 82,
+      "title": "Rule 2",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Treat Yourself Like Someone You Are Responsible for Helping",
+      "body": "You would give a friend the medicine they need. Why not yourself? Aim at your own well-being as if it mattered — because it does. Stop punishing yourself for being human and start tending to your future self with care.",
+      "caption_hook": "Would you give this to a friend? 🤝 Why not yourself?"
+    },
+    {
+      "day": 83,
+      "title": "Rule 3",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Make Friends With People Who Want the Best for You",
+      "body": "Surround yourself with those who pull you upward, not those who drag you down to comfort their own failure. A true friend will not enable your decline. Choose them deliberately; they shape who you become.",
+      "caption_hook": "Who pulls you up? Who drags you down? 🪜"
+    },
+    {
+      "day": 84,
+      "title": "Rule 4",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Compare Yourself to Who You Were Yesterday",
+      "body": "Not to who someone else is today. The internal critic should help you, not destroy you. Aim at incremental improvement against your own past — that is a comparison you can win, and the only one that matters.",
+      "caption_hook": "Better than yesterday 📈 What's your win today?"
+    },
+    {
+      "day": 85,
+      "title": "Rule 5",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Do Not Let Children Do Things That Make You Dislike Them",
+      "body": "Discipline is love. Children act to discover the limits of acceptable behavior. Without limits, they cannot find safe ground. Set the boundary clearly; the resentment of unset limits is far worse than the friction of setting them.",
+      "caption_hook": "Boundaries are love 🛡️ What rule keeps the peace?"
+    },
+    {
+      "day": 86,
+      "title": "Rule 6",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Set Your House in Order Before You Criticize the World",
+      "body": "Before you blame society, examine your own life. Have you done what you know you should be doing? Fix what's within your power before turning your judgment outward. Humility precedes credibility.",
+      "caption_hook": "Fix your own first 🏠 What's calling for attention?"
+    },
+    {
+      "day": 87,
+      "title": "Rule 7",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Pursue What Is Meaningful, Not What Is Expedient",
+      "body": "Expediency is the easy path; meaning is the hard one. Sacrifice the present for the future. Choose responsibility over impulse. Meaning emerges when you bear voluntary burdens that are worth bearing.",
+      "caption_hook": "Meaningful > expedient 🎯 What's worth the hard path?"
+    },
+    {
+      "day": 88,
+      "title": "Rule 8",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Tell the Truth — or, at Least, Don't Lie",
+      "body": "Lying corrupts the speaker as much as the listener. Each falsehood weakens you. Speak what you believe, even when it costs you. Truth is the foundation upon which a life of meaning is built — without it, nothing stable stands.",
+      "caption_hook": "Truth is the foundation 🗣️ What needs saying?"
+    },
+    {
+      "day": 89,
+      "title": "Rule 9",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Assume the Person You Are Listening To Knows Something You Don't",
+      "body": "Listening — really listening — is rare. Assume your conversation partner holds a piece of the truth you lack. Approach them with curiosity, not the urge to win. You'll learn more, and they'll feel seen.",
+      "caption_hook": "Listen to learn, not to reply 👂 Who taught you recently?"
+    },
+    {
+      "day": 90,
+      "title": "Rule 10",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Be Precise in Your Speech",
+      "body": "Vague problems remain unsolvable. Name what is wrong, exactly. Specify what you want, exactly. Imprecise speech allows monsters to grow in the shadows. The act of articulation is itself the act of confronting.",
+      "caption_hook": "Name the monster to defeat it 🎯 What needs articulating?"
+    },
+    {
+      "day": 91,
+      "title": "Rule 11",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Do Not Bother Children When They Are Skateboarding",
+      "body": "Risk is not the enemy of growth — it is the path to it. To shield young people from danger is to keep them weak. Allow striving against difficulty. Competence is forged in voluntary discomfort, not protected from it.",
+      "caption_hook": "Let them struggle, let them grow 🛹 Where are you over-protecting?"
+    },
+    {
+      "day": 92,
+      "title": "Rule 12",
+      "book": "12 Rules for Life",
+      "author": "Jordan Peterson",
+      "headline": "Pet a Cat When You Encounter One on the Street",
+      "body": "Life contains tragedy beyond what we can fix. When you can, stop to notice the small wonders — the cat, the leaf, the moment. They will not solve your problems. They will remind you that beauty exists alongside suffering.",
+      "caption_hook": "Stop. Notice the beauty 🐱 What small wonder did you miss today?"
+    }
   ]
 }
