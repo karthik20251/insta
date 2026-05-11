@@ -18,14 +18,20 @@ GRAPH = "https://graph.facebook.com/v21.0"
 def build_caption(day: dict) -> str:
     book_day = day.get("book_day", day["day"])
     book_total = day.get("book_total", day.get("total_days", 92))
-    # Hashtags adjust to which book this day belongs to
+    # Hashtags = book-specific niche tags + reach/growth/engagement tags
+    # Total stays at IG's 30-hashtag cap to avoid penalties.
     book_lower = day["book"].lower()
     if "atomic habits" in book_lower:
-        tags = "#atomichabits #jamesclear #habits #mindset #selfimprovement #productivity #discipline #identity #books #dailyquotes"
+        niche = "#atomichabits #jamesclear #habits #discipline #productivity #identity #books #booksofinstagram"
     elif "12 rules" in book_lower or "jordan peterson" in book_lower:
-        tags = "#12rulesforlife #jordanpeterson #meaning #responsibility #philosophy #stoic #mindset #selfimprovement #books #dailyquotes"
+        niche = "#12rulesforlife #jordanpeterson #meaning #responsibility #philosophy #stoic #books #booksofinstagram"
     else:
-        tags = "#48lawsofpower #robertgreene #power #wisdom #mindset #selfimprovement #strategy #philosophy #books #dailyquotes"
+        niche = "#48lawsofpower #robertgreene #power #wisdom #strategy #philosophy #books #booksofinstagram"
+
+    reach = "#viral #reels #trending #fyp #explorepage #foryourpage #reachmore #getnoticed"
+    growth = "#growthmindset #successmindset #keepgrowing #goalsetter #motivation #mindset #selfimprovement"
+    engage = "#dailyquotes #likeforlikes #doubletap #engagementboost"  # 4 — keeps total at 30
+    tags = f"{niche}\n.\n{reach}\n.\n{growth}\n.\n{engage}"
     parts = [
         day["headline"],
         "",
@@ -42,48 +48,50 @@ def build_caption(day: dict) -> str:
     return "\n".join(parts)
 
 
-def post_reel(video_url: str, caption: str) -> str:
+def _create_and_publish(media_data: dict) -> str:
+    """Create a media container, wait for ingestion, publish. Returns media_id."""
     user_id = os.environ["IG_USER_ID"]
     token = os.environ["IG_ACCESS_TOKEN"]
 
-    # 1. Create container
-    r = requests.post(
-        f"{GRAPH}/{user_id}/media",
-        data={
-            "media_type": "REELS",
-            "video_url": video_url,
-            "caption": caption,
-            "share_to_feed": "true",
-            "access_token": token,
-        },
-        timeout=60,
-    )
+    r = requests.post(f"{GRAPH}/{user_id}/media",
+                      data={**media_data, "access_token": token}, timeout=60)
     r.raise_for_status()
     creation_id = r.json()["id"]
 
-    # 2. Wait for IG to ingest the video
     for _ in range(30):
-        s = requests.get(
-            f"{GRAPH}/{creation_id}",
-            params={"fields": "status_code", "access_token": token},
-            timeout=30,
-        ).json()
+        s = requests.get(f"{GRAPH}/{creation_id}",
+                         params={"fields": "status_code", "access_token": token},
+                         timeout=30).json()
         if s.get("status_code") == "FINISHED":
             break
         if s.get("status_code") == "ERROR":
             raise RuntimeError(f"IG ingestion error: {s}")
         time.sleep(10)
     else:
-        raise TimeoutError("IG did not finish processing the video in time")
+        raise TimeoutError("IG did not finish processing the media in time")
 
-    # 3. Publish
-    r = requests.post(
-        f"{GRAPH}/{user_id}/media_publish",
-        data={"creation_id": creation_id, "access_token": token},
-        timeout=60,
-    )
+    r = requests.post(f"{GRAPH}/{user_id}/media_publish",
+                      data={"creation_id": creation_id, "access_token": token}, timeout=60)
     r.raise_for_status()
     return r.json()["id"]
+
+
+def post_reel(video_url: str, caption: str) -> str:
+    return _create_and_publish({
+        "media_type": "REELS",
+        "video_url": video_url,
+        "caption": caption,
+        "share_to_feed": "true",
+    })
+
+
+def post_story(video_url: str) -> str:
+    """Share the same video to Stories (24-hour visibility). Best-effort:
+    if it fails, the Reel post is unaffected."""
+    return _create_and_publish({
+        "media_type": "STORIES",
+        "video_url": video_url,
+    })
 
 
 if __name__ == "__main__":

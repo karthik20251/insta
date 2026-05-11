@@ -9,7 +9,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from generate import build, total_days
-from post import build_caption, post_reel
+from post import build_caption, post_reel, post_story
 
 load_dotenv()
 
@@ -95,8 +95,17 @@ def main() -> int:
 
     caption = build_caption(day)
     media_id = post_reel(video_url, caption)
-    print(f"  posted: media_id={media_id}")
+    print(f"  posted reel: media_id={media_id}")
     write_github_output(media_id=media_id)
+
+    # Cross-post to Stories — best-effort, don't fail the run if it errors
+    try:
+        story_id = post_story(video_url)
+        print(f"  shared to story: media_id={story_id}")
+        write_github_output(story_id=story_id)
+    except Exception as e:
+        print(f"  WARN: story share failed (non-fatal): {e}")
+
     return 0
 
 
