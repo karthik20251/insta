@@ -161,52 +161,53 @@ def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[s
 
 
 def render_image(day: dict, out_path: Path) -> None:
+    """Render the main quote frame.
+
+    Visual hierarchy (top → bottom):
+      1. HEADLINE (biggest, top portion) — grabs first-second attention
+      2. Divider
+      3. Body text — explains the principle
+      4. Day label (small gold) + author/book attribution (italic dim) — footer
+    """
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
-    font_title = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 56, weight=700)
     font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 78, weight=900)
     font_body = pick_font(["PlayfairDisplay.ttf", "PlayfairDisplay-Regular.ttf"], 50, weight=500)
+    font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
 
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    top_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
     head_lines = wrap_text(day["headline"].upper(), font_head, max_w)
     body_lines = wrap_text(day["body"], font_body, max_w)
 
-    # ── Pre-pass: measure total height of the main text block so we can center it
     def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
         bbox = draw.textbbox((0, 0), line, font=font)
         return bbox[3] - bbox[1]
 
-    h_title = line_h(font_title)
-    gap_title_to_head = 100              # space between top label and headline
+    # ── Pre-pass: measure total height of headline + divider + body
     h_head = sum(line_h(font_head, l) + 18 for l in head_lines) - 18
     gap_head_to_divider = 30
     h_divider = 3
     gap_divider_to_body = 60
     h_body = sum(line_h(font_body, l) + 14 for l in body_lines) - 14
-    total = h_title + gap_title_to_head + h_head + gap_head_to_divider + h_divider + gap_divider_to_body + h_body
+    total = h_head + gap_head_to_divider + h_divider + gap_divider_to_body + h_body
 
-    # Reserve top + bottom margins (bottom margin includes footer attribution zone)
-    top_margin = 240
-    footer_zone = 280
+    # Reserve top + bottom margins (bottom margin includes day label + footer zone)
+    top_margin = 200
+    footer_zone = 320
     available = HEIGHT - top_margin - footer_zone
     y = top_margin + max(0, (available - total) // 2)
 
-    # ── Draw pass ─────────────────────────────────────────────────────────────
-    bbox = draw.textbbox((0, 0), top_label, font=font_title)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), top_label, fill=GOLD, font=font_title)
-    y += h_title + gap_title_to_head
-
+    # ── Draw pass — headline first ─────────────────────────────────────────────
     for line in head_lines:
         bbox = draw.textbbox((0, 0), line, font=font_head)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_head)
         y += line_h(font_head, line) + 18
 
-    y += gap_head_to_divider - 18  # offset the trailing 18 from headline loop
+    y += gap_head_to_divider - 18
     draw.line([(WIDTH / 2 - 80, y), (WIDTH / 2 + 80, y)], fill=GOLD, width=h_divider)
     y += gap_divider_to_body
 
@@ -215,10 +216,14 @@ def render_image(day: dict, out_path: Path) -> None:
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
         y += line_h(font_body, line) + 14
 
-    # Footer pinned to bottom
+    # ── Footer block (day label in gold + author/book in italic) ──────────────
+    day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
+    bbox = draw.textbbox((0, 0), day_label, font=font_day)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 240), day_label, fill=GOLD, font=font_day)
+
     foot = f"— {day['author']}, {day['book']}"
     bbox = draw.textbbox((0, 0), foot, font=font_foot)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 200), foot, fill=DIM, font=font_foot)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 180), foot, fill=DIM, font=font_foot)
 
     img.save(out_path, "PNG", optimize=True)
 
@@ -302,25 +307,32 @@ def pick_music(book: str = "") -> Path | None:
 
 
 def make_video(image_path: Path, end_image_path: Path, music_path: Path | None, out_path: Path) -> None:
-    """Build a 12-sec Reel: 9 sec of quote frame → crossfade → 3 sec of end frame.
+    """Build a 12-sec Reel: 9 sec of quote frame (with slow Ken Burns zoom) →
+    crossfade → 3 sec of end frame.
 
-    A 0.5-sec crossfade smooths the transition. Audio (if present) plays under
-    both frames and gets a fade-out at the end."""
+    Ken Burns adds slow continuous motion to the static main frame, which
+    dramatically improves IG/YT retention (algorithms favor motion, viewers
+    don't perceive static images as "Reels")."""
     # Filter graph:
-    #   [0:v] = main frame, looped to MAIN_FRAME_SEC + crossfade-buffer
-    #   [1:v] = end frame, looped to END_FRAME_SEC
-    #   xfade joins them at MAIN_FRAME_SEC - 0.5 with 0.5-sec crossfade
+    #   [0:v] → zoompan (Ken Burns slow zoom-in) → output 9.5 sec
+    #   [1:v] → static, 3.5 sec
+    #   xfade joins them with 0.5-sec crossfade
     xfade_offset = MAIN_FRAME_SEC - 0.5
+    main_out_frames = int((MAIN_FRAME_SEC + 0.5) * 30)  # 285 frames at 30fps
+    # Pre-scale to 2x so zoom-in stays crisp; zoom progresses 1.0 → ~1.16x over the main frame
     vfilter = (
-        f"[0:v]trim=duration={MAIN_FRAME_SEC},setpts=PTS-STARTPTS[v0];"
-        f"[1:v]trim=duration={END_FRAME_SEC + 0.5},setpts=PTS-STARTPTS[v1];"
+        f"[0:v]scale={WIDTH * 2}:{HEIGHT * 2},"
+        f"zoompan=z='1+0.0005*on':"
+        f"x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"d={main_out_frames}:fps=30:s={WIDTH}x{HEIGHT}[v0];"
+        f"[1:v]setpts=PTS-STARTPTS[v1];"
         f"[v0][v1]xfade=transition=fade:duration=0.5:offset={xfade_offset}[outv]"
     )
 
     cmd = [
         "ffmpeg", "-y",
-        "-loop", "1", "-t", str(MAIN_FRAME_SEC + 1), "-i", str(image_path),
-        "-loop", "1", "-t", str(END_FRAME_SEC + 1), "-i", str(end_image_path),
+        "-framerate", "1", "-loop", "1", "-t", "1", "-i", str(image_path),
+        "-framerate", "30", "-loop", "1", "-t", str(END_FRAME_SEC + 0.5), "-i", str(end_image_path),
     ]
     if music_path:
         cmd += ["-i", str(music_path)]

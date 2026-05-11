@@ -35,18 +35,25 @@ CTAS = [
 def build_caption(day: dict) -> str:
     book_day = day.get("book_day", day["day"])
     book_total = day.get("book_total", day.get("total_days", 92))
+    # Hashtag strategy: niche-focused, no engagement-bait, no generic mega-tags.
+    # ~22 tags total. Mix of small/medium/large, but nothing above ~50M posts.
     book_lower = day["book"].lower()
     if "atomic habits" in book_lower:
-        niche = "#atomichabits #jamesclear #habits #discipline #productivity #identity #books #booksofinstagram"
+        niche = "#atomichabits #jamesclear #habits #habitformation #habitstacking #atomichabitsbook"
+        adjacent = "#productivitytips #discipline #consistency #routines #selfdiscipline"
+        broader = "#personalgrowth #selfimprovement #selfdevelopment #mindsetcoach #growthjourney"
+        books_quote = "#booksofinstagram #wisdomdaily #lifelessons"
     elif "12 rules" in book_lower or "jordan peterson" in book_lower:
-        niche = "#12rulesforlife #jordanpeterson #meaning #responsibility #philosophy #stoic #books #booksofinstagram"
+        niche = "#12rulesforlife #jordanpeterson #petersonquotes #peterson12rules #lobsterlife"
+        adjacent = "#philosophyquotes #responsibility #meaningfulliving #lifephilosophy #ancientwisdom"
+        broader = "#personalgrowth #selfimprovement #stoicwisdom #mindsetshift #lifelessons"
+        books_quote = "#booksofinstagram #wisdomdaily #booklovers"
     else:
-        niche = "#48lawsofpower #robertgreene #power #wisdom #strategy #philosophy #books #booksofinstagram"
-
-    reach = "#viral #reels #trending #fyp #explorepage #foryourpage #reachmore #getnoticed"
-    growth = "#growthmindset #successmindset #keepgrowing #goalsetter #motivation #mindset #selfimprovement"
-    engage = "#dailyquotes #likeforlikes #doubletap #engagementboost"
-    tags = f"{niche}\n.\n{reach}\n.\n{growth}\n.\n{engage}"
+        niche = "#48lawsofpower #robertgreene #lawsofpower #powerprinciples #greenebooks"
+        adjacent = "#strategicmindset #leadershipprinciples #ancientwisdom #classicliterature #powerplaybook"
+        broader = "#stoicwisdom #philosophyquotes #personalgrowth #selfimprovement #lifelessons"
+        books_quote = "#booksofinstagram #wisdomdaily #quoteoftheday"
+    tags = f"{niche}\n.\n{adjacent}\n.\n{broader}\n.\n{books_quote}"
 
     hook = day.get("caption_hook", "")
     cta = CTAS[day["day"] % len(CTAS)]
