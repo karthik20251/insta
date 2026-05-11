@@ -82,6 +82,8 @@ def post_reel(video_url: str, caption: str) -> str:
         "video_url": video_url,
         "caption": caption,
         "share_to_feed": "true",
+        # Hide like and view counts on the published Reel
+        "like_and_views_counts_disabled": "true",
     })
 
 

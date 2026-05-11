@@ -155,6 +155,31 @@ RULES_MUSIC = {
     ],
 }
 
+# Action Cuts — energetic/cinematic for additional variety in 48 Laws + Atomic Habits
+LAWS_ACTION_MUSIC = {
+    "archive_id": "Kevin-Macleod_Action-Cuts_2014_FullAlbum",
+    "subfolder": "Action Cuts",
+    "tracks": [
+        "Kevin MacLeod - 02 - Action.mp3",
+        "Kevin MacLeod - 04 - Black Vortex.mp3",
+        "Kevin MacLeod - 12 - Heroic Age.mp3",
+        "Kevin MacLeod - 13 - Hitman.mp3",
+        "Kevin MacLeod - 19 - Noble Race.mp3",
+        "Kevin MacLeod - 24 - The Complex.mp3",
+    ],
+}
+
+ATOMIC_ACTION_MUSIC = {
+    "archive_id": "Kevin-Macleod_Action-Cuts_2014_FullAlbum",
+    "subfolder": "Action Cuts",
+    "tracks": [
+        "Kevin MacLeod - 16 - Mighty and Meek.mp3",
+        "Kevin MacLeod - 18 - Movement Proposition.mp3",
+        "Kevin MacLeod - 20 - Plans in Motion.mp3",
+        "Kevin MacLeod - 25 - Unity.mp3",
+    ],
+}
+
 
 def fetch_music(spec: dict, out_dir: Path) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -196,6 +221,12 @@ def main() -> int:
 
     print("\n=== 12 Rules music ===")
     fetch_music(RULES_MUSIC, ROOT / "music" / "rules")
+
+    print("\n=== Action Cuts -> 48 Laws (energetic for power/strategy days) ===")
+    fetch_music(LAWS_ACTION_MUSIC, ROOT / "music" / "48laws")
+
+    print("\n=== Action Cuts -> Atomic Habits (energetic for habit/action days) ===")
+    fetch_music(ATOMIC_ACTION_MUSIC, ROOT / "music" / "atomic")
 
     return 0
 
