@@ -286,7 +286,17 @@ def render_example_frame(day: dict, out_path: Path) -> None:
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    label_text = "FOR YOUR LIFE"
+    # Book-specific label: each book has its own tone signature
+    slug = book_slug(day.get("book", ""))
+    if slug == "48laws":
+        label_text = "TODAY'S MOVE"        # tactical, game-like
+    elif slug == "atomic":
+        label_text = "THE PRACTICE"        # habit-focused, ritualistic
+    elif slug == "rules":
+        label_text = "LIVE BY THIS"        # philosophical, principled
+    else:
+        label_text = "IN PRACTICE"         # fallback for future books
+
     example_lines = wrap_text(day.get("example", ""), font_body, max_w)
 
     def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
