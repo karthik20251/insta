@@ -18,8 +18,8 @@ OUT_DIR.mkdir(exist_ok=True)
 
 WIDTH, HEIGHT = 1080, 1920
 DURATION_SEC = 24
-INTRO_FRAME_SEC = 2        # 0-2:    just headline (hook)
-MAIN_FRAME_SEC = 8         # 2-10:   the law/principle (abstract)
+INTRO_FRAME_SEC = 3        # 0-3:    tease (curiosity hook — no law reveal)
+MAIN_FRAME_SEC = 7         # 3-10:   the law/principle reveal
 EXAMPLE_FRAME_SEC = 12     # 10-22:  real-life example (acceptance for life)
 END_FRAME_SEC = 2          # 22-24:  CTA + tomorrow teaser
 
@@ -230,39 +230,94 @@ def render_image(day: dict, out_path: Path) -> None:
     img.save(out_path, "PNG", optimize=True)
 
 
-def render_intro_frame(day: dict, out_path: Path) -> None:
-    """First 2 seconds — just the headline + day label, centered.
+def _book_top_label(day: dict) -> str:
+    """Series-identity label for the top of the intro frame.
+    Example: '⚔️ 48 LAWS · DAY 5' / '🌱 ATOMIC HABITS · DAY 2' / '⚖️ 12 RULES · DAY 2'.
 
-    Used as a hook before the full quote fades in. Same background painting as
-    the main frame for visual continuity, just less content.
+    Always uses book_day for the number — consistent with the bottom day label,
+    no contradictory numbering on the same frame."""
+    slug = book_slug(day.get("book", ""))
+    if slug == "atomic":
+        return f"🌱 ATOMIC HABITS  ·  DAY {day['book_day']}"
+    if slug == "rules":
+        return f"⚖️ 12 RULES  ·  DAY {day['book_day']}"
+    return f"⚔️ 48 LAWS  ·  DAY {day['book_day']}"
+
+
+def render_intro_frame(day: dict, out_path: Path) -> None:
+    """First 3 seconds — the tease (curiosity hook) over the same background.
+
+    Layout:
+      Top (small gold + emoji)    book/series identity + per-book day number
+      Middle (large white + emoji) the tease — DOES NOT reveal the law
+      Bottom (gold)                existing day label "LAW N · DAY N OF M"
+
+    The headline is intentionally NOT shown here — the MAIN frame (sec 3-10)
+    is the reveal. Showing the headline up front would spoil the payoff.
     """
+    if not day.get("tease"):
+        raise ValueError(f"Day {day.get('day')} is missing required 'tease' field — every day must have one")
+
+    # Local import keeps the heavy Twemoji-fetching code out of the import path
+    # for all other rendering functions (which don't need pilmoji).
+    from pilmoji import Pilmoji
+    from pilmoji.source import Twemoji
+
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
-
-    font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 78, weight=900)
-    font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
 
     margin = 90
     max_w = WIDTH - 2 * margin
 
-    head_lines = wrap_text(day["headline"].upper(), font_head, max_w)
+    # ── Fonts ──────────────────────────────────────────────────────────────────
+    font_top = pick_font(["Cinzel.ttf"], 30, weight=600)
+    font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
+    # Start at 76px; shrink to 64px if the tease wraps to 3+ lines
+    tease = day["tease"]
+    font_tease = pick_font(["PlayfairDisplay.ttf"], 76, weight=700)
+    lines = wrap_text(tease, font_tease, max_w)
+    if len(lines) >= 3:
+        font_tease = pick_font(["PlayfairDisplay.ttf"], 64, weight=700)
+        lines = wrap_text(tease, font_tease, max_w)
 
     def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
         bbox = draw.textbbox((0, 0), line, font=font)
         return bbox[3] - bbox[1]
 
-    h_head = sum(line_h(font_head, l) + 18 for l in head_lines) - 18
-    y = (HEIGHT - h_head) // 2  # dead-center vertically
+    # ── Layout positioning ────────────────────────────────────────────────────
+    # Top label at y ≈ 180 (matches the gold-label slot the bottom uses, mirrored)
+    top_y = 180
+    # Bottom day label pinned to HEIGHT - 240 (continuity with main + example frames)
+    bottom_y = HEIGHT - 240
+    # Center the tease block in the area between top label and bottom label
+    block_top_margin = 320       # below the top label
+    block_bot_margin = HEIGHT - 320  # above the bottom label
+    h_tease = sum(line_h(font_tease, l) + 16 for l in lines) - 16
+    tease_y = block_top_margin + max(0, ((block_bot_margin - block_top_margin) - h_tease) // 2)
 
-    for line in head_lines:
-        bbox = draw.textbbox((0, 0), line, font=font_head)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_head)
-        y += line_h(font_head, line) + 18
+    # ── Draw ─────────────────────────────────────────────────────────────────
+    with Pilmoji(img, source=Twemoji) as pilmoji:
+        # Top series-identity label (with book emoji via pilmoji)
+        top_text = _book_top_label(day)
+        bbox = draw.textbbox((0, 0), top_text, font=font_top)
+        pilmoji.text(
+            ((WIDTH - (bbox[2] - bbox[0])) // 2, top_y),
+            top_text, fill=GOLD, font=font_top
+        )
 
-    # Day label at bottom (same position as main frame for visual continuity)
+        # Tease (dominant, white, with emoji rendered as Twemoji PNGs)
+        for line in lines:
+            bbox = draw.textbbox((0, 0), line, font=font_tease)
+            pilmoji.text(
+                ((WIDTH - (bbox[2] - bbox[0])) // 2, tease_y),
+                line, fill=WHITE, font=font_tease
+            )
+            tease_y += line_h(font_tease, line) + 16
+
+    # Bottom day label — same as main + example frames (no emoji, raw draw)
     day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
     bbox = draw.textbbox((0, 0), day_label, font=font_day)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 240), day_label, fill=GOLD, font=font_day)
+    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, bottom_y), day_label, fill=GOLD, font=font_day)
 
     img.save(out_path, "PNG", optimize=True)
 
@@ -438,15 +493,15 @@ def pick_music(book: str = "", mood: str = "") -> Path | None:
 def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: Path,
                music_path: Path | None, out_path: Path) -> None:
     """Build a 24-sec Reel as four frames with crossfades:
-       0-2 sec     intro      (headline + day label only)
-       2-10 sec    main       (law explanation, with Ken Burns zoom)
+       0-3 sec     intro      (tease — curiosity hook, no law reveal)
+       3-10 sec    main       (law/principle reveal, with Ken Burns zoom)
        10-22 sec   example    (real-life application, with subtle zoom)
        22-24 sec   end frame  (CTA + tomorrow teaser)
 
     Each transition uses a 0.5-sec crossfade.
     """
-    t_intro_to_main = INTRO_FRAME_SEC - 0.5                              # 1.5
-    t_main_to_example = INTRO_FRAME_SEC + MAIN_FRAME_SEC - 0.5            # 9.5
+    t_intro_to_main = INTRO_FRAME_SEC - 0.5                                       # 2.5
+    t_main_to_example = INTRO_FRAME_SEC + MAIN_FRAME_SEC - 0.5                     # 9.5
     t_example_to_end = INTRO_FRAME_SEC + MAIN_FRAME_SEC + EXAMPLE_FRAME_SEC - 0.5  # 21.5
 
     main_out_frames = int((MAIN_FRAME_SEC + 0.5) * 30)

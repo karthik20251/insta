@@ -34,11 +34,13 @@ days = quotes["days"]
 check("total days", len(days) == 92, f"{len(days)} days", f"expected 92, got {len(days)}")
 check("sequence", [d["day"] for d in days] == list(range(1, 93)), "1-92 contiguous", "gaps or duplicates")
 
-# 2. Required fields per day
+# 2. Required fields per day (all load-bearing on the renderer)
 print("\n[2] required fields per day")
-required = ["day", "title", "headline", "body", "caption_hook"]
+required = ["day", "title", "headline", "body", "caption_hook", "tease", "example", "mood"]
 missing = [(d["day"], f) for d in days for f in required if f not in d]
-check("all fields present", not missing, "all 92 days × 5 fields", f"missing: {missing[:5]}")
+check("all fields present", not missing,
+      f"all 92 days x {len(required)} fields",
+      f"missing: {missing[:5]}")
 
 # 3. Music + backgrounds present per book
 print("\n[3] assets per book")

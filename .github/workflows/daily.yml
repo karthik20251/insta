@@ -2,10 +2,10 @@ name: Daily 48 Laws Post
 
 on:
   schedule:
-    # 12:30 UTC = 18:00 IST (target 6:00 PM India time).
+    # 12:00 UTC = 17:30 IST (target 5:30 PM India time).
     # GitHub Actions cron typically lands 5-30 min late under load, so most
-    # runs will go live between 6:00 and 6:30 PM IST.
-    - cron: "30 12 * * *"
+    # runs will go live between 5:30 and 6:00 PM IST — prime evening window.
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 permissions:
