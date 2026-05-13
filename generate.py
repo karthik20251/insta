@@ -17,11 +17,11 @@ OUT_DIR = ROOT / "output"
 OUT_DIR.mkdir(exist_ok=True)
 
 WIDTH, HEIGHT = 1080, 1920
-DURATION_SEC = 24
-INTRO_FRAME_SEC = 3        # 0-3:    tease (curiosity hook — no law reveal)
-MAIN_FRAME_SEC = 7         # 3-10:   the law/principle reveal
-EXAMPLE_FRAME_SEC = 12     # 10-22:  real-life example (acceptance for life)
-END_FRAME_SEC = 2          # 22-24:  CTA + tomorrow teaser
+DURATION_SEC = 12
+INTRO_FRAME_SEC = 2        # 0-2:    tease (curiosity hook — no law reveal)
+MAIN_FRAME_SEC = 4         # 2-6:    the law/principle reveal
+EXAMPLE_FRAME_SEC = 4      # 6-10:   real-life example (acceptance for life)
+END_FRAME_SEC = 2          # 10-12:  CTA + tomorrow teaser
 
 GOLD = (212, 175, 55)
 WHITE = (240, 240, 240)
