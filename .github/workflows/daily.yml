@@ -11,6 +11,14 @@ on:
 permissions:
   contents: write
 
+# Prevent simultaneous runs (e.g. delayed scheduled run + manual workflow_dispatch)
+# from racing and posting the same day twice. Second run queues and -- with the
+# idempotency check in main.py -- exits cleanly when it sees today's post already
+# exists on IG.
+concurrency:
+  group: daily-post
+  cancel-in-progress: false
+
 jobs:
   post:
     runs-on: ubuntu-latest
@@ -54,7 +62,7 @@ jobs:
         run: python main.py
 
       - name: Email — success
-        if: success() && env.MAIL_USERNAME != ''
+        if: success() && env.MAIL_USERNAME != '' && steps.post.outputs.skipped != 'true'
         uses: dawidd6/action-send-mail@v3
         env:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}

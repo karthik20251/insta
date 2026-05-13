@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import os
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
+import requests
 from dotenv import load_dotenv
 
 from generate import build, total_days
@@ -15,6 +16,42 @@ from post_youtube import build_youtube_metadata, upload_short, short_url
 load_dotenv()
 
 ROOT = Path(__file__).parent
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def already_posted_today_ist() -> tuple[bool, str]:
+    """Idempotency guard: True if @nandetroll_ already has a post dated today (IST).
+
+    Prevents duplicate posts when a manual `workflow_dispatch` run overlaps with a
+    delayed scheduled run. Fails open: if the check itself errors (network, API
+    blip), we proceed and let the real post call surface the failure -- better to
+    risk one duplicate than to silently skip a real day.
+    """
+    user_id = os.environ.get("IG_USER_ID")
+    token = os.environ.get("IG_ACCESS_TOKEN")
+    if not user_id or not token:
+        return False, "IG env vars missing — skipping idempotency check"
+    try:
+        r = requests.get(
+            f"https://graph.facebook.com/v21.0/{user_id}/media",
+            params={"fields": "id,timestamp,permalink", "limit": "1", "access_token": token},
+            timeout=15,
+        )
+        r.raise_for_status()
+        items = r.json().get("data", [])
+        if not items:
+            return False, "no prior posts on the account"
+        latest = items[0]
+        ts_str = latest.get("timestamp", "")
+        if not ts_str:
+            return False, f"latest post {latest.get('id')} has no timestamp"
+        latest_ist = datetime.strptime(ts_str, "%Y-%m-%dT%H:%M:%S%z").astimezone(IST).date()
+        today_ist = datetime.now(timezone.utc).astimezone(IST).date()
+        if latest_ist == today_ist:
+            return True, f"already posted today ({today_ist}): {latest.get('permalink') or latest.get('id')}"
+        return False, f"last post {latest_ist}, today {today_ist} — proceeding"
+    except Exception as e:
+        return False, f"idempotency check errored, proceeding anyway: {e}"
 
 
 def current_day() -> int:
@@ -73,6 +110,12 @@ def write_github_output(**kv) -> None:
 def main() -> int:
     day_num = current_day()
     print(f"==> Day {day_num}/{total_days()}")
+
+    skip, reason = already_posted_today_ist()
+    print(f"  [idempotency] {reason}")
+    if skip:
+        write_github_output(day_num=day_num, skipped="true")
+        return 0
 
     result = build(day_num)
     day = result["day"]
