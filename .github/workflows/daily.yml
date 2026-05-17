@@ -45,8 +45,20 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add output/
-          git commit -m "build: day video [skip ci]" || echo "no changes"
-          git push
+          git commit -m "build: day video [skip ci]" || { echo "no changes"; exit 0; }
+          # Bounded rebase-retry: a concurrent manual/cron push moving the
+          # branch must NOT non-fast-forward-fail the day. [skip ci] keeps the
+          # rebased auto-commit from re-triggering the workflow.
+          for attempt in 1 2 3 4 5; do
+            if git push; then
+              echo "pushed on attempt $attempt"; exit 0
+            fi
+            echo "push rejected (attempt $attempt) — rebasing onto origin/${GITHUB_REF_NAME}"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            sleep 3
+          done
+          echo "ERROR: could not push output after 5 rebase-retries" >&2
+          exit 1
 
       - name: Post to Instagram + YouTube
         id: post

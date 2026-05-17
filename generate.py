@@ -261,7 +261,8 @@ def render_intro_frame(day: dict, out_path: Path) -> None:
     # Local import keeps the heavy Twemoji-fetching code out of the import path
     # for all other rendering functions (which don't need pilmoji).
     from pilmoji import Pilmoji
-    from pilmoji.source import Twemoji
+
+    from twemoji_local import LocalTwemoji, strip_emoji
 
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
@@ -293,25 +294,42 @@ def render_intro_frame(day: dict, out_path: Path) -> None:
     block_top_margin = 320       # below the top label
     block_bot_margin = HEIGHT - 320  # above the bottom label
     h_tease = sum(line_h(font_tease, l) + 16 for l in lines) - 16
-    tease_y = block_top_margin + max(0, ((block_bot_margin - block_top_margin) - h_tease) // 2)
+    tease_y_start = block_top_margin + max(0, ((block_bot_margin - block_top_margin) - h_tease) // 2)
+    top_text = _book_top_label(day)
+
+    def _draw_centered(text: str, y: int, font, fill, drawer) -> None:
+        bbox = draw.textbbox((0, 0), text, font=font)
+        x = (WIDTH - (bbox[2] - bbox[0])) // 2
+        drawer(x, y, text, font, fill)
 
     # ── Draw ─────────────────────────────────────────────────────────────────
-    with Pilmoji(img, source=Twemoji) as pilmoji:
-        # Top series-identity label (with book emoji via pilmoji)
-        top_text = _book_top_label(day)
-        bbox = draw.textbbox((0, 0), top_text, font=font_top)
-        pilmoji.text(
-            ((WIDTH - (bbox[2] - bbox[0])) // 2, top_y),
-            top_text, fill=GOLD, font=font_top
-        )
+    # Normal path: vendored local Twemoji (no network on the critical path;
+    # byte-identical to the pre-patch CDN render). Fallback path: if Pilmoji
+    # itself fails entirely, render the words WITHOUT emoji rather than crash
+    # the whole day's post — and emit a loud, grep-able marker so any affected
+    # day is detectable and excludable from attribution.
+    try:
+        with Pilmoji(img, source=LocalTwemoji) as pilmoji:
+            def _pm(x, y, text, font, fill):
+                pilmoji.text((x, y), text, fill=fill, font=font)
+            _draw_centered(top_text, top_y, font_top, GOLD, _pm)
+            tease_y = tease_y_start
+            for line in lines:
+                _draw_centered(line, tease_y, font_tease, WHITE, _pm)
+                tease_y += line_h(font_tease, line) + 16
+    except Exception as e:  # noqa: BLE001 — never crash the post for an emoji
+        print(f"!! PILMOJI_FALLBACK_FIRED day={day.get('day')} err={e!r}")
+        gh_out = os.environ.get("GITHUB_OUTPUT")
+        if gh_out:
+            with open(gh_out, "a", encoding="utf-8") as f:
+                f.write("pilmoji_fallback=true\n")
 
-        # Tease (dominant, white, with emoji rendered as Twemoji PNGs)
+        def _plain(x, y, text, font, fill):
+            draw.text((x, y), text, fill=fill, font=font)
+        _draw_centered(strip_emoji(top_text), top_y, font_top, GOLD, _plain)
+        tease_y = tease_y_start
         for line in lines:
-            bbox = draw.textbbox((0, 0), line, font=font_tease)
-            pilmoji.text(
-                ((WIDTH - (bbox[2] - bbox[0])) // 2, tease_y),
-                line, fill=WHITE, font=font_tease
-            )
+            _draw_centered(strip_emoji(line), tease_y, font_tease, WHITE, _plain)
             tease_y += line_h(font_tease, line) + 16
 
     # Bottom day label — same as main + example frames (no emoji, raw draw)
@@ -492,17 +510,21 @@ def pick_music(book: str = "", mood: str = "") -> Path | None:
 
 def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: Path,
                music_path: Path | None, out_path: Path) -> None:
-    """Build a 24-sec Reel as four frames with crossfades:
-       0-3 sec     intro      (tease — curiosity hook, no law reveal)
-       3-10 sec    main       (law/principle reveal, with Ken Burns zoom)
-       10-22 sec   example    (real-life application, with subtle zoom)
-       22-24 sec   end frame  (CTA + tomorrow teaser)
+    """Build the Reel as four crossfaded frames. Durations are driven ENTIRELY
+    by the constants at the top of this file (currently 2/4/4/2 = 12s); do not
+    hardcode timings here — that comment rot is what bit us on the 24->12 revert.
 
-    Each transition uses a 0.5-sec crossfade.
+       intro    INTRO_FRAME_SEC      tease (curiosity hook, no law reveal)
+       main     MAIN_FRAME_SEC       law/principle reveal (Ken Burns zoom)
+       example  EXAMPLE_FRAME_SEC    real-life application (subtle zoom)
+       end      END_FRAME_SEC        CTA + tomorrow teaser
+
+    Each transition is a 0.5-sec crossfade; total = DURATION_SEC.
     """
-    t_intro_to_main = INTRO_FRAME_SEC - 0.5                                       # 2.5
-    t_main_to_example = INTRO_FRAME_SEC + MAIN_FRAME_SEC - 0.5                     # 9.5
-    t_example_to_end = INTRO_FRAME_SEC + MAIN_FRAME_SEC + EXAMPLE_FRAME_SEC - 0.5  # 21.5
+    # Offsets are formulas, not numbers, so they cannot rot on the next retiming.
+    t_intro_to_main = INTRO_FRAME_SEC - 0.5                                       # = INTRO-0.5
+    t_main_to_example = INTRO_FRAME_SEC + MAIN_FRAME_SEC - 0.5                     # = INTRO+MAIN-0.5
+    t_example_to_end = INTRO_FRAME_SEC + MAIN_FRAME_SEC + EXAMPLE_FRAME_SEC - 0.5  # = INTRO+MAIN+EXAMPLE-0.5
 
     main_out_frames = int((MAIN_FRAME_SEC + 0.5) * 30)
     example_out_frames = int((EXAMPLE_FRAME_SEC + 0.5) * 30)
