@@ -27,37 +27,32 @@ def today_ist() -> date:
     return datetime.now(timezone.utc).astimezone(IST).date()
 
 
-def ig_posted_today() -> tuple[bool, str]:
-    """True if @nandetroll_ already has an IG post dated today (IST).
-
-    Fails open: if the check itself errors (network/API blip), proceed and let
-    the real post surface the failure -- one possible duplicate is recoverable;
-    a silently-skipped real day is not.
-    """
+def ig_today_count() -> int | None:
+    """Count IG posts dated today (IST). Used for SLOT-AWARE 2/day dedupe:
+    the AM slot skips if >=1 today, the PM slot skips if >=2 today — so each
+    slot is idempotent on re-run, max 2/day, and the 2nd post can never be
+    silently eaten by an 'any post today' guard. Returns None on error
+    (fail-open: a recoverable possible dup beats a silently-skipped slot)."""
     user_id = os.environ.get("IG_USER_ID")
     token = os.environ.get("IG_ACCESS_TOKEN")
     if not user_id or not token:
-        return False, "IG env vars missing — IG dedupe skipped (proceeding)"
+        return None
     try:
         r = requests.get(
             f"https://graph.facebook.com/v21.0/{user_id}/media",
-            params={"fields": "id,timestamp,permalink", "limit": "1", "access_token": token},
+            params={"fields": "id,timestamp", "limit": "8", "access_token": token},
             timeout=15,
         )
         r.raise_for_status()
-        items = r.json().get("data", [])
-        if not items:
-            return False, "IG: no prior posts (proceeding)"
-        latest = items[0]
-        ts_str = latest.get("timestamp", "")
-        if not ts_str:
-            return False, f"IG: latest {latest.get('id')} has no timestamp (proceeding)"
-        latest_ist = datetime.strptime(ts_str, "%Y-%m-%dT%H:%M:%S%z").astimezone(IST).date()
-        if latest_ist == today_ist():
-            return True, f"IG: already posted today ({today_ist()}) {latest.get('permalink') or latest.get('id')}"
-        return False, f"IG: last post {latest_ist}, today {today_ist()} (proceeding)"
-    except Exception as e:
-        return False, f"IG dedupe errored, proceeding anyway: {e}"
+        today = today_ist()
+        n = 0
+        for m in r.json().get("data", []):
+            ts = m.get("timestamp", "")
+            if ts and datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S%z").astimezone(IST).date() == today:
+                n += 1
+        return n
+    except Exception:
+        return None
 
 
 def yt_posted_today() -> tuple[bool, str]:
@@ -107,6 +102,23 @@ def current_day() -> int:
     if n > total:
         raise SystemExit(f"Series complete (day {n} > {total}). Nothing to post.")
     return n
+
+
+def current_slot() -> int:
+    """0 = AM, 1 = PM. Set by the workflow per cron (POST_SLOT env);
+    manual runs default to AM."""
+    return 1 if os.environ.get("POST_SLOT", "AM").strip().upper() == "PM" else 0
+
+
+def current_position() -> int:
+    """1-based posting position for 2/day: two slots per day. Single source
+    of truth shared by the workflow's build step AND main(), so the
+    committed/raw-URL video is exactly the one that gets posted."""
+    pos = (current_day() - 1) * 2 + current_slot() + 1
+    total = total_days()
+    if pos > total:
+        raise SystemExit(f"Series complete (position {pos} > {total}).")
+    return pos
 
 
 def upload_to_public_url(local_video: Path) -> str:
@@ -164,20 +176,26 @@ def write_github_output(**kv) -> None:
 
 
 def main() -> int:
-    pos = current_day()
+    pos = current_position()                       # 2/day, slot-aware
+    slot = current_slot()
     day_num = ordered_item(pos)  # interleaved order: no variant trio back-to-back
-    print(f"==> Position {pos}/{total_days()} -> item {day_num}")
+    print(f"==> Position {pos}/{total_days()}  slot={'PM' if slot else 'AM'}  -> item {day_num}")
 
-    # Per-platform idempotency. The OLD guard was IG-only and exited the whole
-    # run -> a manual re-run to recover a failed YouTube upload would skip
-    # entirely and permanently drop the stronger platform. Now each platform
-    # is gated independently; we only short-circuit when BOTH are already done.
-    ig_skip, ig_reason = ig_posted_today()
+    # Slot-aware idempotency for 2/day: AM skips if >=1 post today, PM skips
+    # if >=2. Each slot idempotent on re-run; max 2/day; the 2nd post can't
+    # be eaten by an 'any post today' guard. Fail-open on count error.
+    cnt = ig_today_count()
+    if cnt is None:
+        ig_skip, ig_reason = False, "IG dedupe unavailable (fail-open, proceeding)"
+    else:
+        ig_skip = cnt >= (slot + 1)
+        ig_reason = f"IG: {cnt} post(s) today; slot {'PM' if slot else 'AM'} " \
+                    f"{'already done -> skip' if ig_skip else 'proceeding'}"
     yt_skip, yt_reason = yt_posted_today()
     print(f"  [idempotency] {ig_reason}")
     print(f"  [idempotency] {yt_reason}")
     if ig_skip and yt_skip:
-        print("  both platforms already have today's post — nothing to do")
+        print("  both platforms already have this slot — nothing to do")
         write_github_output(day_num=day_num, skipped="true")
         return 0
 

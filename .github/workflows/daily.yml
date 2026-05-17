@@ -2,21 +2,24 @@ name: Daily 48 Laws Post
 
 on:
   schedule:
-    # 12:00 UTC = 17:30 IST (target 5:30 PM India time).
-    # GitHub Actions cron typically lands 5-30 min late under load, so most
-    # runs will go live between 5:30 and 6:00 PM IST — prime evening window.
-    - cron: "0 12 * * *"
+    # 2 posts/day. GH Actions cron drifts 15-90 min late under load.
+    - cron: "30 3 * * *"     # AM slot  (~09:00 IST, lands ~09:30-11:00)
+    - cron: "30 12 * * *"    # PM slot  (~18:00 IST, lands ~18:30-20:00)
   workflow_dispatch:
+    inputs:
+      slot:
+        description: "Slot for a manual run"
+        type: choice
+        options: ["AM", "PM"]
+        default: "AM"
 
 permissions:
   contents: write
 
-# Prevent simultaneous runs (e.g. delayed scheduled run + manual workflow_dispatch)
-# from racing and posting the same day twice. Second run queues and -- with the
-# idempotency check in main.py -- exits cleanly when it sees today's post already
-# exists on IG.
+# Per-slot concurrency: AM and PM never block each other, but a delayed run of
+# the same slot queues (slot-aware idempotency in main.py then exits it cleanly).
 concurrency:
-  group: daily-post
+  group: daily-post-${{ github.event.schedule || inputs.slot }}
   cancel-in-progress: false
 
 jobs:
@@ -35,10 +38,19 @@ jobs:
       - name: Install Python deps
         run: pip install -r requirements.txt
 
-      - name: Build today's video
+      - name: Resolve posting slot
+        run: |
+          if [ "${{ github.event.schedule }}" = "30 12 * * *" ]; then
+            echo "POST_SLOT=PM" >> "$GITHUB_ENV"
+          else
+            echo "POST_SLOT=${{ inputs.slot || 'AM' }}" >> "$GITHUB_ENV"
+          fi
+          echo "Resolved POST_SLOT=$(grep POST_SLOT "$GITHUB_ENV" | tail -1)"
+
+      - name: Build this slot's video
         env:
           START_DATE: ${{ vars.START_DATE }}
-        run: python -c "from generate import build, ordered_item; from main import current_day; build(ordered_item(current_day()))"
+        run: python -c "from generate import build, ordered_item; from main import current_position; build(ordered_item(current_position()))"
 
       - name: Commit output so it's reachable via raw URL
         run: |
