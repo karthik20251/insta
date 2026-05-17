@@ -3,7 +3,16 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-# Google OAuth credentials (never commit these — they grant write access to your YT channel)
+# Google OAuth / service-account credentials (never commit — write access to YT + Drive)
 client_secret*.json
 yt_token.json
-# keep output/ tracked so GitHub Actions can host it via raw URL
+gdrive_token.json
+gdrive_service_account.json
+*service_account*.json
+# keep output/ tracked so the (dormant) GitHub Actions raw-URL host still works
+# for legacy day_*.mp4 — but the content-factory output is consume-down and
+# regenerated, so it is structurally excluded (no manual-discipline footgun):
+output/queue.json
+output/_bio_guide.md
+output/item_*
+output/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_*
