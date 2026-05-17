@@ -3,8 +3,8 @@ name: Daily 48 Laws Post
 on:
   schedule:
     # 2 posts/day. GH Actions cron drifts 15-90 min late under load.
-    - cron: "30 3 * * *"     # AM slot  (~09:00 IST, lands ~09:30-11:00)
-    - cron: "30 12 * * *"    # PM slot  (~18:00 IST, lands ~18:30-20:00)
+    - cron: "30 5 * * *"     # MIDDAY slot (05:30 UTC = 11:00 IST; drift -> lands ~11:15-12:45)
+    - cron: "30 12 * * *"    # EVENING slot (12:30 UTC = 18:00 IST; drift -> lands ~18:30-20:00)
   workflow_dispatch:
     inputs:
       slot:
