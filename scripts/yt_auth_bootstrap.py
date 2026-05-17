@@ -19,7 +19,14 @@ ROOT = Path(__file__).parent.parent
 CLIENT_SECRET = ROOT / "client_secret.json"
 TOKEN_FILE = ROOT / "yt_token.json"
 
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+# Additive: upload (unchanged, keeps posting working) + analytics readonly
+# (new, enables programmatic retention/traffic-source pulls for the engagement
+# test). The new token is a SUPERSET of the old one — upload capability is
+# retained, never replaced.
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
+]
 
 
 def main() -> int:
@@ -30,7 +37,9 @@ def main() -> int:
     print(">> Starting OAuth flow. Your default browser will open in a moment...")
     print(">> If you see 'Google hasn't verified this app', click 'Advanced' ->")
     print("   'Go to instaautomatic-youtube (unsafe)' — that's normal for personal apps")
-    print(">> Approve the 'Manage your YouTube videos' permission.")
+    print(">> Approve BOTH permissions:")
+    print("     - 'Manage your YouTube videos'         (upload — unchanged)")
+    print("     - 'View your YouTube Analytics reports' (retention — new)")
     print()
 
     flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET), SCOPES)
