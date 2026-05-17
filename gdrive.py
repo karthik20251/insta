@@ -27,29 +27,62 @@ from pathlib import Path
 from googleapiclient.discovery import build as _build
 from googleapiclient.http import MediaFileUpload
 
+import json
+
 ROOT = Path(__file__).parent
 SCOPES = ["https://www.googleapis.com/auth/drive.file"]
-SA_KEY = ROOT / os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "gdrive_service_account.json")
-OAUTH_CLIENT = ROOT / "client_secret.json"
 OAUTH_TOKEN = ROOT / "gdrive_token.json"
+SA_FILE = ROOT / "gdrive_service_account.json"
 
 
 def _credentials():
-    if SA_KEY.exists():
+    """Resolution order (first that's available wins). The env paths are for
+    GitHub Actions (headless); the file paths are for local runs.
+
+      1. GOOGLE_SERVICE_ACCOUNT_JSON env = raw SA key JSON  (CI, path A:
+         true robot — needs a Workspace Shared Drive destination)
+      2. GDRIVE_CLIENT_ID/SECRET/REFRESH_TOKEN env          (CI, path B:
+         OAuth refresh in secrets — works on consumer Gmail)
+      3. gdrive_service_account.json file                    (local SA)
+      4. gdrive_token.json file                              (local OAuth
+         from scripts/gdrive_auth_bootstrap.py)
+    """
+    from google.auth.transport.requests import Request
+
+    sa_env = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+    if sa_env.startswith("{"):
+        from google.oauth2 import service_account
+        return service_account.Credentials.from_service_account_info(
+            json.loads(sa_env), scopes=SCOPES)
+
+    cid = os.environ.get("GDRIVE_CLIENT_ID")
+    csec = os.environ.get("GDRIVE_CLIENT_SECRET")
+    rtok = os.environ.get("GDRIVE_REFRESH_TOKEN")
+    if cid and csec and rtok:
+        from google.oauth2.credentials import Credentials
+        creds = Credentials(
+            None, refresh_token=rtok, client_id=cid, client_secret=csec,
+            token_uri="https://oauth2.googleapis.com/token", scopes=SCOPES)
+        creds.refresh(Request())
+        return creds
+
+    if SA_FILE.exists():
         from google.oauth2 import service_account
         return service_account.Credentials.from_service_account_file(
-            str(SA_KEY), scopes=SCOPES)
+            str(SA_FILE), scopes=SCOPES)
+
     if OAUTH_TOKEN.exists():
-        from google.auth.transport.requests import Request
         from google.oauth2.credentials import Credentials
         creds = Credentials.from_authorized_user_file(str(OAUTH_TOKEN), SCOPES)
         if not creds.valid:
             creds.refresh(Request())
             OAUTH_TOKEN.write_text(creds.to_json(), encoding="utf-8")
         return creds
+
     raise RuntimeError(
-        "No Drive credentials. Provide gdrive_service_account.json (service "
-        "account) OR run scripts/gdrive_auth_bootstrap.py once (OAuth)."
+        "No Drive credentials. CI: set GOOGLE_SERVICE_ACCOUNT_JSON (raw key) "
+        "or GDRIVE_CLIENT_ID/SECRET/REFRESH_TOKEN secrets. Local: drop "
+        "gdrive_service_account.json or run scripts/gdrive_auth_bootstrap.py."
     )
 
 

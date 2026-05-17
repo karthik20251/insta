@@ -1,0 +1,53 @@
+name: Stock Drive (content factory delivery)
+
+# Headless content factory: regenerates the deterministic queue, renders the
+# next ~2 weeks of videos + post packs, uploads them into the shared Drive
+# folder. No auto-posting — a human still posts from the folder with trending
+# audio. Runs weekly so the folder always holds >=1 unposted week.
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"          # Sundays 06:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: stock-drive
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  stock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Build the deterministic queue
+        env:
+          # MUST be a fixed date or the consume-down plan drifts every run.
+          QUEUE_START_DATE: ${{ vars.QUEUE_START_DATE }}
+        run: python scripts/build_queue.py
+
+      - name: Render + upload the forward window into Drive
+        env:
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+          AMAZON_AFFILIATE_TAG: ${{ vars.AMAZON_AFFILIATE_TAG }}
+          STOCK_LEAD_DAYS: ${{ vars.STOCK_LEAD_DAYS }}
+          # Path A — true robot (Workspace Shared Drive): one secret.
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          # Path B — consumer Gmail (OAuth refresh in secrets): three secrets.
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+        run: python scripts/stock_drive.py
