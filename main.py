@@ -90,18 +90,19 @@ def yt_posted_today() -> tuple[bool, str]:
 
 
 def current_day() -> int:
-    """Day 1 on START_DATE; clamps at total_days() (computed from quotes.json)."""
+    """Day number since START_DATE (1-based). PERPETUAL: there is no end /
+    'series complete' stop. scheduled_item() cycles the full corpus through
+    AM(technique) / PM(book-story) every 138 days, so after the corpus is
+    exhausted it simply repeats from the top — nothing is ever dropped or
+    deleted, posting continues forever."""
     start = os.environ.get("START_DATE")
     if not start:
         raise RuntimeError("START_DATE not set (format YYYY-MM-DD)")
     start_d = datetime.strptime(start, "%Y-%m-%d").date()
     n = (today_ist() - start_d).days + 1
-    total = total_days()
     if n < 1:
         raise RuntimeError(f"Today is before START_DATE ({start_d}); nothing to post")
-    if n > total:
-        raise SystemExit(f"Series complete (day {n} > {total}). Nothing to post.")
-    return n
+    return n  # no upper bound — never stops
 
 
 def current_slot() -> int:
