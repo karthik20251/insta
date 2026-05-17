@@ -156,7 +156,9 @@ def upload_to_public_url(local_video: Path) -> str:
         return url
 
     if backend == "transfer":
-        import requests
+        # NOTE: do NOT `import requests` here — a function-local import makes
+        # `requests` local to this whole function and breaks the github
+        # branch's requests.head with UnboundLocalError. Use the module import.
         with open(local_video, "rb") as f:
             r = requests.put(f"https://transfer.sh/{local_video.name}", data=f, timeout=300)
         r.raise_for_status()
