@@ -8,6 +8,12 @@ import textwrap
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()  # factory is run directly now — pick up AMAZON_AFFILIATE_TAG
+except Exception:
+    pass
+
 ROOT = Path(__file__).parent
 QUOTES = ROOT / "quotes.json"
 MUSIC_DIR = ROOT / "music"
@@ -28,35 +34,49 @@ WHITE = (240, 240, 240)
 DIM = (170, 170, 170)
 
 
+# Variant -> mood, so the (untouched) music selector keeps working without a
+# stored `mood` field. TACTIC = assertive, MISTAKE = tense, SCENARIO = reflective.
+_VARIANT_MOOD = {"TACTIC": "regal", "MISTAKE": "tense", "SCENARIO": "contemplative"}
+
+
 def load_day(day_num: int) -> dict:
+    """Load variant-item `day_num` (1-based) from the repositioned items[] model.
+
+    Returns the item augmented with backward-compatible keys (`day`, `mood`,
+    `book_day`, `book_total`, `total_days`) so the dormant post.py / main.py /
+    post_youtube paths keep working unchanged while manual posting is active.
+    """
     data = json.loads(QUOTES.read_text(encoding="utf-8"))
     default_book = data["book"]
     default_author = data["author"]
+    items = data["items"]
 
-    # Compute book_day (position within book) and book_total (size of book) for every day
-    by_book: dict[str, list[dict]] = {}
-    for d in data["days"]:
-        bk = d.get("book", default_book)
-        by_book.setdefault(bk, []).append(d)
+    # parent (law/rule/principle) position within its book, for legacy footers
+    parent_seen: dict[str, list[str]] = {}
+    for it in items:
+        b = it.get("book", default_book)
+        lst = parent_seen.setdefault(b, [])
+        if it["parent_law"] not in lst:
+            lst.append(it["parent_law"])
 
-    for d in data["days"]:
-        if d["day"] == day_num:
-            book = d.get("book", default_book)
-            day_list = by_book[book]
-            book_day = next(i for i, x in enumerate(day_list) if x["day"] == day_num) + 1
-            result = dict(d)
-            result.setdefault("book", default_book)
+    for it in items:
+        if it["item"] == day_num:
+            book = it.get("book", default_book)
+            plist = parent_seen[book]
+            result = dict(it)
+            result["day"] = it["item"]
             result.setdefault("author", default_author)
-            result["total_days"] = len(data["days"])
-            result["book_day"] = book_day
-            result["book_total"] = len(day_list)
+            result["mood"] = it.get("mood") or _VARIANT_MOOD.get(it.get("variant_type", ""), "regal")
+            result["book_day"] = plist.index(it["parent_law"]) + 1
+            result["book_total"] = len(plist)
+            result["total_days"] = len(items)
             return result
-    raise ValueError(f"No entry for day {day_num}")
+    raise ValueError(f"No entry for item {day_num}")
 
 
 def total_days() -> int:
     data = json.loads(QUOTES.read_text(encoding="utf-8"))
-    return len(data["days"])
+    return len(data["items"])
 
 
 def pick_font(preferred: list[str], size: int, weight: int | None = None) -> ImageFont.FreeTypeFont:
@@ -107,7 +127,7 @@ def book_slug(book_name: str) -> str:
     return "48laws"
 
 
-def make_background(day_num: int, book: str = "") -> Image.Image:
+def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Image.Image:
     """Pick a (deterministic-per-day) background painting from the book's subfolder.
 
     Falls back to top-level backgrounds/ then gradient if subfolder is empty."""
@@ -129,9 +149,15 @@ def make_background(day_num: int, book: str = "") -> Image.Image:
 
     # Build a single-row darkening mask (white where we want darker, black where we want lighter)
     # Then stretch it to full image and use as opacity mask blending bg with black.
-    # Slightly lighter overlay for Atomic Habits so the brighter paintings show through.
-    base_dark = 0.55 if slug == "atomic" else 0.62
-    edge_dark = 0.20 if slug == "atomic" else 0.22
+    # `bright` (intro + end frames) realizes the committed contrast spec §3a:
+    # the scrim is the WEAK sub-lever — text-mass does the work — but a much
+    # lighter scrim stops the near-black-box thumbnail. standard = main/3rd.
+    if scrim == "bright":
+        base_dark = 0.28 if slug == "atomic" else 0.32
+        edge_dark = 0.12 if slug == "atomic" else 0.14
+    else:
+        base_dark = 0.55 if slug == "atomic" else 0.62
+        edge_dark = 0.20 if slug == "atomic" else 0.22
     mask_col = Image.new("L", (1, HEIGHT))
     mp = mask_col.load()
     for y in range(HEIGHT):
@@ -230,36 +256,105 @@ def render_image(day: dict, out_path: Path) -> None:
     img.save(out_path, "PNG", optimize=True)
 
 
-def _book_top_label(day: dict) -> str:
-    """Series-identity label for the top of the intro frame.
-    Example: '⚔️ 48 LAWS · DAY 5' / '🌱 ATOMIC HABITS · DAY 2' / '⚖️ 12 RULES · DAY 2'.
+def _book_kicker(day: dict) -> str:
+    """Small gold credibility kicker — the book is the product, never stripped."""
+    return str(day.get("book", "")).upper()
 
-    Always uses book_day for the number — consistent with the bottom day label,
-    no contradictory numbering on the same frame."""
-    slug = book_slug(day.get("book", ""))
-    if slug == "atomic":
-        return f"🌱 ATOMIC HABITS  ·  DAY {day['book_day']}"
-    if slug == "rules":
-        return f"⚖️ 12 RULES  ·  DAY {day['book_day']}"
-    return f"⚔️ 48 LAWS  ·  DAY {day['book_day']}"
+
+def _draw_hook(day: dict, img: "Image.Image", draw: "ImageDraw.ImageDraw") -> None:
+    """Shared hook composition for the intro frame AND the loop-matched end
+    frame: book kicker → gold rule → big bold payoff-first tease, on a local
+    legibility panel (so the bright scrim doesn't kill white-text contrast).
+
+    CHANGE 2: text-mass is the workhorse (committed contrast spec §3-reweighted).
+    Reused by render_end_frame so the last frame is visually identical to the
+    first — a clean Shorts loop with no fade-to-CTA.
+    """
+    from pilmoji import Pilmoji
+
+    from twemoji_local import LocalTwemoji, strip_emoji
+
+    tease = day["tease"]
+    margin = 80
+    max_w = WIDTH - 2 * margin
+
+    font_kick = pick_font(["Cinzel.ttf"], 34, weight=700)
+    # Workhorse: big + heavy. Step down only as line count grows.
+    for size in (98, 84, 72, 62):
+        font_tease = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
+        lines = wrap_text(tease, font_tease, max_w)
+        if len(lines) <= 3 or size == 62:
+            break
+
+    def line_h(font, s: str = "Mg") -> int:
+        b = draw.textbbox((0, 0), s, font=font)
+        return b[3] - b[1]
+
+    gap = 20
+    h_tease = sum(line_h(font_tease, l) + gap for l in lines) - gap
+    h_kick = line_h(font_kick)
+    rule_gap = 36
+    block_h = h_kick + rule_gap + 6 + rule_gap + h_tease
+    block_top = (HEIGHT - block_h) // 2
+
+    # Local legibility panel behind the whole hook block (semi-opaque black,
+    # rounded) — bright scrim everywhere else, protected text here.
+    pad = 56
+    panel = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    pdraw = ImageDraw.Draw(panel)
+    pdraw.rounded_rectangle(
+        [margin - pad, block_top - pad, WIDTH - margin + pad, block_top + block_h + pad],
+        radius=44, fill=(0, 0, 0, 150),
+    )
+    img.paste(Image.alpha_composite(img.convert("RGBA"), panel).convert("RGB"), (0, 0))
+    draw = ImageDraw.Draw(img)
+
+    def centered(text: str, y: int, font, fill, drawer) -> None:
+        b = draw.textbbox((0, 0), text, font=font)
+        drawer((WIDTH - (b[2] - b[0])) // 2, y, text, font, fill)
+
+    kick = _book_kicker(day)
+
+    def paint(drawer) -> None:
+        y = block_top
+        centered(kick, y, font_kick, GOLD, drawer)
+        y += h_kick + rule_gap
+        draw.line([(WIDTH / 2 - 90, y), (WIDTH / 2 + 90, y)], fill=GOLD, width=6)
+        y += 6 + rule_gap
+        for ln in lines:
+            centered(ln, y, font_tease, WHITE, drawer)
+            y += line_h(font_tease, ln) + gap
+
+    try:
+        with Pilmoji(img, source=LocalTwemoji) as pm:
+            paint(lambda x, y, t, f, c: pm.text((x, y), t, fill=c, font=f))
+    except Exception as e:  # noqa: BLE001 — never crash the post for an emoji
+        print(f"!! PILMOJI_FALLBACK_FIRED day={day.get('day')} err={e!r}")
+        gh_out = os.environ.get("GITHUB_OUTPUT")
+        if gh_out:
+            with open(gh_out, "a", encoding="utf-8") as f:
+                f.write("pilmoji_fallback=true\n")
+        kick = strip_emoji(kick)
+        lines = [strip_emoji(l) for l in lines]
+        paint(lambda x, y, t, f, c: draw.text((x, y), t, fill=c, font=f))
 
 
 def render_intro_frame(day: dict, out_path: Path) -> None:
-    """First 3 seconds — the tease (curiosity hook) over the same background.
-
-    Layout:
-      Top (small gold + emoji)    book/series identity + per-book day number
-      Middle (large white + emoji) the tease — DOES NOT reveal the law
-      Bottom (gold)                existing day label "LAW N · DAY N OF M"
-
-    The headline is intentionally NOT shown here — the MAIN frame (sec 3-10)
-    is the reveal. Showing the headline up front would spoil the payoff.
-    """
+    """Frame 1 (CHANGE 2): the payoff-first contrast hook. Must read in <1s.
+    Bright scrim + big bold tease on a legibility panel. No bottom series
+    label — that lives on the loop-matched end frame only."""
     if not day.get("tease"):
-        raise ValueError(f"Day {day.get('day')} is missing required 'tease' field — every day must have one")
+        raise ValueError(f"Item {day.get('day')} missing required 'tease'")
+    img = make_background(day["day"], day.get("book", ""), scrim="bright")
+    draw = ImageDraw.Draw(img)
+    _draw_hook(day, img, draw)
+    img.save(out_path, "PNG", optimize=True)
 
-    # Local import keeps the heavy Twemoji-fetching code out of the import path
-    # for all other rendering functions (which don't need pilmoji).
+
+def render_example_frame(day: dict, out_path: Path) -> None:
+    """Frame 3: the divisive comment_q ('example' is gone in the variant model).
+    A 'YOUR MOVE' provocation that demands a reply — same question pinned as
+    first comment by the post pack. This is the engagement engine."""
     from pilmoji import Pilmoji
 
     from twemoji_local import LocalTwemoji, strip_emoji
@@ -269,207 +364,87 @@ def render_intro_frame(day: dict, out_path: Path) -> None:
 
     margin = 90
     max_w = WIDTH - 2 * margin
+    font_label = pick_font(["Cinzel.ttf"], 56, weight=800)
+    font_q = pick_font(["PlayfairDisplay.ttf"], 72, weight=800)
+    font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 36, weight=500)
 
-    # ── Fonts ──────────────────────────────────────────────────────────────────
-    font_top = pick_font(["Cinzel.ttf"], 30, weight=600)
-    font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
-    # Start at 76px; shrink to 64px if the tease wraps to 3+ lines
-    tease = day["tease"]
-    font_tease = pick_font(["PlayfairDisplay.ttf"], 76, weight=700)
-    lines = wrap_text(tease, font_tease, max_w)
-    if len(lines) >= 3:
-        font_tease = pick_font(["PlayfairDisplay.ttf"], 64, weight=700)
-        lines = wrap_text(tease, font_tease, max_w)
+    q = day.get("comment_q", "")
+    for size in (72, 64, 56):
+        font_q = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
+        q_lines = wrap_text(q, font_q, max_w)
+        if len(q_lines) <= 4 or size == 56:
+            break
 
-    def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
-        bbox = draw.textbbox((0, 0), line, font=font)
-        return bbox[3] - bbox[1]
+    def line_h(font, s: str = "Mg") -> int:
+        b = draw.textbbox((0, 0), s, font=font)
+        return b[3] - b[1]
 
-    # ── Layout positioning ────────────────────────────────────────────────────
-    # Top label at y ≈ 180 (matches the gold-label slot the bottom uses, mirrored)
-    top_y = 180
-    # Bottom day label pinned to HEIGHT - 240 (continuity with main + example frames)
-    bottom_y = HEIGHT - 240
-    # Center the tease block in the area between top label and bottom label
-    block_top_margin = 320       # below the top label
-    block_bot_margin = HEIGHT - 320  # above the bottom label
-    h_tease = sum(line_h(font_tease, l) + 16 for l in lines) - 16
-    tease_y_start = block_top_margin + max(0, ((block_bot_margin - block_top_margin) - h_tease) // 2)
-    top_text = _book_top_label(day)
+    h_label = line_h(font_label)
+    gap = 70
+    h_q = sum(line_h(font_q, l) + 18 for l in q_lines) - 18
+    total = h_label + gap + h_q
+    top_margin, footer_zone = 260, 300
+    y0 = top_margin + max(0, ((HEIGHT - top_margin - footer_zone) - total) // 2)
 
-    def _draw_centered(text: str, y: int, font, fill, drawer) -> None:
-        bbox = draw.textbbox((0, 0), text, font=font)
-        x = (WIDTH - (bbox[2] - bbox[0])) // 2
-        drawer(x, y, text, font, fill)
+    def centered(text, y, font, fill, drawer):
+        b = draw.textbbox((0, 0), text, font=font)
+        drawer((WIDTH - (b[2] - b[0])) // 2, y, text, font, fill)
 
-    # ── Draw ─────────────────────────────────────────────────────────────────
-    # Normal path: vendored local Twemoji (no network on the critical path;
-    # byte-identical to the pre-patch CDN render). Fallback path: if Pilmoji
-    # itself fails entirely, render the words WITHOUT emoji rather than crash
-    # the whole day's post — and emit a loud, grep-able marker so any affected
-    # day is detectable and excludable from attribution.
+    def paint(drawer):
+        y = y0
+        centered("YOUR MOVE", y, font_label, GOLD, drawer)
+        y += h_label + gap
+        for ln in q_lines:
+            centered(ln, y, font_q, WHITE, drawer)
+            y += line_h(font_q, ln) + 18
+
     try:
-        with Pilmoji(img, source=LocalTwemoji) as pilmoji:
-            def _pm(x, y, text, font, fill):
-                pilmoji.text((x, y), text, fill=fill, font=font)
-            _draw_centered(top_text, top_y, font_top, GOLD, _pm)
-            tease_y = tease_y_start
-            for line in lines:
-                _draw_centered(line, tease_y, font_tease, WHITE, _pm)
-                tease_y += line_h(font_tease, line) + 16
-    except Exception as e:  # noqa: BLE001 — never crash the post for an emoji
+        with Pilmoji(img, source=LocalTwemoji) as pm:
+            paint(lambda x, y, t, f, c: pm.text((x, y), t, fill=c, font=f))
+    except Exception as e:  # noqa: BLE001
         print(f"!! PILMOJI_FALLBACK_FIRED day={day.get('day')} err={e!r}")
         gh_out = os.environ.get("GITHUB_OUTPUT")
         if gh_out:
             with open(gh_out, "a", encoding="utf-8") as f:
                 f.write("pilmoji_fallback=true\n")
+        ql = [strip_emoji(l) for l in q_lines]
+        y = y0
+        centered("YOUR MOVE", y, font_label, GOLD,
+                 lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
+        y += h_label + gap
+        for ln in ql:
+            centered(ln, y, font_q, WHITE,
+                     lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
+            y += line_h(font_q, ln) + 18
 
-        def _plain(x, y, text, font, fill):
-            draw.text((x, y), text, fill=fill, font=font)
-        _draw_centered(strip_emoji(top_text), top_y, font_top, GOLD, _plain)
-        tease_y = tease_y_start
-        for line in lines:
-            _draw_centered(strip_emoji(line), tease_y, font_tease, WHITE, _plain)
-            tease_y += line_h(font_tease, line) + 16
-
-    # Bottom day label — same as main + example frames (no emoji, raw draw)
-    day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
-    bbox = draw.textbbox((0, 0), day_label, font=font_day)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, bottom_y), day_label, fill=GOLD, font=font_day)
-
-    img.save(out_path, "PNG", optimize=True)
-
-
-def render_example_frame(day: dict, out_path: Path) -> None:
-    """Third frame (12 sec) — a real-life example showing how to apply the law/principle.
-
-    Layout:
-      Top: "FOR YOUR LIFE" gold label
-      Middle: the example text (centered, large readable body font)
-      Bottom: same day label + author/book as main frame (continuity)
-    """
-    img = make_background(day["day"], day.get("book", ""))
-    draw = ImageDraw.Draw(img)
-
-    font_label = pick_font(["Cinzel.ttf"], 52, weight=700)
-    font_body = pick_font(["PlayfairDisplay.ttf"], 54, weight=500)
-    font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
-    font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
-
-    margin = 90
-    max_w = WIDTH - 2 * margin
-
-    # Book-specific label: each book has its own tone signature
-    slug = book_slug(day.get("book", ""))
-    if slug == "48laws":
-        label_text = "TODAY'S MOVE"        # tactical, game-like
-    elif slug == "atomic":
-        label_text = "THE PRACTICE"        # habit-focused, ritualistic
-    elif slug == "rules":
-        label_text = "LIVE BY THIS"        # philosophical, principled
-    else:
-        label_text = "IN PRACTICE"         # fallback for future books
-
-    example_lines = wrap_text(day.get("example", ""), font_body, max_w)
-
-    def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
-        bbox = draw.textbbox((0, 0), line, font=font)
-        return bbox[3] - bbox[1]
-
-    h_label = line_h(font_label)
-    gap_label_to_body = 80
-    h_body = sum(line_h(font_body, l) + 16 for l in example_lines) - 16
-    total = h_label + gap_label_to_body + h_body
-
-    top_margin = 240
-    footer_zone = 320
-    available = HEIGHT - top_margin - footer_zone
-    y = top_margin + max(0, (available - total) // 2)
-
-    bbox = draw.textbbox((0, 0), label_text, font=font_label)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), label_text, fill=GOLD, font=font_label)
-    y += h_label + gap_label_to_body
-
-    for line in example_lines:
-        bbox = draw.textbbox((0, 0), line, font=font_body)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
-        y += line_h(font_body, line) + 16
-
-    # Footer (day label + attribution) — same as main frame for continuity
-    day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
-    bbox = draw.textbbox((0, 0), day_label, font=font_day)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 240), day_label, fill=GOLD, font=font_day)
-    foot = f"— {day['author']}, {day['book']}"
-    bbox = draw.textbbox((0, 0), foot, font=font_foot)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 180), foot, fill=DIM, font=font_foot)
-
+    foot = f"— {day.get('author', '')}, {day.get('book', '')}"
+    b = draw.textbbox((0, 0), foot, font=font_foot)
+    draw.text(((WIDTH - (b[2] - b[0])) / 2, HEIGHT - 170), foot, fill=DIM, font=font_foot)
     img.save(out_path, "PNG", optimize=True)
 
 
 def render_end_frame(day: dict, out_path: Path) -> None:
-    """Render the last-3-second 'COMMENT BELOW + TOMORROW teaser' frame.
+    """CHANGE 3: the loop-matched closer. NO CTA card, NO tomorrow teaser.
 
-    Cross-book transitions are handled automatically: if the next day belongs to
-    a different book, the teaser shows the new book's title. If there is no next
-    day (final post), shows 'SERIES COMPLETE'."""
-    img = make_background(day["day"], day.get("book", ""))
+    It re-renders the exact intro hook composition on the same bright scrim, so
+    the final frame is visually identical to frame 1 — a seamless Shorts loop
+    that rewards rewatch. The only addition is a SMALL persistent bottom
+    overlay (book-aware stable-parent series label + bio funnel)."""
+    img = make_background(day["day"], day.get("book", ""), scrim="bright")
     draw = ImageDraw.Draw(img)
+    _draw_hook(day, img, draw)               # identical to frame 1 -> clean loop
+    draw = ImageDraw.Draw(img)               # _draw_hook re-pastes the image
 
-    font_cta = pick_font(["Cinzel.ttf"], 76, weight=900)
-    font_label = pick_font(["Cinzel.ttf"], 44, weight=600)
-    font_next = pick_font(["PlayfairDisplay.ttf"], 60, weight=700)
-    font_arrow = pick_font(["PlayfairDisplay.ttf"], 80, weight=700)
-    font_follow = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
+    font_sub = pick_font(["Cinzel.ttf"], 34, weight=700)
+    font_books = pick_font(["Cinzel.ttf"], 30, weight=600)
 
-    margin = 90
-    max_w = WIDTH - 2 * margin
+    line1 = day.get("series_label", "SUBSCRIBE FOR THE REST")  # book-aware, stable parent
+    line2 = "BOOKS  ·  LINK IN BIO"
 
-    # Top: big CTA
-    cta_main = "COMMENT BELOW"
-    cta_sub = "Save · Share · Tag a friend"
-    bbox = draw.textbbox((0, 0), cta_main, font=font_cta)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 400), cta_main, fill=GOLD, font=font_cta)
-    bbox = draw.textbbox((0, 0), cta_sub, font=font_label)
-    draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 520), cta_sub, fill=WHITE, font=font_label)
-    draw.line([(WIDTH / 2 - 100, 660), (WIDTH / 2 + 100, 660)], fill=GOLD, width=4)
-
-    # Look up tomorrow's content for the teaser
-    next_day = None
-    if day["day"] < total_days():
-        try:
-            next_day = load_day(day["day"] + 1)
-        except ValueError:
-            next_day = None
-
-    if next_day:
-        label = "TOMORROW"
-        bbox = draw.textbbox((0, 0), label, font=font_label)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 760), label, fill=GOLD, font=font_label)
-
-        title_line = next_day["title"].upper()
-        bbox = draw.textbbox((0, 0), title_line, font=font_next)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 840), title_line, fill=WHITE, font=font_next)
-
-        y = 930
-        for line in wrap_text(next_day["headline"], font_next, max_w):
-            bbox = draw.textbbox((0, 0), line, font=font_next)
-            draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_next)
-            y += (bbox[3] - bbox[1]) + 12
-
-        chevron = "» » »"
-        bbox = draw.textbbox((0, 0), chevron, font=font_arrow)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y + 50), chevron, fill=GOLD, font=font_arrow)
-
-        follow = "follow @nandetroll_ for daily"
-        bbox = draw.textbbox((0, 0), follow, font=font_follow)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 200), follow, fill=DIM, font=font_follow)
-    else:
-        label = "SERIES COMPLETE"
-        bbox = draw.textbbox((0, 0), label, font=font_label)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 800), label, fill=GOLD, font=font_label)
-        thanks = "Thank you for following along"
-        bbox = draw.textbbox((0, 0), thanks, font=font_next)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, 900), thanks, fill=WHITE, font=font_next)
+    b = draw.textbbox((0, 0), line1, font=font_sub)
+    draw.text(((WIDTH - (b[2] - b[0])) / 2, HEIGHT - 200), line1, fill=GOLD, font=font_sub)
+    b = draw.textbbox((0, 0), line2, font=font_books)
+    draw.text(((WIDTH - (b[2] - b[0])) / 2, HEIGHT - 150), line2, fill=WHITE, font=font_books)
 
     img.save(out_path, "PNG", optimize=True)
 
@@ -585,19 +560,119 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     subprocess.run(cmd, check=True)
 
 
+CORPORATE_HASHTAGS = (
+    "#corporatelife #officepolitics #careeradvice #careertok #workplacewisdom "
+    "#newmanager #careergrowth #worksmarter #9to5life #corporateamerica "
+    "#careertips #professionaldevelopment #worklife #officelife #managertips "
+    "#careercoach #workplacetips #climbingtheladder #corporateladder #careerhacks"
+)
+_AFF_PLACEHOLDER = "{SET_AMAZON_AFFILIATE_TAG}"
+
+
+def _affiliate_tag() -> str:
+    return os.environ.get("AMAZON_AFFILIATE_TAG", "").strip() or _AFF_PLACEHOLDER
+
+
+def _amazon_link(book: str, tag: str) -> str:
+    from urllib.parse import quote_plus
+    return f"https://www.amazon.in/s?k={quote_plus(book + ' book')}&tag={tag}"
+
+
+def _series_tag(series_label: str) -> str:
+    """'LAW 7/48 · SUBSCRIBE FOR THE REST' -> 'Law 7/48' for the caption."""
+    head = series_label.split("·")[0].strip()
+    return head.title() if head else "the series"
+
+
+def write_bio_guide() -> Path:
+    """The single affiliate DESTINATION (put behind one bio link / Linktree).
+    'Which of these 3 should you read first' captures intent without a hard
+    sell and 3x's the qualifying-sale surface for Amazon's 3/180-day gate."""
+    tag = _affiliate_tag()
+    books = [
+        ("The 48 Laws of Power", "you're being out-maneuvered and don't know the rules"),
+        ("Atomic Habits", "you know what to do but can't stay consistent"),
+        ("12 Rules for Life", "the chaos is getting to you and you need an anchor"),
+    ]
+    lines = [
+        "# Start here: which book should you read first?",
+        "",
+        "Three books, one question — where are you actually stuck right now?",
+        "",
+    ]
+    for b, who in books:
+        lines += [f"## {b}", f"Read this first if **{who}**.", f"→ {_amazon_link(b, tag)}", ""]
+    lines += ["_As an Amazon Associate, qualifying purchases support the channel._", ""]
+    p = OUT_DIR / "_bio_guide.md"
+    p.write_text("\n".join(lines), encoding="utf-8")
+    return p
+
+
+def emit_post_pack(day: dict, video_path: Path, out_path: Path) -> None:
+    """CHANGE 4: the paste-ready content-factory output. Manual posting reads
+    this; the pipeline no longer auto-posts."""
+    tag = _affiliate_tag()
+    hook = day["tease"]
+    cq = day["comment_q"]
+    series = _series_tag(day.get("series_label", ""))
+    aff = _amazon_link(day.get("book", ""), tag)
+
+    caption = "\n".join([
+        hook,
+        "",
+        cq,
+        "",
+        "📚 New here? Which of these 3 books should you read first → link in bio",
+        f"Follow — {series}, the rest drops daily.",
+        "",
+        CORPORATE_HASHTAGS,
+    ])
+
+    pack = "\n".join([
+        f"# ITEM {day['day']:03d}  ·  {day.get('book','')}  ·  {day.get('parent_law','')}"
+        f"  ·  {day.get('variant_type','')}",
+        f"# video: {video_path.name}",
+        "",
+        "[CAPTION]",
+        caption,
+        "",
+        "[PIN AS FIRST COMMENT]   (post this as the first comment, then pin it)",
+        cq,
+        "",
+        "[TRENDING AUDIO]",
+        "Pick a TRENDING sound in-app before posting. Do NOT post on the muted /"
+        " licensed track — trending audio is the reach lever.",
+        "",
+        "[BIO LINK / AFFILIATE]   (destination lives behind ONE 'link in bio')",
+        "Bio link -> output/_bio_guide.md  (host on Linktree / one-pager)",
+        f"This item's book, tagged: {aff}",
+        (f"NOTE: AMAZON_AFFILIATE_TAG is unset — {_AFF_PLACEHOLDER} is a visible"
+         " placeholder, NOT a live link. Set it before posting."
+         if tag == _AFF_PLACEHOLDER else f"Affiliate tag active: {tag}"),
+        "",
+    ])
+    out_path.write_text(pack, encoding="utf-8")
+
+
 def build(day_num: int) -> dict:
+    """Render item `day_num` (1-based over the 276 variant items) + emit its
+    paste-ready post pack. Content factory: builds, does NOT post."""
     day = load_day(day_num)
-    intro_image_path = OUT_DIR / f"day_{day_num:02d}_intro.png"
-    image_path = OUT_DIR / f"day_{day_num:02d}.png"
-    example_image_path = OUT_DIR / f"day_{day_num:02d}_example.png"
-    end_image_path = OUT_DIR / f"day_{day_num:02d}_end.png"
-    video_path = OUT_DIR / f"day_{day_num:02d}.mp4"
+    n = f"{day_num:03d}"
+    intro_image_path = OUT_DIR / f"item_{n}_intro.png"
+    image_path = OUT_DIR / f"item_{n}.png"
+    example_image_path = OUT_DIR / f"item_{n}_q.png"
+    end_image_path = OUT_DIR / f"item_{n}_end.png"
+    video_path = OUT_DIR / f"item_{n}.mp4"
+    post_path = OUT_DIR / f"item_{n}_post.txt"
     render_intro_frame(day, intro_image_path)
     render_image(day, image_path)
     render_example_frame(day, example_image_path)
     render_end_frame(day, end_image_path)
     music = pick_music(day.get("book", ""), day.get("mood", ""))
     make_video(intro_image_path, image_path, example_image_path, end_image_path, music, video_path)
+    write_bio_guide()
+    emit_post_pack(day, video_path, post_path)
     return {
         "day": day,
         "intro_image": intro_image_path,
@@ -605,6 +680,7 @@ def build(day_num: int) -> dict:
         "example_image": example_image_path,
         "end_image": end_image_path,
         "video": video_path,
+        "post_pack": post_path,
         "music": music,
     }
 
@@ -613,4 +689,4 @@ if __name__ == "__main__":
     import sys
     n = int(sys.argv[1]) if len(sys.argv) > 1 else 1
     result = build(n)
-    print(f"Built day {n}: {result['video']}")
+    print(f"Built item {n}: {result['video']}  +  {result['post_pack'].name}")

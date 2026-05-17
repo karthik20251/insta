@@ -7,6 +7,11 @@ import json
 import sys
 from pathlib import Path
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 CHECKS_RUN = 0
@@ -30,17 +35,27 @@ print("\n=== Pre-flight check ===\n")
 # 1. quotes.json
 print("[1] quotes.json")
 quotes = json.loads((Path(__file__).parent.parent / "quotes.json").read_text(encoding="utf-8"))
-days = quotes["days"]
-check("total days", len(days) == 92, f"{len(days)} days", f"expected 92, got {len(days)}")
-check("sequence", [d["day"] for d in days] == list(range(1, 93)), "1-92 contiguous", "gaps or duplicates")
+items = quotes["items"]
+N = 276
+check("total items", len(items) == N, f"{len(items)} items", f"expected {N}, got {len(items)}")
+check("sequence", [it["item"] for it in items] == list(range(1, N + 1)),
+      f"1-{N} contiguous", "gaps or duplicates")
 
-# 2. Required fields per day (all load-bearing on the renderer)
-print("\n[2] required fields per day")
-required = ["day", "title", "headline", "body", "caption_hook", "tease", "example", "mood"]
-missing = [(d["day"], f) for d in days for f in required if f not in d]
+# 2. Required fields per variant item (all load-bearing on the renderer/factory)
+print("\n[2] required fields per item")
+required = ["item", "parent_law", "book", "title", "headline", "author",
+            "variant_type", "series_label", "tease", "comment_q", "body"]
+missing = [(it.get("item"), f) for it in items for f in required if f not in it]
 check("all fields present", not missing,
-      f"all 92 days x {len(required)} fields",
+      f"all {N} items x {len(required)} fields",
       f"missing: {missing[:5]}")
+bad_vt = [it["item"] for it in items
+          if it.get("variant_type") not in ("TACTIC", "MISTAKE", "SCENARIO")]
+check("variant_type valid", not bad_vt, "all TACTIC/MISTAKE/SCENARIO",
+      f"bad: {bad_vt[:5]}")
+bad_q = [it["item"] for it in items if not str(it.get("comment_q", "")).strip().endswith("👇")]
+check("comment_q ends with prompt emoji", not bad_q, f"all {N} end with the prompt",
+      f"missing prompt: {bad_q[:5]}")
 
 # 3. Music + backgrounds present per book
 print("\n[3] assets per book")
@@ -72,7 +87,7 @@ print("\n[6] code modules importable")
 try:
     from generate import build, load_day, total_days
     check("generate.py imports", True, "OK")
-    check("total_days() = 92", total_days() == 92, f"= {total_days()}")
+    check("total_days() = 276", total_days() == 276, f"= {total_days()}")
 except Exception as e:
     check("generate.py imports", False, "", str(e))
 

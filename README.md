@@ -1,5 +1,7 @@
 # instaautomatic
 
+> **Manual posting active; API auto-poster on standby.** The pipeline is a content factory — it renders the video and emits a paste-ready post pack (`output/item_NN_post.txt`); a human posts via the native app for trending audio. The reliability patch + API poster remain intact and revertible.
+
 A fully autonomous daily multi-platform content bot. Builds a 24-second video each day from a book quote, picks a mood-matched royalty-free track, publishes to **Instagram Reels + Stories + YouTube Shorts**, and emails you both URLs. Runs on GitHub Actions — no server, no maintenance.
 
 Currently queued: **92 days** of content across 3 books → posts daily at **5:30 PM IST** (lands 5:30–6:00 PM with GitHub Actions delay) to:
