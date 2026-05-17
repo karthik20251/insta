@@ -50,14 +50,23 @@ jobs:
       - name: Build this slot's video
         env:
           START_DATE: ${{ vars.START_DATE }}
-        run: python -c "from generate import build, ordered_item; from main import current_position; build(ordered_item(current_position()))"
+        run: |
+          python -c "from generate import build, ordered_item; from main import current_position; print('::VIDEO::'+build(ordered_item(current_position()))['video'].name)" 2>/dev/null | grep '^::VIDEO::' > /tmp/v
+          name="$(sed 's/^::VIDEO:://' /tmp/v)"
+          test -n "$name" || { echo "could not resolve built video name" >&2; exit 1; }
+          echo "VIDEO_FILE=$name" >> "$GITHUB_ENV"
+          echo "built: $name"
 
-      - name: Commit output so it's reachable via raw URL
+      - name: Commit the posted video so its raw URL resolves
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add output/
-          git commit -m "build: day video [skip ci]" || { echo "no changes"; exit 0; }
+          # output/item_* is gitignored (no factory churn in git). The github
+          # upload backend needs THIS one video committed so IG can fetch its
+          # raw URL — force-add only it, not the whole output/ dir.
+          rel="output/$(basename "$VIDEO_FILE")"
+          git add -f "$rel"
+          git commit -m "build: ${rel} [skip ci]" || { echo "no changes"; exit 0; }
           # Bounded rebase-retry: a concurrent manual/cron push moving the
           # branch must NOT non-fast-forward-fail the day. [skip ci] keeps the
           # rebased auto-commit from re-triggering the workflow.
