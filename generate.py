@@ -274,7 +274,7 @@ def _draw_hook(day: dict, img: "Image.Image", draw: "ImageDraw.ImageDraw") -> No
 
     from twemoji_local import LocalTwemoji, strip_emoji
 
-    tease = day["tease"]
+    tease = strip_emoji(day["tease"])   # clean editorial type, no Twemoji (AI tell)
     margin = 80
     max_w = WIDTH - 2 * margin
 
@@ -368,7 +368,7 @@ def render_example_frame(day: dict, out_path: Path) -> None:
     font_q = pick_font(["PlayfairDisplay.ttf"], 72, weight=800)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 36, weight=500)
 
-    q = day.get("comment_q", "")
+    q = strip_emoji(day.get("comment_q", ""))   # clean frame; the 👇 stays in the caption only
     for size in (72, 64, 56):
         font_q = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
         q_lines = wrap_text(q, font_q, max_w)
@@ -560,12 +560,37 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     subprocess.run(cmd, check=True)
 
 
-CORPORATE_HASHTAGS = (
-    "#corporatelife #officepolitics #careeradvice #careertok #workplacewisdom "
-    "#newmanager #careergrowth #worksmarter #9to5life #corporateamerica "
-    "#careertips #professionaldevelopment #worklife #officelife #managertips "
-    "#careercoach #workplacetips #climbingtheladder #corporateladder #careerhacks"
-)
+# Energetic amplifier line — rotated per item so 276 posts don't read as one
+# templated stamp (the content-farm signal that throttles reach).
+_AMPLIFIERS = [
+    "Most people learn this the hard way.",
+    "Save this — you'll want it Monday.",
+    "This is why some get promoted and you don't.",
+    "Nobody teaches you this at work.",
+    "Screenshot it. Use it this week.",
+    "The gap between busy and promoted is right here.",
+    "Uncomfortable, but it's true.",
+    "Read it twice — then watch your office differently.",
+]
+_FOLLOW_CTAS = [
+    "Follow for daily corporate survival.",
+    "Follow if office politics is draining you.",
+    "Daily tactics so you stop getting played — follow.",
+    "This is the stuff they don't teach you. Follow.",
+    "More every single day → follow.",
+    "Follow before the person after your job does.",
+]
+_FUNNEL = "The 3 books this comes from: linktr.ee/unwrittenrules"
+# Tight core (always) + a rotating pack so no two posts share the same tag set.
+_HASHTAG_CORE = ["#officepolitics", "#corporatelife", "#careeradvice",
+                 "#worklife", "#careertok"]
+_HASHTAG_POOL = [
+    "#managingup", "#gettingpromoted", "#workplacetips", "#careergrowth",
+    "#newmanager", "#officelife", "#careertips", "#worksmarter",
+    "#climbingtheladder", "#corporateladder", "#careerhacks", "#workadvice",
+    "#bosstips", "#officepoliticstips", "#careercoach", "#jobtips",
+    "#workplacedrama", "#9to5life", "#promotiontips", "#corporatelifebelike",
+]
 _AFF_PLACEHOLDER = "{SET_AMAZON_AFFILIATE_TAG}"
 
 
@@ -700,16 +725,25 @@ def corporate_caption(day: dict) -> str:
     """The repositioned caption — used by BOTH the paste-ready pack and the
     automatic poster, so a hands-off post carries the same hook + divisive
     question + bio funnel + corporate hashtags as a manual one."""
-    series = _series_tag(day.get("series_label", ""))
+    from twemoji_local import strip_emoji
+    i = int(day.get("item", 1))
+    amp = _AMPLIFIERS[i % len(_AMPLIFIERS)]
+    cta = _FOLLOW_CTAS[(i // 2) % len(_FOLLOW_CTAS)]
+    # Rotating window over the pool so each post's tag set differs (kills the
+    # identical-hashtags-every-post throttle) — core tags always present.
+    start = (i * 3) % len(_HASHTAG_POOL)
+    rot = [_HASHTAG_POOL[(start + k) % len(_HASHTAG_POOL)] for k in range(7)]
+    tags = " ".join(_HASHTAG_CORE + rot)
     return "\n".join([
-        day["tease"],
+        strip_emoji(day["tease"]),     # clean, human — no decorative emoji
+        amp,
         "",
-        day["comment_q"],
+        day["comment_q"],              # keeps the one functional 👇
         "",
-        "📚 New here? Which of these 3 books should you read first → link in bio",
-        f"Follow — {series}, the rest drops daily.",
+        cta,
+        _FUNNEL,
         "",
-        CORPORATE_HASHTAGS,
+        tags,
     ])
 
 
