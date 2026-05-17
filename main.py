@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-from generate import build, corporate_caption, scheduled_item, total_days
+from generate import build, corporate_caption, load_day, scheduled_item, total_days
 from post import post_reel, post_story
 from post_youtube import build_youtube_metadata, upload_short, short_url
 
@@ -27,30 +27,35 @@ def today_ist() -> date:
     return datetime.now(timezone.utc).astimezone(IST).date()
 
 
-def ig_today_count() -> int | None:
-    """Count IG posts dated today (IST). Used for SLOT-AWARE 2/day dedupe:
-    the AM slot skips if >=1 today, the PM slot skips if >=2 today — so each
-    slot is idempotent on re-run, max 2/day, and the 2nd post can never be
-    silently eaten by an 'any post today' guard. Returns None on error
-    (fail-open: a recoverable possible dup beats a silently-skipped slot)."""
+def ig_has_caption(first_line: str) -> bool | None:
+    """PER-ITEM IG dedupe (replaces the broken count-based guard).
+
+    Skip IG only if a recent IG post's caption already STARTS WITH this
+    item's `tease` (the first line of corporate_caption, unique per item).
+    Order-independent: PM landing before AM under cron drift can no longer
+    cannibalize AM's IG post (the bug: YT got AM's item, IG didn't, because
+    '>=1 post today' suppressed it). Each slot reaches IG with its OWN item;
+    a true re-run of the same item correctly skips. None on error
+    (fail-open: a recoverable dup beats a silently-missed post)."""
     user_id = os.environ.get("IG_USER_ID")
     token = os.environ.get("IG_ACCESS_TOKEN")
     if not user_id or not token:
         return None
+    target = (first_line or "").strip()
+    if not target:
+        return None
     try:
         r = requests.get(
             f"https://graph.facebook.com/v21.0/{user_id}/media",
-            params={"fields": "id,timestamp", "limit": "8", "access_token": token},
+            params={"fields": "caption", "limit": "25", "access_token": token},
             timeout=15,
         )
         r.raise_for_status()
-        today = today_ist()
-        n = 0
         for m in r.json().get("data", []):
-            ts = m.get("timestamp", "")
-            if ts and datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S%z").astimezone(IST).date() == today:
-                n += 1
-        return n
+            cap = (m.get("caption") or "").strip()
+            if cap and cap.split("\n", 1)[0].strip() == target:
+                return True
+        return False
     except Exception:
         return None
 
@@ -187,13 +192,14 @@ def main() -> int:
     # Slot-aware idempotency for 2/day: AM skips if >=1 post today, PM skips
     # if >=2. Each slot idempotent on re-run; max 2/day; the 2nd post can't
     # be eaten by an 'any post today' guard. Fail-open on count error.
-    cnt = ig_today_count()
-    if cnt is None:
+    _item = load_day(day_num)
+    _has = ig_has_caption(_item.get("tease", ""))
+    if _has is None:
         ig_skip, ig_reason = False, "IG dedupe unavailable (fail-open, proceeding)"
     else:
-        ig_skip = cnt >= (slot + 1)
-        ig_reason = f"IG: {cnt} post(s) today; slot {'PM' if slot else 'AM'} " \
-                    f"{'already done -> skip' if ig_skip else 'proceeding'}"
+        ig_skip = _has
+        ig_reason = ("IG: this exact item already on IG -> skip" if _has
+                     else "IG: item not yet on IG -> proceeding")
     yt_skip, yt_reason = yt_posted_today()
     print(f"  [idempotency] {ig_reason}")
     print(f"  [idempotency] {yt_reason}")
