@@ -16,3 +16,5 @@ output/queue.json
 output/_bio_guide.md
 output/item_*
 output/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_*
+# brand assets are deliverables, regenerable via scripts/make_brand_assets.py
+output/brand_*.png
