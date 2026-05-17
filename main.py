@@ -11,7 +11,7 @@ import requests
 from dotenv import load_dotenv
 
 from generate import build, corporate_caption, load_day, scheduled_item, total_days
-from post import post_reel, post_story
+from post import post_reel  # post_story intentionally not imported (manual Stories)
 from post_youtube import build_youtube_metadata, upload_short, short_url
 
 load_dotenv()
@@ -236,13 +236,9 @@ def main() -> int:
         media_id = post_reel(video_url, caption)
         print(f"  posted reel: media_id={media_id}")
         write_github_output(media_id=media_id)
-        # Story best-effort — only when we actually posted the Reel
-        try:
-            story_id = post_story(video_url)
-            print(f"  shared to story: media_id={story_id}")
-            write_github_output(story_id=story_id)
-        except Exception as e:
-            print(f"  WARN: story share failed (non-fatal): {e}")
+        # Stories are posted MANUALLY by the owner (so the link sticker can be
+        # attached at share time). Auto Story-share intentionally disabled.
+        # post.post_story() is left intact/dormant — revertible if ever wanted.
 
     # YouTube (gated, best-effort)
     if yt_skip:
