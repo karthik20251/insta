@@ -639,6 +639,63 @@ def ordered_item(pos: int) -> int:
     return _ORDER_CACHE[(pos - 1) % len(_ORDER_CACHE)]
 
 
+def _parent_order() -> tuple[list[str], dict]:
+    """92 parents, book-interleaved (shared with ordered_item's logic)."""
+    data = json.loads(QUOTES.read_text(encoding="utf-8"))
+    items = data["items"]
+    by_key = {(it["parent_law"], it["variant_type"]): it["item"] for it in items}
+    by_book: dict[str, list[str]] = {}
+    for it in items:
+        by_book.setdefault(it["book"], [])
+        if it["parent_law"] not in by_book[it["book"]]:
+            by_book[it["book"]].append(it["parent_law"])
+    spread = []
+    for book, parents in by_book.items():
+        n = len(parents)
+        for i, p in enumerate(parents):
+            spread.append(((i + 0.5) / n, -n, book, p))
+    spread.sort()
+    return [p for _, _, _, p in spread], by_key
+
+
+def _weave(a: list[int], b: list[int]) -> list[int]:
+    """Deterministically interleave two lists by even position-fraction so the
+    shorter one is spread through the longer (no clumping)."""
+    tagged = [((i + 0.5) / len(a), x) for i, x in enumerate(a)] + \
+             [((i + 0.5) / len(b), x) for i, x in enumerate(b)]
+    tagged.sort(key=lambda t: t[0])
+    return [x for _, x in tagged]
+
+
+_SLOT_CACHE: dict[int, list[int]] | None = None
+
+
+def scheduled_item(day: int, slot: int) -> int:
+    """Fixed slot themes (NOT random): morning(slot 0)=technique-y, evening
+    (slot 1)=book/story. Balanced over the full corpus, every item used once:
+
+      AM = all 92 TACTIC + 46 MISTAKE   (the move + the trap)
+      PM = all 92 SCENARIO + 46 MISTAKE (the story + the rest of the bait)
+
+    SCENARIO is only 1/3 of items but PM is 1/2 the slots, so the 92 MISTAKEs
+    are split 46/46 across AM/PM — that's the one unavoidable adjustment to
+    keep both slots full for the whole run instead of PM drying up at day 92.
+    """
+    global _SLOT_CACHE
+    if _SLOT_CACHE is None:
+        porder, by_key = _parent_order()
+        tac = [by_key[(p, "TACTIC")] for p in porder]
+        mis = [by_key[(p, "MISTAKE")] for p in porder]
+        scn = [by_key[(p, "SCENARIO")] for p in porder]
+        half = len(mis) // 2
+        _SLOT_CACHE = {
+            0: _weave(tac, mis[:half]),          # AM: technique-y
+            1: _weave(scn, mis[half:]),          # PM: book/story
+        }
+    seq = _SLOT_CACHE[1 if slot else 0]
+    return seq[(day - 1) % len(seq)]
+
+
 def corporate_caption(day: dict) -> str:
     """The repositioned caption — used by BOTH the paste-ready pack and the
     automatic poster, so a hands-off post carries the same hook + divisive

@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-from generate import build, corporate_caption, ordered_item, total_days
+from generate import build, corporate_caption, scheduled_item, total_days
 from post import post_reel, post_story
 from post_youtube import build_youtube_metadata, upload_short, short_url
 
@@ -178,10 +178,10 @@ def write_github_output(**kv) -> None:
 
 
 def main() -> int:
-    pos = current_position()                       # 2/day, slot-aware
-    slot = current_slot()
-    day_num = ordered_item(pos)  # interleaved order: no variant trio back-to-back
-    print(f"==> Position {pos}/{total_days()}  slot={'PM' if slot else 'AM'}  -> item {day_num}")
+    day = current_day()
+    slot = current_slot()                          # 0=AM technique-y, 1=PM book/story
+    day_num = scheduled_item(day, slot)
+    print(f"==> Day {day}  slot={'PM (book/story)' if slot else 'AM (technique)'}  -> item {day_num}")
 
     # Slot-aware idempotency for 2/day: AM skips if >=1 post today, PM skips
     # if >=2. Each slot idempotent on re-run; max 2/day; the 2nd post can't

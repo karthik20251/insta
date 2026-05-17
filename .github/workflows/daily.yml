@@ -51,7 +51,7 @@ jobs:
         env:
           START_DATE: ${{ vars.START_DATE }}
         run: |
-          python -c "from generate import build, ordered_item; from main import current_position; print('::VIDEO::'+build(ordered_item(current_position()))['video'].name)" 2>/dev/null | grep '^::VIDEO::' > /tmp/v
+          python -c "from generate import build, scheduled_item; from main import current_day, current_slot; print('::VIDEO::'+build(scheduled_item(current_day(), current_slot()))['video'].name)" 2>/dev/null | grep '^::VIDEO::' > /tmp/v
           name="$(sed 's/^::VIDEO:://' /tmp/v)"
           test -n "$name" || { echo "could not resolve built video name" >&2; exit 1; }
           echo "VIDEO_FILE=$name" >> "$GITHUB_ENV"
