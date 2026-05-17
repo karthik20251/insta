@@ -38,7 +38,7 @@ jobs:
       - name: Build today's video
         env:
           START_DATE: ${{ vars.START_DATE }}
-        run: python -c "from generate import build; from main import current_day; build(current_day())"
+        run: python -c "from generate import build, ordered_item; from main import current_day; build(ordered_item(current_day()))"
 
       - name: Commit output so it's reachable via raw URL
         run: |

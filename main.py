@@ -10,8 +10,8 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-from generate import build, total_days
-from post import build_caption, post_reel, post_story
+from generate import build, corporate_caption, ordered_item, total_days
+from post import post_reel, post_story
 from post_youtube import build_youtube_metadata, upload_short, short_url
 
 load_dotenv()
@@ -164,8 +164,9 @@ def write_github_output(**kv) -> None:
 
 
 def main() -> int:
-    day_num = current_day()
-    print(f"==> Day {day_num}/{total_days()}")
+    pos = current_day()
+    day_num = ordered_item(pos)  # interleaved order: no variant trio back-to-back
+    print(f"==> Position {pos}/{total_days()} -> item {day_num}")
 
     # Per-platform idempotency. The OLD guard was IG-only and exited the whole
     # run -> a manual re-run to recover a failed YouTube upload would skip
@@ -199,7 +200,7 @@ def main() -> int:
 
     video_url = upload_to_public_url(result["video"])
     print(f"  public url: {video_url}")
-    caption = build_caption(day)
+    caption = corporate_caption(day)  # repositioned caption, same as the pack
 
     # Instagram (gated)
     if ig_skip:

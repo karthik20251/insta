@@ -608,25 +608,61 @@ def write_bio_guide() -> Path:
     return p
 
 
-def emit_post_pack(day: dict, video_path: Path, out_path: Path) -> None:
-    """CHANGE 4: the paste-ready content-factory output. Manual posting reads
-    this; the pipeline no longer auto-posts."""
-    tag = _affiliate_tag()
-    hook = day["tease"]
-    cq = day["comment_q"]
-    series = _series_tag(day.get("series_label", ""))
-    aff = _amazon_link(day.get("book", ""), tag)
+_ORDER_CACHE: list[int] | None = None
 
-    caption = "\n".join([
-        hook,
+
+def ordered_item(pos: int) -> int:
+    """Map 1-based posting position -> item number, using the SAME deterministic
+    interleave as scripts/build_queue.py (a law's TACTIC/MISTAKE/SCENARIO never
+    post back-to-back; books stay mixed). The automatic poster uses this so a
+    hands-off feed has the same variety as the planned queue."""
+    global _ORDER_CACHE
+    if _ORDER_CACHE is None:
+        data = json.loads(QUOTES.read_text(encoding="utf-8"))
+        items = data["items"]
+        by_key = {(it["parent_law"], it["variant_type"]): it["item"] for it in items}
+        by_book: dict[str, list[str]] = {}
+        for it in items:
+            by_book.setdefault(it["book"], [])
+            if it["parent_law"] not in by_book[it["book"]]:
+                by_book[it["book"]].append(it["parent_law"])
+        spread = []
+        for book, parents in by_book.items():
+            n = len(parents)
+            for i, p in enumerate(parents):
+                spread.append(((i + 0.5) / n, -n, book, p))
+        spread.sort()
+        porder = [p for _, _, _, p in spread]
+        variants = ("TACTIC", "MISTAKE", "SCENARIO")
+        _ORDER_CACHE = [by_key[(porder[k % len(porder)], variants[k % 3])]
+                        for k in range(len(items))]
+    return _ORDER_CACHE[(pos - 1) % len(_ORDER_CACHE)]
+
+
+def corporate_caption(day: dict) -> str:
+    """The repositioned caption — used by BOTH the paste-ready pack and the
+    automatic poster, so a hands-off post carries the same hook + divisive
+    question + bio funnel + corporate hashtags as a manual one."""
+    series = _series_tag(day.get("series_label", ""))
+    return "\n".join([
+        day["tease"],
         "",
-        cq,
+        day["comment_q"],
         "",
         "📚 New here? Which of these 3 books should you read first → link in bio",
         f"Follow — {series}, the rest drops daily.",
         "",
         CORPORATE_HASHTAGS,
     ])
+
+
+def emit_post_pack(day: dict, video_path: Path, out_path: Path) -> None:
+    """The paste-ready content-factory output (for manual posting). The
+    automatic poster uses corporate_caption() directly."""
+    tag = _affiliate_tag()
+    cq = day["comment_q"]
+    aff = _amazon_link(day.get("book", ""), tag)
+    caption = corporate_caption(day)
 
     pack = "\n".join([
         f"# ITEM {day['day']:03d}  ·  {day.get('book','')}  ·  {day.get('parent_law','')}"
