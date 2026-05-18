@@ -213,12 +213,12 @@ def main() -> int:
     print(f"  built video: {result['video']}")
 
     write_github_output(
-        day_num=day_num,
-        title=day["title"],
-        headline=day["headline"],
+        item=day["item"],
+        variant=day["variant_type"],
+        slot=("PM (book/story)" if slot else "AM (technique)"),
+        parent=day["parent_law"],
         book=day["book"],
-        book_day=day["book_day"],
-        book_total=day["book_total"],
+        tease=day["tease"],
     )
 
     if "--dry-run" in sys.argv:

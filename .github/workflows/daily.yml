@@ -107,15 +107,14 @@ jobs:
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
-          subject: "[OK] Day ${{ steps.post.outputs.day_num }} posted — ${{ steps.post.outputs.title }}: ${{ steps.post.outputs.headline }}"
+          subject: "[OK] ${{ steps.post.outputs.slot }} posted — ${{ steps.post.outputs.tease }}"
           body: |
-            Posted successfully to @nandetroll_
+            Posted to @nandetroll_
 
-            Day ${{ steps.post.outputs.day_num }} of 92 (overall series)
-            Book: ${{ steps.post.outputs.book }}
-            Book Day: ${{ steps.post.outputs.book_day }} of ${{ steps.post.outputs.book_total }}
-            Title: ${{ steps.post.outputs.title }}
-            Headline: ${{ steps.post.outputs.headline }}
+            Slot:    ${{ steps.post.outputs.slot }}
+            Content: ${{ steps.post.outputs.tease }}
+            Type:    ${{ steps.post.outputs.variant }}  (item #${{ steps.post.outputs.item }})
+            Source:  ${{ steps.post.outputs.parent }} — ${{ steps.post.outputs.book }}
 
             IG Media ID: ${{ steps.post.outputs.media_id }}
             View on Instagram: https://www.instagram.com/nandetroll_/
@@ -137,13 +136,14 @@ jobs:
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
-          subject: "[FAIL] Daily post FAILED for Day ${{ steps.post.outputs.day_num }}"
+          subject: "[FAIL] ${{ steps.post.outputs.slot }} post FAILED — ${{ steps.post.outputs.tease }}"
           body: |
             The daily post workflow FAILED.
 
-            Day attempted: ${{ steps.post.outputs.day_num }} (book day ${{ steps.post.outputs.book_day }} / ${{ steps.post.outputs.book_total }} — ${{ steps.post.outputs.book }})
-            Title: ${{ steps.post.outputs.title }}
-            Headline: ${{ steps.post.outputs.headline }}
+            Slot:    ${{ steps.post.outputs.slot }}
+            Content: ${{ steps.post.outputs.tease }}
+            Type:    ${{ steps.post.outputs.variant }}  (item #${{ steps.post.outputs.item }})
+            Source:  ${{ steps.post.outputs.parent }} — ${{ steps.post.outputs.book }}
 
             Check the run logs:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
