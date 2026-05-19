@@ -66,7 +66,11 @@ jobs:
           # raw URL — force-add only it, not the whole output/ dir.
           rel="output/$(basename "$VIDEO_FILE")"
           git add -f "$rel"
-          git commit -m "build: ${rel} [skip ci]" || { echo "no changes"; exit 0; }
+          # SELF-CLEAN: drop every previously-committed posted video so the
+          # repo never accumulates them (only the current one stays, just long
+          # enough for IG to fetch its raw URL). Prevents endless bloat.
+          git ls-files 'output/item_*.mp4' | grep -vx "$rel" | xargs -r git rm -q --ignore-unmatch
+          git commit -m "build+clean: ${rel} [skip ci]" || { echo "no changes"; exit 0; }
           # Bounded rebase-retry: a concurrent manual/cron push moving the
           # branch must NOT non-fast-forward-fail the day. [skip ci] keeps the
           # rebased auto-commit from re-triggering the workflow.
