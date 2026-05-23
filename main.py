@@ -229,18 +229,23 @@ def main() -> int:
     print(f"  public url: {video_url}")
     caption = corporate_caption(day)  # repositioned caption, same as the pack
 
-    # Instagram (gated)
+    # Instagram + YouTube run INDEPENDENTLY now: an IG flake (ingest timeout,
+    # API hiccup) used to bail the whole script and silently skip YT too.
+    # Each platform's failure is captured and re-raised AFTER both attempts,
+    # so one good post still goes out and the email still flags the failure.
+    failures: list[str] = []
+
     if ig_skip:
         print(f"  [skip IG] {ig_reason}")
     else:
-        media_id = post_reel(video_url, caption)
-        print(f"  posted reel: media_id={media_id}")
-        write_github_output(media_id=media_id)
-        # Stories are posted MANUALLY by the owner (so the link sticker can be
-        # attached at share time). Auto Story-share intentionally disabled.
-        # post.post_story() is left intact/dormant — revertible if ever wanted.
+        try:
+            media_id = post_reel(video_url, caption)
+            print(f"  posted reel: media_id={media_id}")
+            write_github_output(media_id=media_id)
+        except Exception as e:
+            print(f"  ERROR: IG post failed: {type(e).__name__}: {e}")
+            failures.append(f"IG: {type(e).__name__}: {e}")
 
-    # YouTube (gated, best-effort)
     if yt_skip:
         print(f"  [skip YT] {yt_reason}")
     else:
@@ -251,8 +256,11 @@ def main() -> int:
             print(f"  uploaded to youtube: {yt_url}")
             write_github_output(youtube_id=yt_id, youtube_url=yt_url)
         except Exception as e:
-            print(f"  WARN: youtube upload failed (non-fatal): {e}")
+            print(f"  ERROR: YT upload failed: {type(e).__name__}: {e}")
+            failures.append(f"YT: {type(e).__name__}: {e}")
 
+    if failures:
+        raise SystemExit("Post failures: " + " | ".join(failures))
     return 0
 
 

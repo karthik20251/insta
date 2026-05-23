@@ -1,9 +1,8 @@
 """Pull live performance data on recent Reels from the IG Graph API.
 
-NOTE: This token has `instagram_basic` + `instagram_content_publish` but NOT
-`instagram_manage_insights`, so the /insights endpoint returns OAuthException #10.
-We fetch like_count + comments_count directly off /{media_id} instead, which is
-all the API exposes without the insights scope.
+Requires `instagram_manage_insights` on the token (use scripts/ig_auth_insights.py
+to mint one). Without that scope, per-Reel views/reach/watch-time are hidden
+and only like_count / comments_count come back.
 """
 import os
 import sys
@@ -14,6 +13,19 @@ load_dotenv()
 
 GRAPH = "https://graph.facebook.com/v21.0"
 FIELDS = "id,caption,media_type,media_product_type,timestamp,permalink,like_count,comments_count"
+# Reels insight metrics (v22+ — `plays` removed, replaced by `views`).
+INSIGHT_METRICS = (
+    "views,reach,saved,shares,total_interactions,"
+    "ig_reels_video_view_total_time,ig_reels_avg_watch_time"
+)
+
+
+def fetch_insights(media_id: str, token: str) -> dict:
+    r = requests.get(f"{GRAPH}/{media_id}/insights",
+                     params={"metric": INSIGHT_METRICS, "access_token": token}, timeout=30)
+    if r.status_code != 200:
+        return {}
+    return {x["name"]: x["values"][0]["value"] for x in r.json().get("data", [])}
 
 
 def main() -> int:
@@ -30,26 +42,36 @@ def main() -> int:
     r.raise_for_status()
     items = r.json().get("data", [])
     print(f"Found {len(items)} recent posts.\n")
-    print(f"{'date':<10}  {'kind':<6}  {'likes':>5}  {'comm':>4}  caption")
-    print("-" * 78)
+    print(f"{'date':<10}  {'views':>5}  {'reach':>5}  {'likes':>5}  {'comm':>4}  {'saved':>5}  {'share':>5}  {'avgW(s)':>7}  caption")
+    print("-" * 110)
 
-    total_likes = total_comments = 0
+    tot = {"views": 0, "reach": 0, "likes": 0, "comments": 0, "saved": 0, "shares": 0}
     for m in items:
         ts = m.get("timestamp", "?")[:10]
-        cap = (m.get("caption", "") or "")[:55].replace("\n", " ")
+        cap = (m.get("caption", "") or "")[:50].replace("\n", " ")
         permalink = m.get("permalink", "")
-        kind = m.get("media_product_type") or m.get("media_type") or "?"
         likes = m.get("like_count", 0)
         comments = m.get("comments_count", 0)
-        total_likes += likes
-        total_comments += comments
-        print(f"{ts}  {kind:<6}  {likes:>5}  {comments:>4}  {cap}")
+        ins = fetch_insights(m["id"], token)
+        views = ins.get("views", 0)
+        reach = ins.get("reach", 0)
+        saved = ins.get("saved", 0)
+        shares = ins.get("shares", 0)
+        avg_ms = ins.get("ig_reels_avg_watch_time", 0)
+        avg_s = round(avg_ms / 1000, 1) if avg_ms else 0
+        for k, v in (("views", views), ("reach", reach), ("likes", likes),
+                     ("comments", comments), ("saved", saved), ("shares", shares)):
+            tot[k] += v
+        print(f"{ts}  {views:>5}  {reach:>5}  {likes:>5}  {comments:>4}  {saved:>5}  {shares:>5}  {avg_s:>7}  {cap}")
         if permalink:
-            print(f"{'':10}  {'':6}  {'':5}  {'':4}  {permalink}")
+            print(f"{'':10}  {'':>5}  {'':>5}  {'':>5}  {'':>4}  {'':>5}  {'':>5}  {'':>7}  {permalink}")
 
-    print("-" * 78)
-    print(f"Totals across {len(items)} posts: {total_likes} likes, {total_comments} comments")
-    print("\n(plays/reach/saves/shares require instagram_manage_insights — not granted on this token)")
+    print("-" * 110)
+    print(f"Totals ({len(items)} posts): views={tot['views']}  reach={tot['reach']}  "
+          f"likes={tot['likes']}  comm={tot['comments']}  saved={tot['saved']}  shares={tot['shares']}")
+    if tot["views"]:
+        eng = (tot["likes"] + tot["comments"] + tot["saved"] + tot["shares"]) / tot["views"] * 100
+        print(f"Engagement rate (likes+comm+saves+shares / views): {eng:.2f}%")
     return 0
 
 

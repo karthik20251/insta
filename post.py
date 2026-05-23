@@ -83,27 +83,42 @@ def build_caption(day: dict) -> str:
     return "\n".join(parts)
 
 
-def _create_and_publish(media_data: dict) -> str:
-    """Create a media container, wait for ingestion, publish. Returns media_id."""
-    user_id = os.environ["IG_USER_ID"]
-    token = os.environ["IG_ACCESS_TOKEN"]
-
+def _ingest_one(media_data: dict, user_id: str, token: str, max_polls: int) -> str | None:
+    """Create one container and poll until FINISHED. Returns creation_id on
+    success, None on timeout. Raises on hard IG ingestion ERROR."""
     r = requests.post(f"{GRAPH}/{user_id}/media",
                       data={**media_data, "access_token": token}, timeout=60)
     r.raise_for_status()
     creation_id = r.json()["id"]
-
-    for _ in range(30):
+    for _ in range(max_polls):
         s = requests.get(f"{GRAPH}/{creation_id}",
                          params={"fields": "status_code", "access_token": token},
                          timeout=30).json()
-        if s.get("status_code") == "FINISHED":
-            break
-        if s.get("status_code") == "ERROR":
+        sc = s.get("status_code")
+        if sc == "FINISHED":
+            return creation_id
+        if sc == "ERROR":
             raise RuntimeError(f"IG ingestion error: {s}")
         time.sleep(10)
-    else:
-        raise TimeoutError("IG did not finish processing the media in time")
+    return None
+
+
+def _create_and_publish(media_data: dict) -> str:
+    """Create a media container, wait for ingestion, publish. Returns media_id.
+
+    Two-shot: first attempt polls up to 10 min (IG ingest spikes happen). If
+    that times out, recreate the container and poll again (sometimes IG just
+    drops a single ingest job — a fresh container clears it). Previous code
+    bailed after 5 min on a single container and lost the whole post."""
+    user_id = os.environ["IG_USER_ID"]
+    token = os.environ["IG_ACCESS_TOKEN"]
+
+    creation_id = _ingest_one(media_data, user_id, token, max_polls=60)  # 10 min
+    if creation_id is None:
+        # First container is stuck — abandon it and try a fresh one.
+        creation_id = _ingest_one(media_data, user_id, token, max_polls=60)
+    if creation_id is None:
+        raise TimeoutError("IG did not finish processing the media after 2 attempts (20 min total)")
 
     r = requests.post(f"{GRAPH}/{user_id}/media_publish",
                       data={"creation_id": creation_id, "access_token": token}, timeout=60)
