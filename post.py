@@ -106,19 +106,19 @@ def _ingest_one(media_data: dict, user_id: str, token: str, max_polls: int) -> s
 def _create_and_publish(media_data: dict) -> str:
     """Create a media container, wait for ingestion, publish. Returns media_id.
 
-    Two-shot: first attempt polls up to 10 min (IG ingest spikes happen). If
-    that times out, recreate the container and poll again (sometimes IG just
-    drops a single ingest job — a fresh container clears it). Previous code
-    bailed after 5 min on a single container and lost the whole post."""
+    Single 5-min attempt. Normal IG ingestion finishes in 30-90s; 5 min covers
+    the long tail of healthy spikes. When the account is under a Meta throttle
+    (containers POST 200 but never reach FINISHED), no amount of waiting helps
+    — better to fail fast so the workflow exits in <5 min instead of 20, and
+    so we don't hammer the API and extend the throttle. The decoupled flow in
+    main.py still posts to YT on the same run, and the email pack still ships
+    the .mp4 + caption ready to post manually if the slot's IG times out."""
     user_id = os.environ["IG_USER_ID"]
     token = os.environ["IG_ACCESS_TOKEN"]
 
-    creation_id = _ingest_one(media_data, user_id, token, max_polls=60)  # 10 min
+    creation_id = _ingest_one(media_data, user_id, token, max_polls=30)  # 5 min
     if creation_id is None:
-        # First container is stuck — abandon it and try a fresh one.
-        creation_id = _ingest_one(media_data, user_id, token, max_polls=60)
-    if creation_id is None:
-        raise TimeoutError("IG did not finish processing the media after 2 attempts (20 min total)")
+        raise TimeoutError("IG did not FINISH ingest in 5 min (likely Meta throttle)")
 
     r = requests.post(f"{GRAPH}/{user_id}/media_publish",
                       data={"creation_id": creation_id, "access_token": token}, timeout=60)

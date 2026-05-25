@@ -96,12 +96,14 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
-          # IG auto-post is OFF: Meta silently throttled this account after the
-          # 05-23 retry storm (containers POST 200, then never reach FINISHED).
-          # Workflow now emails a paste-ready pack instead (you post on phone
-          # with trending audio = 3-5x more reach). Flip to 'true' to test the
-          # auto path once the throttle clears (verify with manual workflow_dispatch).
-          IG_AUTOPOST_ENABLED: 'false'
+          # IG auto-post stays ON. Meta silently throttled this account after
+          # the 05-23 retry storm (containers POST 200, never reach FINISHED),
+          # so individual slots will fail with TimeoutError until the throttle
+          # clears (~24-72h). Owner's call: keep retrying automatically rather
+          # than fall back to manual posting. The post-pack email still ships
+          # as a harmless backup so if IG times out, the .mp4 + caption arrive
+          # ready-to-paste if owner wants to post manually that slot.
+          IG_AUTOPOST_ENABLED: 'true'
         run: python main.py
 
       - name: Stage post-pack as email body
