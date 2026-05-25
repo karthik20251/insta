@@ -96,9 +96,25 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          # IG auto-post is OFF: Meta silently throttled this account after the
+          # 05-23 retry storm (containers POST 200, then never reach FINISHED).
+          # Workflow now emails a paste-ready pack instead (you post on phone
+          # with trending audio = 3-5x more reach). Flip to 'true' to test the
+          # auto path once the throttle clears (verify with manual workflow_dispatch).
+          IG_AUTOPOST_ENABLED: 'false'
         run: python main.py
 
-      - name: Email — success
+      - name: Stage post-pack as email body
+        if: success() && steps.post.outputs.post_pack_path != ''
+        id: stage_email
+        run: |
+          {
+            echo 'BODY<<POSTPACK_EOF'
+            cat "${{ steps.post.outputs.post_pack_path }}"
+            echo 'POSTPACK_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Email — IG ready to post manually
         if: success() && env.MAIL_USERNAME != '' && steps.post.outputs.skipped != 'true'
         uses: dawidd6/action-send-mail@v3
         env:
@@ -111,21 +127,9 @@ jobs:
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
-          subject: "[OK] ${{ steps.post.outputs.slot }} posted — ${{ steps.post.outputs.tease }}"
-          body: |
-            Posted to @nandetroll_
-
-            Slot:    ${{ steps.post.outputs.slot }}
-            Content: ${{ steps.post.outputs.tease }}
-            Type:    ${{ steps.post.outputs.variant }}  (item #${{ steps.post.outputs.item }})
-            Source:  ${{ steps.post.outputs.parent }} — ${{ steps.post.outputs.book }}
-
-            IG Media ID: ${{ steps.post.outputs.media_id }}
-            View on Instagram: https://www.instagram.com/nandetroll_/
-
-            YouTube Short: ${{ steps.post.outputs.youtube_url }}
-
-            Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          subject: "[POST IG] ${{ steps.post.outputs.slot }} — ${{ steps.post.outputs.tease }}"
+          body: ${{ steps.stage_email.outputs.BODY }}
+          attachments: ${{ steps.post.outputs.video_file_relpath }}
 
       - name: Email — failure
         if: failure() && env.MAIL_USERNAME != ''

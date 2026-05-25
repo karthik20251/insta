@@ -229,11 +229,21 @@ def main() -> int:
     print(f"  public url: {video_url}")
     caption = corporate_caption(day)  # repositioned caption, same as the pack
 
-    # Instagram + YouTube run INDEPENDENTLY now: an IG flake (ingest timeout,
-    # API hiccup) used to bail the whole script and silently skip YT too.
-    # Each platform's failure is captured and re-raised AFTER both attempts,
-    # so one good post still goes out and the email still flags the failure.
+    # IG auto-post disabled by default — Meta silently throttled this account
+    # after the 05-23 retry storm (containers POST 200, then never reach
+    # FINISHED). Auto attempts now hang for 20 min and never post. Workflow
+    # emails the owner a paste-ready pack instead. Flip to 'true' to test
+    # re-enable once the throttle is verified clear.
+    ig_autopost = os.environ.get("IG_AUTOPOST_ENABLED", "false").strip().lower() == "true"
+    if not ig_autopost and not ig_skip:
+        ig_skip = True
+        ig_reason = "IG auto-post disabled — see email pack (post manually with trending audio)"
+
+    # Instagram + YouTube run INDEPENDENTLY: an IG flake used to bail the whole
+    # script and silently skip YT too. Each platform's failure is captured and
+    # re-raised AFTER both attempts, so one good post still goes out.
     failures: list[str] = []
+    yt_url = None
 
     if ig_skip:
         print(f"  [skip IG] {ig_reason}")
@@ -258,6 +268,38 @@ def main() -> int:
         except Exception as e:
             print(f"  ERROR: YT upload failed: {type(e).__name__}: {e}")
             failures.append(f"YT: {type(e).__name__}: {e}")
+
+    # Always emit the manual-post pack — the success-email step ships this to
+    # the owner's phone (paste-ready caption + comment_q + raw URL + video).
+    # When IG auto is re-enabled this pack still ships harmlessly as a backup.
+    pack_lines = [
+        f"ITEM #{day['item']}  ·  {day['variant_type']}  ·  {day['parent_law']}  ·  {day['book']}",
+        "",
+        f"TEASE:  {day['tease']}",
+        "",
+        "------------ CAPTION (copy everything below this line) ------------",
+        caption,
+        "------------ END CAPTION ------------",
+        "",
+        "------------ PIN AS FIRST COMMENT ------------",
+        day.get("comment_q", ""),
+        "------------ END PIN ------------",
+        "",
+        f"Video URL:     {video_url}",
+        f"Video file:    {result['video'].name} (attached to this email)",
+        f"YouTube:       {yt_url or 'not uploaded this run'}",
+        "",
+        "INSTRUCTIONS (30 sec):",
+        "  1. Save the attached video to your phone Camera Roll",
+        "  2. Open Instagram -> Reels -> Add from gallery",
+        "  3. Pick a TRENDING sound in-app (3-5x more reach than a muted post)",
+        "  4. Paste the caption above",
+        "  5. Post -> then add the PIN text as the first comment and pin it",
+    ]
+    pack_path = ROOT / "output" / "post_pack_email.txt"
+    pack_path.write_text("\n".join(pack_lines), encoding="utf-8")
+    write_github_output(post_pack_path=str(pack_path.relative_to(ROOT)),
+                        video_file_relpath=str(result["video"].relative_to(ROOT)))
 
     if failures:
         raise SystemExit("Post failures: " + " | ".join(failures))
