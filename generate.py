@@ -425,19 +425,55 @@ def render_example_frame(day: dict, out_path: Path) -> None:
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 36, weight=500)
 
     q = strip_emoji(day.get("comment_q", ""))   # clean frame; the 👇 stays in the caption only
+
+    # Semantic split: comment_q is typed as "setup — choice?" OR "setup: choice?"
+    # — render those as TWO blocks (setup, bigger vertical gap, choice) instead
+    # of one word-wrapped paragraph. Visual feedback was that the wrap broke
+    # "confront or log it?" across lines mid-phrase. Applies UNIFORMLY to every
+    # comment_q in the catalog that uses either separator; falls through to
+    # single-block rendering when neither is present.
+    def _split_q(text: str) -> list[str]:
+        for sep in (" — ", ": "):
+            if sep in text:
+                a, b = text.split(sep, 1)
+                b = b.strip()
+                # Colon split: only honor it if the second part is actually a
+                # question (avoids splitting on labels like "Day 1: ..." that
+                # may slip in). Em-dash always splits — it's almost always
+                # semantic in this catalog.
+                if sep == ": " and "?" not in b:
+                    continue
+                if b and b[0].islower():
+                    b = b[0].upper() + b[1:]
+                return [a.strip(), b]
+        return [text]
+
+    q_blocks = _split_q(q)
+
+    # Step font down until ALL blocks combined fit a reasonable line count.
     for size in (72, 64, 56):
         font_q = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
-        q_lines = wrap_text(q, font_q, max_w)
-        if len(q_lines) <= 4 or size == 56:
+        wrapped_blocks = [wrap_text(b, font_q, max_w) for b in q_blocks]
+        if sum(len(lines) for lines in wrapped_blocks) <= 4 or size == 56:
             break
 
     def line_h(font, s: str = "Mg") -> int:
         b = draw.textbbox((0, 0), s, font=font)
         return b[3] - b[1]
 
+    # Flat (line, gap_after_px) sequence: small gap inside a block, bigger
+    # gap between blocks so setup vs choice reads as TWO visual chunks.
+    INTRA_GAP, BLOCK_GAP = 18, 56
+    rendered: list[tuple[str, int]] = []
+    for bi, lines in enumerate(wrapped_blocks):
+        for li, ln in enumerate(lines):
+            last_of_block = (li == len(lines) - 1)
+            has_next_block = bi < len(wrapped_blocks) - 1
+            rendered.append((ln, BLOCK_GAP if (last_of_block and has_next_block) else INTRA_GAP))
+
     h_label = line_h(font_label)
     gap = 70
-    h_q = sum(line_h(font_q, l) + 18 for l in q_lines) - 18
+    h_q = sum(line_h(font_q, ln) for ln, _ in rendered) + sum(g for _, g in rendered[:-1])
     total = h_label + gap + h_q
     top_margin, footer_zone = 260, 300
     y0 = top_margin + max(0, ((HEIGHT - top_margin - footer_zone) - total) // 2)
@@ -450,9 +486,9 @@ def render_example_frame(day: dict, out_path: Path) -> None:
         y = y0
         centered("YOUR MOVE", y, font_label, GOLD, drawer)
         y += h_label + gap
-        for ln in q_lines:
+        for ln, gap_after in rendered:
             centered(ln, y, font_q, WHITE, drawer)
-            y += line_h(font_q, ln) + 18
+            y += line_h(font_q, ln) + gap_after
 
     try:
         with Pilmoji(img, source=LocalTwemoji) as pm:
@@ -463,15 +499,14 @@ def render_example_frame(day: dict, out_path: Path) -> None:
         if gh_out:
             with open(gh_out, "a", encoding="utf-8") as f:
                 f.write("pilmoji_fallback=true\n")
-        ql = [strip_emoji(l) for l in q_lines]
         y = y0
         centered("YOUR MOVE", y, font_label, GOLD,
                  lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
         y += h_label + gap
-        for ln in ql:
-            centered(ln, y, font_q, WHITE,
+        for ln, gap_after in rendered:
+            centered(strip_emoji(ln), y, font_q, WHITE,
                      lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
-            y += line_h(font_q, ln) + 18
+            y += line_h(font_q, ln) + gap_after
 
     foot = f"— {day.get('author', '')}, {day.get('book', '')}"
     b = draw.textbbox((0, 0), foot, font=font_foot)
@@ -620,32 +655,30 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
 # templated stamp (the content-farm signal that throttles reach).
 _AMPLIFIERS = [
     "Most people learn this the hard way.",
-    "Save this — you'll want it Monday.",
+    "The quiet ones at work already know this.",
     "This is why some get promoted and you don't.",
     "Nobody teaches you this at work.",
-    "Screenshot it. Use it this week.",
-    "The gap between busy and promoted is right here.",
-    "Uncomfortable, but it's true.",
-    "Read it twice — then watch your office differently.",
+    "Notice who in your office already does this.",
+    "Read it twice. Then watch your office differently.",
+    "They won't say this in the all-hands.",
+    "This one took me three jobs to figure out.",
 ]
 _FOLLOW_CTAS = [
     "Follow for daily corporate survival.",
     "Follow if office politics is draining you.",
     "Daily tactics so you stop getting played — follow.",
-    "This is the stuff they don't teach you. Follow.",
-    "More every single day → follow.",
+    "Read by people who got promoted last quarter. Up to you.",
     "Follow before the person after your job does.",
 ]
 _FUNNEL = "The 3 books this comes from: linktr.ee/unwrittenrules"
 # Tight core (always) + a rotating pack so no two posts share the same tag set.
-_HASHTAG_CORE = ["#officepolitics", "#corporatelife", "#careeradvice",
-                 "#worklife", "#careertok"]
+_HASHTAG_CORE = ["#officepolitics", "#managingup", "#48lawsofpower",
+                 "#climbingtheladder", "#powerdynamics"]
 _HASHTAG_POOL = [
-    "#managingup", "#gettingpromoted", "#workplacetips", "#careergrowth",
-    "#newmanager", "#officelife", "#careertips", "#worksmarter",
-    "#climbingtheladder", "#corporateladder", "#careerhacks", "#workadvice",
-    "#bosstips", "#officepoliticstips", "#careercoach", "#jobtips",
-    "#workplacedrama", "#9to5life", "#promotiontips", "#corporatelifebelike",
+    "#gettingpromoted", "#newmanager", "#workplacedrama", "#officepoliticstips",
+    "#promotiontips", "#bosstips", "#corporatesurvival", "#robertgreene",
+    "#workplacepolitics", "#careerstrategy", "#workplacetips", "#corporateladder",
+    "#careerhacks", "#workadvice",
 ]
 _AFF_PLACEHOLDER = "{SET_AMAZON_AFFILIATE_TAG}"
 
@@ -788,7 +821,7 @@ def corporate_caption(day: dict) -> str:
     # Rotating window over the pool so each post's tag set differs (kills the
     # identical-hashtags-every-post throttle) — core tags always present.
     start = (i * 3) % len(_HASHTAG_POOL)
-    rot = [_HASHTAG_POOL[(start + k) % len(_HASHTAG_POOL)] for k in range(7)]
+    rot = [_HASHTAG_POOL[(start + k) % len(_HASHTAG_POOL)] for k in range(2)]
     tags = " ".join(_HASHTAG_CORE + rot)
     return "\n".join([
         strip_emoji(day["tease"]),     # clean, human — no decorative emoji
