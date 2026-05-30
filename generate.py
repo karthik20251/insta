@@ -124,7 +124,29 @@ def book_slug(book_name: str) -> str:
         return "atomic"
     if "12 rules" in b or "jordan peterson" in b:
         return "rules"
+    if book_name and "48 laws" not in b and "robert greene" not in b:
+        import sys
+        print(f"[generate] WARN: unknown book {book_name!r} -> falling back to '48laws' slug", file=sys.stderr)
     return "48laws"
+
+
+# Per-image scrim overrides — pulls bright backgrounds under the readability
+# ceiling without changing the global atomic palette. Tuple = (base_dark_bright,
+# edge_dark_bright, base_dark_standard, edge_dark_standard). Audit confirmed
+# these three atomic backgrounds have center_text_zone_luminance > 75 — bump
+# them to the 48laws-strength scrim values.
+PER_IMAGE_SCRIM: dict[str, tuple[float, float, float, float]] = {
+    "hokusai_great_wave.jpg":      (0.32, 0.14, 0.62, 0.22),
+    "turner_fighting_temeraire.jpg":(0.32, 0.14, 0.62, 0.22),
+    "wanderer_fog.jpg":            (0.32, 0.14, 0.62, 0.22),
+}
+
+# Per-image post-processing — applied AFTER scrim composite, BEFORE return.
+# Currently only Monet, whose low std-dev is artistic intent but renders flat
+# without a slight contrast+saturation bump.
+PER_IMAGE_POSTPROCESS: dict[str, dict] = {
+    "monet_impression_sunrise.jpg": {"contrast": 1.15, "color": 1.20},
+}
 
 
 def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Image.Image:
@@ -141,9 +163,25 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
         draw_gradient(img)
         return img
 
-    # Deterministic per day so re-renders look identical
-    bg_path = backgrounds[(day_num * 7 + 3) % len(backgrounds)]
-    bg = Image.open(bg_path).convert("RGB")
+    # Deterministic per day so re-renders look identical.
+    # MULTIPLIER must be coprime with every pool size we'll ever ship,
+    # otherwise (day*K) % len collapses to a single index and the same
+    # painting plays every day. Old K=7 broke against rules-pool size 7
+    # (every day_num resolved to index 3 -> only dore_inferno shown for
+    # 49 days). 11 is prime and coprime with 2-10,12-14 — covers any
+    # realistic future pool. Book offset adds variety across books so
+    # AM/PM on the same day don't drift toward the same relative index.
+    K = 11
+    book_offset = sum(ord(c) for c in slug) % len(backgrounds)
+    bg_path = backgrounds[(day_num * K + 3 + book_offset) % len(backgrounds)]
+    try:
+        bg = Image.open(bg_path).convert("RGB")
+    except OSError as e:
+        import sys
+        print(f"[generate] WARN: could not open {bg_path.name}: {e} — using gradient", file=sys.stderr)
+        img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
+        draw_gradient(img)
+        return img
     if bg.size != (WIDTH, HEIGHT):
         bg = bg.resize((WIDTH, HEIGHT), Image.LANCZOS)
 
@@ -158,6 +196,14 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
     else:
         base_dark = 0.55 if slug == "atomic" else 0.62
         edge_dark = 0.20 if slug == "atomic" else 0.22
+    # Per-image override: bright atomic paintings get pulled to 48laws-strength
+    # so white hook text stays readable on the y=720-1200 band.
+    override = PER_IMAGE_SCRIM.get(bg_path.name)
+    if override:
+        if scrim == "bright":
+            base_dark, edge_dark = override[0], override[1]
+        else:
+            base_dark, edge_dark = override[2], override[3]
     mask_col = Image.new("L", (1, HEIGHT))
     mp = mask_col.load()
     for y in range(HEIGHT):
@@ -167,7 +213,15 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
         mp[0, y] = int(darken * 255)
     mask = mask_col.resize((WIDTH, HEIGHT))
     black = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
-    return Image.composite(black, bg, mask)
+    result = Image.composite(black, bg, mask)
+    post = PER_IMAGE_POSTPROCESS.get(bg_path.name)
+    if post:
+        from PIL import ImageEnhance
+        if "contrast" in post:
+            result = ImageEnhance.Contrast(result).enhance(post["contrast"])
+        if "color" in post:
+            result = ImageEnhance.Color(result).enhance(post["color"])
+    return result
 
 
 def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[str]:
