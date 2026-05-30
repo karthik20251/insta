@@ -13,7 +13,14 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    # force-ssl is required to call commentThreads.insert (auto-pinned
+    # engagement comment after each upload). Credentials minted before this
+    # was added will fail with insufficientScope — re-mint via
+    # scripts/yt_auth_manual.py once and update the GH secret.
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 ROOT = Path(__file__).parent
 TOKEN_FILE = ROOT / "yt_token.json"
 
@@ -108,3 +115,53 @@ def upload_short(video_path: Path, title: str, description: str, tags: list[str]
 
 def short_url(video_id: str) -> str:
     return f"https://www.youtube.com/shorts/{video_id}"
+
+
+# Rotating closer lines — keep the "if you miss, you regret" pattern fresh so
+# the comment doesn't read identical across 30 days of posts.
+_COMMENT_CLOSERS = (
+    "Most people find this channel six months too late.",
+    "The ones who scroll past this usually regret it by Q2.",
+    "Don't be the person learning this the week before review season.",
+    "Save this for the meeting you're definitely going to have.",
+    "If you're still on the fence, you're already losing ground.",
+    "Every week you delay is a week the politics win.",
+)
+
+
+def build_yt_comment(day: dict) -> str:
+    """The pinned engagement comment posted right after each upload.
+
+    Structure: the item's own divisive question (forces a reply) -> the
+    like/subscribe ask -> the rotating FOMO closer. Short on purpose; long
+    pinned comments read as desperate. The 👇 is the only emoji — same as the
+    caption — to keep the human voice."""
+    q = (day.get("comment_q") or "").strip()
+    if q.endswith("👇"):
+        q = q[:-1].strip()
+    closer = _COMMENT_CLOSERS[int(day.get("item", 1)) % len(_COMMENT_CLOSERS)]
+    return "\n".join([
+        f"{q} 👇 Drop your call in the replies.",
+        "",
+        "LIKE if this lands. SHARE with whoever needs the heads-up. SUBSCRIBE — daily corporate tactics decoded from the 3 books office politics actually runs on.",
+        "",
+        closer,
+    ])
+
+
+def post_comment(video_id: str, text: str) -> str:
+    """Post a top-level comment on a video. Returns the comment thread id.
+
+    Requires the credential to carry the youtube.force-ssl scope. Fails fast
+    with a readable error if the scope is missing (i.e. the token hasn't
+    been re-minted since the scope was added)."""
+    creds = get_credentials()
+    yt = build("youtube", "v3", credentials=creds, cache_discovery=False)
+    body = {
+        "snippet": {
+            "videoId": video_id,
+            "topLevelComment": {"snippet": {"textOriginal": text}},
+        }
+    }
+    resp = yt.commentThreads().insert(part="snippet", body=body).execute()
+    return resp["id"]

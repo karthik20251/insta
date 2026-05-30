@@ -22,6 +22,9 @@ STATE = ROOT / ".yt_oauth_state.json"          # PKCE verifier between phases
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/yt-analytics.readonly",
+    # commentThreads.insert needs force-ssl. The other two scopes don't grant
+    # commenting; without this one post_comment fails with insufficientScope.
+    "https://www.googleapis.com/auth/youtube.force-ssl",
 ]
 REDIRECT = "http://localhost"                   # loopback; browser will just 404 — fine
 

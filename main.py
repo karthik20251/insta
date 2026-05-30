@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from generate import build, corporate_caption, load_day, scheduled_item, total_days
 from post import post_reel  # post_story intentionally not imported (manual Stories)
-from post_youtube import build_youtube_metadata, upload_short, short_url
+from post_youtube import build_youtube_metadata, upload_short, short_url, post_comment, build_yt_comment
 
 load_dotenv()
 
@@ -265,6 +265,17 @@ def main() -> int:
             yt_url = short_url(yt_id)
             print(f"  uploaded to youtube: {yt_url}")
             write_github_output(youtube_id=yt_id, youtube_url=yt_url)
+            # Engagement comment — best-effort, NEVER fails the post. If the
+            # token doesn't have force-ssl yet (one-off re-auth required after
+            # this feature shipped), the upload still counts; just log and move
+            # on. Same pattern as the YouTube best-effort block already used.
+            try:
+                comment_text = build_yt_comment(day)
+                comment_id = post_comment(yt_id, comment_text)
+                print(f"  posted yt comment: {comment_id}")
+                write_github_output(youtube_comment_id=comment_id)
+            except Exception as ce:
+                print(f"  WARN: yt comment failed (non-fatal): {type(ce).__name__}: {ce}")
         except Exception as e:
             print(f"  ERROR: YT upload failed: {type(e).__name__}: {e}")
             failures.append(f"YT: {type(e).__name__}: {e}")
