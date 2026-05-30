@@ -205,15 +205,18 @@ def main() -> int:
     print(f"  public url: {video_url}")
     caption = corporate_caption(day)  # repositioned caption, same as the pack
 
-    # IG auto-post disabled by default — Meta silently throttled this account
-    # after the 05-23 retry storm (containers POST 200, then never reach
-    # FINISHED). Auto attempts now hang for 20 min and never post. Workflow
-    # emails the owner a paste-ready pack instead. Flip to 'true' to test
-    # re-enable once the throttle is verified clear.
-    ig_autopost = os.environ.get("IG_AUTOPOST_ENABLED", "false").strip().lower() == "true"
+    # IG auto-post is back ON by default (2026-05-30). It was disabled after
+    # the 05-23 Meta throttle (containers POSTing 200 but never FINISHED), but
+    # that's a week stale now and the reliability patch since (raw-URL HEAD-
+    # poll, per-platform idempotency) addresses the retry storm that caused
+    # the throttle. The first cron after this change is the real test.
+    # Kill switch: set repo variable IG_AUTOPOST_ENABLED=false in GitHub
+    # (Settings -> Variables) to disable IG auto-post without a code change —
+    # workflow falls back to emailing the manual pack.
+    ig_autopost = os.environ.get("IG_AUTOPOST_ENABLED", "true").strip().lower() == "true"
     if not ig_autopost and not ig_skip:
         ig_skip = True
-        ig_reason = "IG auto-post disabled — see email pack (post manually with trending audio)"
+        ig_reason = "IG auto-post disabled via IG_AUTOPOST_ENABLED=false — see email pack"
 
     # Instagram + YouTube run INDEPENDENTLY: an IG flake used to bail the whole
     # script and silently skip YT too. Each platform's failure is captured and
