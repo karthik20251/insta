@@ -23,11 +23,11 @@ OUT_DIR = ROOT / "output"
 OUT_DIR.mkdir(exist_ok=True)
 
 WIDTH, HEIGHT = 1080, 1920
-DURATION_SEC = 12
-INTRO_FRAME_SEC = 2        # 0-2:    tease (curiosity hook — no law reveal)
-MAIN_FRAME_SEC = 4         # 2-6:    the law/principle reveal
-EXAMPLE_FRAME_SEC = 4      # 6-10:   real-life example (acceptance for life)
-END_FRAME_SEC = 2          # 10-12:  CTA + tomorrow teaser
+DURATION_SEC = 22
+INTRO_FRAME_SEC = 3        # 0-3:    tease (hook — voiced)
+MAIN_FRAME_SEC = 7         # 3-10:   the law/principle reveal (voiced)
+EXAMPLE_FRAME_SEC = 7      # 10-17:  real-life application + comment question
+END_FRAME_SEC = 5          # 17-22:  loss-aversion CTA (save/follow/share/like)
 
 GOLD = (212, 175, 55)
 WHITE = (240, 240, 240)
@@ -245,19 +245,22 @@ def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[s
 
 
 def render_image(day: dict, out_path: Path) -> None:
-    """Render the main quote frame.
+    """Render the main quote frame — headline-only.
+
+    Body text was stripped once burned-in captions were added: captions deliver
+    the body content (kinetic, in sync with the voice), so a static body
+    paragraph on top of that = redundant clutter that hides the painting.
+    Now: headline alone, painting visible around it, captions own delivery.
 
     Visual hierarchy (top → bottom):
-      1. HEADLINE (biggest, top portion) — grabs first-second attention
-      2. Divider
-      3. Body text — explains the principle
-      4. Day label (small gold) + author/book attribution (italic dim) — footer
+      1. HEADLINE (the iconic law statement, the visual anchor)
+      2. (painting visible below — captions land in this strip during playback)
+      3. Day label (small gold) + author/book attribution (italic dim) — footer
     """
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
     font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 78, weight=900)
-    font_body = pick_font(["PlayfairDisplay.ttf", "PlayfairDisplay-Regular.ttf"], 50, weight=500)
     font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
 
@@ -265,42 +268,28 @@ def render_image(day: dict, out_path: Path) -> None:
     max_w = WIDTH - 2 * margin
 
     head_lines = wrap_text(day["headline"].upper(), font_head, max_w)
-    body_lines = wrap_text(day["body"], font_body, max_w)
 
     def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
         bbox = draw.textbbox((0, 0), line, font=font)
         return bbox[3] - bbox[1]
 
-    # ── Pre-pass: measure total height of headline + divider + body
     h_head = sum(line_h(font_head, l) + 18 for l in head_lines) - 18
-    gap_head_to_divider = 30
-    h_divider = 3
-    gap_divider_to_body = 60
-    h_body = sum(line_h(font_body, l) + 14 for l in body_lines) - 14
-    total = h_head + gap_head_to_divider + h_divider + gap_divider_to_body + h_body
 
-    # Reserve top + bottom margins (bottom margin includes day label + footer zone)
-    top_margin = 200
-    footer_zone = 320
+    # Position the headline in the UPPER-MIDDLE so the lower-middle stays
+    # clear for the burned-in caption strip (~y=1450) and the day label
+    # (y=HEIGHT-240). top_margin pushes headline down from the very top so
+    # it doesn't fight the gold book kicker if/when a frame layers it.
+    top_margin = 280
+    footer_zone = 700  # ensure headline stays above the caption strip
     available = HEIGHT - top_margin - footer_zone
-    y = top_margin + max(0, (available - total) // 2)
+    y = top_margin + max(0, (available - h_head) // 2)
 
-    # ── Draw pass — headline first ─────────────────────────────────────────────
     for line in head_lines:
         bbox = draw.textbbox((0, 0), line, font=font_head)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_head)
         y += line_h(font_head, line) + 18
 
-    y += gap_head_to_divider - 18
-    draw.line([(WIDTH / 2 - 80, y), (WIDTH / 2 + 80, y)], fill=GOLD, width=h_divider)
-    y += gap_divider_to_body
-
-    for line in body_lines:
-        bbox = draw.textbbox((0, 0), line, font=font_body)
-        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
-        y += line_h(font_body, line) + 14
-
-    # ── Footer block (day label in gold + author/book in italic) ──────────────
+    # Footer block (day label in gold + author/book in italic) — unchanged.
     day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
     bbox = draw.textbbox((0, 0), day_label, font=font_day)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 240), day_label, fill=GOLD, font=font_day)
@@ -408,75 +397,44 @@ def render_intro_frame(day: dict, out_path: Path) -> None:
 
 
 def render_example_frame(day: dict, out_path: Path) -> None:
-    """Frame 3: the divisive comment_q ('example' is gone in the variant model).
-    A 'YOUR MOVE' provocation that demands a reply — same question pinned as
-    first comment by the post pack. This is the engagement engine."""
-    from pilmoji import Pilmoji
+    """Frame 3: gold action header — 'YOUR MOVE' over '👇 COMMENT BELOW'.
 
+    Question text was stripped once burned-in captions were added: captions
+    deliver the question kinetically in sync with the voice, so showing the
+    same question as static frame text = visual redundancy that hides the
+    painting and competes with the captions in the bottom strip.
+
+    Now: just the banded gold action header at the top, painting visible
+    below, captions deliver the question, footer at the bottom. The pinned-
+    first-comment in the post pack still carries the literal question text
+    so it lives somewhere persistent for sound-off viewers who scroll to
+    comments before re-watching with sound."""
+    from pilmoji import Pilmoji
     from twemoji_local import LocalTwemoji, strip_emoji
 
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
-    margin = 90
-    max_w = WIDTH - 2 * margin
     font_label = pick_font(["Cinzel.ttf"], 56, weight=800)
-    font_q = pick_font(["PlayfairDisplay.ttf"], 72, weight=800)
+    font_cta = pick_font(["Cinzel.ttf"], 52, weight=800)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 36, weight=500)
-
-    q = strip_emoji(day.get("comment_q", ""))   # clean frame; the 👇 stays in the caption only
-
-    # Semantic split: comment_q is typed as "setup — choice?" OR "setup: choice?"
-    # — render those as TWO blocks (setup, bigger vertical gap, choice) instead
-    # of one word-wrapped paragraph. Visual feedback was that the wrap broke
-    # "confront or log it?" across lines mid-phrase. Applies UNIFORMLY to every
-    # comment_q in the catalog that uses either separator; falls through to
-    # single-block rendering when neither is present.
-    def _split_q(text: str) -> list[str]:
-        for sep in (" — ", ": "):
-            if sep in text:
-                a, b = text.split(sep, 1)
-                b = b.strip()
-                # Colon split: only honor it if the second part is actually a
-                # question (avoids splitting on labels like "Day 1: ..." that
-                # may slip in). Em-dash always splits — it's almost always
-                # semantic in this catalog.
-                if sep == ": " and "?" not in b:
-                    continue
-                if b and b[0].islower():
-                    b = b[0].upper() + b[1:]
-                return [a.strip(), b]
-        return [text]
-
-    q_blocks = _split_q(q)
-
-    # Step font down until ALL blocks combined fit a reasonable line count.
-    for size in (72, 64, 56):
-        font_q = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
-        wrapped_blocks = [wrap_text(b, font_q, max_w) for b in q_blocks]
-        if sum(len(lines) for lines in wrapped_blocks) <= 4 or size == 56:
-            break
+    CTA_TEXT = "👇 COMMENT BELOW"
+    CTA_INTRA_GAP = 20    # tight gap between YOUR MOVE and CTA (one band)
 
     def line_h(font, s: str = "Mg") -> int:
         b = draw.textbbox((0, 0), s, font=font)
         return b[3] - b[1]
 
-    # Flat (line, gap_after_px) sequence: small gap inside a block, bigger
-    # gap between blocks so setup vs choice reads as TWO visual chunks.
-    INTRA_GAP, BLOCK_GAP = 18, 56
-    rendered: list[tuple[str, int]] = []
-    for bi, lines in enumerate(wrapped_blocks):
-        for li, ln in enumerate(lines):
-            last_of_block = (li == len(lines) - 1)
-            has_next_block = bi < len(wrapped_blocks) - 1
-            rendered.append((ln, BLOCK_GAP if (last_of_block and has_next_block) else INTRA_GAP))
-
     h_label = line_h(font_label)
-    gap = 70
-    h_q = sum(line_h(font_q, ln) for ln, _ in rendered) + sum(g for _, g in rendered[:-1])
-    total = h_label + gap + h_q
-    top_margin, footer_zone = 260, 300
-    y0 = top_margin + max(0, ((HEIGHT - top_margin - footer_zone) - total) // 2)
+    h_cta = line_h(font_cta)
+    total = h_label + CTA_INTRA_GAP + h_cta
+
+    # Pin the header band to the UPPER third (not vertical-centered) — with
+    # only ~150px of text in 1920px of canvas, true centering would float it
+    # awkwardly in the middle. Upper-third reads as a deliberate header and
+    # leaves the lower 60% of the frame for the painting + caption strip.
+    top_margin = 260
+    y0 = top_margin
 
     def centered(text, y, font, fill, drawer):
         b = draw.textbbox((0, 0), text, font=font)
@@ -485,10 +443,8 @@ def render_example_frame(day: dict, out_path: Path) -> None:
     def paint(drawer):
         y = y0
         centered("YOUR MOVE", y, font_label, GOLD, drawer)
-        y += h_label + gap
-        for ln, gap_after in rendered:
-            centered(ln, y, font_q, WHITE, drawer)
-            y += line_h(font_q, ln) + gap_after
+        y += h_label + CTA_INTRA_GAP
+        centered(CTA_TEXT, y, font_cta, GOLD, drawer)
 
     try:
         with Pilmoji(img, source=LocalTwemoji) as pm:
@@ -502,11 +458,9 @@ def render_example_frame(day: dict, out_path: Path) -> None:
         y = y0
         centered("YOUR MOVE", y, font_label, GOLD,
                  lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
-        y += h_label + gap
-        for ln, gap_after in rendered:
-            centered(strip_emoji(ln), y, font_q, WHITE,
-                     lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
-            y += line_h(font_q, ln) + gap_after
+        y += h_label + CTA_INTRA_GAP
+        centered(strip_emoji(CTA_TEXT), y, font_cta, GOLD,
+                 lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
 
     foot = f"— {day.get('author', '')}, {day.get('book', '')}"
     b = draw.textbbox((0, 0), foot, font=font_foot)
@@ -575,7 +529,9 @@ def pick_music(book: str = "", mood: str = "") -> Path | None:
 
 
 def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: Path,
-               music_path: Path | None, out_path: Path) -> None:
+               music_path: Path | None, out_path: Path,
+               voice_path: Path | None = None,
+               caption_srt: Path | None = None) -> None:
     """Build the Reel as four crossfaded frames. Durations are driven ENTIRELY
     by the constants at the top of this file (currently 2/4/4/2 = 12s); do not
     hardcode timings here — that comment rot is what bit us on the 24->12 revert.
@@ -586,6 +542,10 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
        end      END_FRAME_SEC        CTA + tomorrow teaser
 
     Each transition is a 0.5-sec crossfade; total = DURATION_SEC.
+
+    Audio: music ducks to 0.25 volume so the voice sits on top clearly. If
+    voice_path is None (TTS failed or disabled), music plays at full volume —
+    the post still ships, just without narration (degrades gracefully).
     """
     # Offsets are formulas, not numbers, so they cannot rot on the next retiming.
     t_intro_to_main = INTRO_FRAME_SEC - 0.5                                       # = INTRO-0.5
@@ -595,6 +555,9 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     main_out_frames = int((MAIN_FRAME_SEC + 0.5) * 30)
     example_out_frames = int((EXAMPLE_FRAME_SEC + 0.5) * 30)
 
+    # Decide the final video-output label so we can optionally chain a
+    # captions burn-in on top: [outv_pre] -> subtitles -> [outv].
+    vlabel = "outv" if caption_srt is None else "outv_pre"
     vfilter = (
         # Intro — static
         f"[0:v]setpts=PTS-STARTPTS[v0];"
@@ -611,8 +574,31 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
         # Stitch all four with 0.5-sec crossfades
         f"[v0][v1]xfade=transition=fade:duration=0.5:offset={t_intro_to_main}[ab];"
         f"[ab][v2]xfade=transition=fade:duration=0.5:offset={t_main_to_example}[abc];"
-        f"[abc][v3]xfade=transition=fade:duration=0.5:offset={t_example_to_end}[outv]"
+        f"[abc][v3]xfade=transition=fade:duration=0.5:offset={t_example_to_end}[{vlabel}]"
     )
+    # Burn captions into the stitched video (sound-off accessibility — most
+    # short-form viewers watch muted, so on-screen text is required, not nice-
+    # to-have). Bottom-third placement; large white Arial Bold with thick
+    # black outline so it reads on any background painting. Run from cwd =
+    # output dir so the SRT path stays a bare filename, avoiding libass's
+    # well-known Windows colon-escaping pain on absolute paths.
+    if caption_srt is not None:
+        # libass scales font/margin against its internal script resolution
+        # (default ~384x288), not the 1920x1080 video. Calibrated empirically:
+        # MarginV=30 collided with the gold day label at y=HEIGHT-240; MarginV=
+        # 75 lifts captions to ~y=1450 — cleanly ABOVE the day label (y=1680)
+        # and BELOW the body text (y<=900), in the open lower-third strip.
+        # BorderStyle=1 + Outline=4 gives the thick black outline that keeps
+        # white text legible on any background painting.
+        style = (
+            "FontName=Arial,FontSize=16,PrimaryColour=&HFFFFFF&,"
+            "OutlineColour=&H000000&,BorderStyle=1,Outline=4,Shadow=0,"
+            "Bold=1,Alignment=2,MarginV=75"
+        )
+        vfilter += (
+            f";[outv_pre]subtitles=filename={caption_srt.name}:"
+            f"force_style='{style}'[outv]"
+        )
 
     cmd = [
         "ffmpeg", "-y",
@@ -621,34 +607,56 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
         "-framerate", "1",  "-loop", "1", "-t", "1",                          "-i", str(example_path),
         "-framerate", "30", "-loop", "1", "-t", str(END_FRAME_SEC + 0.5),     "-i", str(end_path),
     ]
-    if music_path:
+    # Build audio inputs + filter chain dynamically based on what we have.
+    # Music goes in input slot 4 (after the 4 video frames); voice (if any)
+    # goes in slot 5. Each branch handles all four music/voice combinations.
+    audio_filter = ""
+    audio_args: list[str] = []
+    if music_path and voice_path:
+        cmd += ["-i", str(music_path), "-i", str(voice_path)]
+        # Music ducked to 0.25 so the narrator sits clearly on top. Voice
+        # at 1.0 with a 0.5s fade-out at the tail as a safety net if the
+        # synthesis runs slightly long (better than mid-word ffmpeg -t cut).
+        audio_filter = (
+            f"[4:a]loudnorm=I=-14:TP=-1.5:LRA=11,volume=0.25,"
+            f"afade=t=in:d=1,afade=t=out:st={DURATION_SEC - 1}:d=1[music];"
+            f"[5:a]volume=1.0,afade=t=out:st={DURATION_SEC - 0.5}:d=0.5[voice];"
+            f"[music][voice]amix=inputs=2:duration=first:normalize=0[outa]"
+        )
+        audio_args = ["-map", "[outv]", "-map", "[outa]",
+                      "-c:a", "aac", "-b:a", "192k"]
+    elif voice_path:
+        cmd += ["-i", str(voice_path)]
+        audio_filter = (
+            f"[4:a]volume=1.0,afade=t=out:st={DURATION_SEC - 0.5}:d=0.5[outa]"
+        )
+        audio_args = ["-map", "[outv]", "-map", "[outa]",
+                      "-c:a", "aac", "-b:a", "192k"]
+    elif music_path:
         cmd += ["-i", str(music_path)]
-        # Audio is now the 5th input (index 4) since we have 4 video frames.
-        # Chain: loudness norm (-14 LUFS broadcast standard) + 1-sec fade-in + 1-sec fade-out
         audio_filter = (
             f"[4:a]loudnorm=I=-14:TP=-1.5:LRA=11,"
-            f"afade=t=in:d=1,"
-            f"afade=t=out:st={DURATION_SEC - 1}:d=1[outa]"
+            f"afade=t=in:d=1,afade=t=out:st={DURATION_SEC - 1}:d=1[outa]"
         )
-        cmd += [
-            "-filter_complex", vfilter + ";" + audio_filter,
-            "-map", "[outv]", "-map", "[outa]",
-            "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "192k",
-            "-t", str(DURATION_SEC),
-            "-r", "30",
-            str(out_path),
-        ]
+        audio_args = ["-map", "[outv]", "-map", "[outa]",
+                      "-c:a", "aac", "-b:a", "192k"]
     else:
-        cmd += [
-            "-filter_complex", vfilter,
-            "-map", "[outv]",
-            "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
-            "-t", str(DURATION_SEC),
-            "-r", "30",
-            str(out_path),
-        ]
-    subprocess.run(cmd, check=True)
+        audio_args = ["-map", "[outv]"]
+
+    filter_complex = vfilter + (";" + audio_filter if audio_filter else "")
+    cmd += [
+        "-filter_complex", filter_complex,
+        *audio_args,
+        "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
+        "-t", str(DURATION_SEC),
+        "-r", "30",
+        str(out_path),
+    ]
+    # When burning captions, cwd MUST be the output dir so the bare SRT
+    # filename in the subtitles filter resolves correctly (libass + Windows
+    # absolute paths is a known headache; relative-from-cwd is the safe path).
+    cwd = str(out_path.parent) if caption_srt is not None else None
+    subprocess.run(cmd, check=True, cwd=cwd)
 
 
 # Energetic amplifier line — rotated per item so 276 posts don't read as one
@@ -886,7 +894,27 @@ def build(day_num: int) -> dict:
     render_example_frame(day, example_image_path)
     render_end_frame(day, end_image_path)
     music = pick_music(day.get("book", ""), day.get("mood", ""))
-    make_video(intro_image_path, image_path, example_image_path, end_image_path, music, video_path)
+    # AI voice narration + synced captions (parasocial identity layer + sound-
+    # off accessibility — ~85% of mobile viewers mute by default, so on-screen
+    # captions are required not optional). Idempotent + fails open on both: if
+    # TTS errors, voice=None AND caption_srt=None, and the video still ships
+    # music-only with no captions rather than crashing the post.
+    voice_path = OUT_DIR / f"item_{n}_voice.mp3"
+    srt_path = OUT_DIR / f"item_{n}.srt"
+    voice = None
+    caption_srt = None
+    try:
+        from tts import synthesize_pitched
+        # 3-segment pitch modulation: high (hook) -> normal (middle) -> deep
+        # (CTA). Same voice throughout (brand stays consistent); pitch shifts
+        # do the energy variety so the narrator never settles into monotone.
+        voice = synthesize_pitched(day, voice_path, srt_path=srt_path)
+        if voice is not None and srt_path.exists() and srt_path.stat().st_size > 16:
+            caption_srt = srt_path
+    except Exception as e:
+        print(f"!! TTS_IMPORT_FAILED day={day_num} err={type(e).__name__}: {e}")
+    make_video(intro_image_path, image_path, example_image_path, end_image_path,
+               music, video_path, voice_path=voice, caption_srt=caption_srt)
     write_bio_guide()
     emit_post_pack(day, video_path, post_path)
     return {

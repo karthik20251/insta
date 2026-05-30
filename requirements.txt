@@ -6,3 +6,4 @@ google-auth-oauthlib==1.2.1
 google-api-python-client==2.151.0
 pilmoji==2.0.4
 emoji<2
+edge-tts==7.2.8
