@@ -308,7 +308,12 @@ def main() -> int:
         "  5. Post -> then add the PIN text as the first comment and pin it",
     ]
     pack_path = ROOT / "output" / "post_pack_email.txt"
-    pack_path.write_text("\n".join(pack_lines), encoding="utf-8")
+    # Trailing newline matters: the daily.yml step reads this file into a
+    # $GITHUB_OUTPUT heredoc. Without a final \n the cat output runs straight
+    # into the closing delimiter token and GHA fails with "Matching delimiter
+    # not found". The YAML now also writes its own \n before the delimiter
+    # for belt-and-suspenders, but writing it here keeps the file readable.
+    pack_path.write_text("\n".join(pack_lines) + "\n", encoding="utf-8")
     write_github_output(post_pack_path=str(pack_path.relative_to(ROOT)),
                         video_file_relpath=str(result["video"].relative_to(ROOT)))
 

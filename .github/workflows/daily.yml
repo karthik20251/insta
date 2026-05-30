@@ -110,10 +110,15 @@ jobs:
         if: success() && steps.post.outputs.post_pack_path != ''
         id: stage_email
         run: |
+          # printf guarantees the BODY content and the closing delimiter each
+          # land on their own line, even if the pack file doesn't end in \n.
+          # Previous heredoc used `cat` + `echo`; when the file ended without
+          # \n the closing 'POSTPACK_EOF' fused with the last content line and
+          # GHA bailed with "Matching delimiter not found".
           {
-            echo 'BODY<<POSTPACK_EOF'
+            printf 'BODY<<POSTPACK_EOF\n'
             cat "${{ steps.post.outputs.post_pack_path }}"
-            echo 'POSTPACK_EOF'
+            printf '\nPOSTPACK_EOF\n'
           } >> "$GITHUB_OUTPUT"
 
       - name: Email — IG ready to post manually
