@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 from generate import build, corporate_caption, load_day, scheduled_item, total_days
 from post import post_reel  # post_story intentionally not imported (manual Stories)
-from post_youtube import build_youtube_metadata, upload_short, short_url, post_comment, build_yt_comment
+from post_youtube import build_youtube_metadata, upload_short, short_url, post_comment, build_yt_comment, yt_has_title
 
 load_dotenv()
 
@@ -60,38 +60,10 @@ def ig_has_caption(first_line: str) -> bool | None:
         return None
 
 
-def yt_posted_today() -> tuple[bool, str]:
-    """True if the YouTube channel already has a video dated today (IST).
-
-    NOTE: listing the channel's own uploads needs a `youtube.readonly`-class
-    scope. The current token is `youtube.upload` (+ `yt-analytics.readonly`
-    once the re-auth lands — which is retention, NOT uploads-listing). So this
-    check FAILS OPEN today: it returns False, meaning YT is always attempted.
-    Worst case = the pre-existing duplicate risk on a manual re-run, never the
-    dangerous mode (permanent YT loss). Activating real YT dedupe is a one-line
-    follow-up: add `youtube.readonly` at the next re-auth (NOT silently expanded
-    here — scope changes require explicit approval).
-    """
-    try:
-        from post_youtube import get_credentials  # noqa: PLC0415 — optional path
-        from googleapiclient.discovery import build as gbuild
-
-        yt = gbuild("youtube", "v3", credentials=get_credentials(), cache_discovery=False)
-        ch = yt.channels().list(part="contentDetails", mine=True).execute()
-        uploads = ch["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
-        pl = yt.playlistItems().list(part="snippet", playlistId=uploads, maxResults=1).execute()
-        items = pl.get("items", [])
-        if not items:
-            return False, "YT: no prior uploads (proceeding)"
-        published = items[0]["snippet"]["publishedAt"]  # ISO8601 Z
-        pub_ist = datetime.strptime(published, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=timezone.utc).astimezone(IST).date()
-        if pub_ist == today_ist():
-            return True, f"YT: already uploaded today ({today_ist()})"
-        return False, f"YT: last upload {pub_ist}, today {today_ist()} (proceeding)"
-    except Exception as e:
-        # Expected until a youtube.readonly re-auth: fail open (YT attempted).
-        return False, f"YT dedupe unavailable (fail-open, YT will be attempted): {type(e).__name__}"
+# yt_posted_today() was REMOVED. It checked "any upload today" which broke
+# the moment force-ssl unlocked the channels.list call: once AM uploaded, PM
+# was permanently skipped for the rest of the day. Replaced with the per-item
+# yt_has_title() in post_youtube.py — matches the IG per-item dedupe pattern.
 
 
 def current_day() -> int:
@@ -200,7 +172,11 @@ def main() -> int:
         ig_skip = _has
         ig_reason = ("IG: this exact item already on IG -> skip" if _has
                      else "IG: item not yet on IG -> proceeding")
-    yt_skip, yt_reason = yt_posted_today()
+    # Per-item YT dedupe: build the expected title for THIS slot's item and
+    # check if it's already on the channel (new title format = tease + #Shorts,
+    # so unique per item). Mirrors ig_has_caption's per-item pattern.
+    _yt_target_title = build_youtube_metadata(_item)["title"]
+    yt_skip, yt_reason = yt_has_title(_yt_target_title)
     print(f"  [idempotency] {ig_reason}")
     print(f"  [idempotency] {yt_reason}")
     if ig_skip and yt_skip:

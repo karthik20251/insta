@@ -53,8 +53,18 @@ def get_credentials() -> Credentials:
 
 
 def build_youtube_metadata(day: dict) -> dict:
-    """Generate Shorts-friendly title, description, and tags from a day dict."""
-    title = f"{day['title']}: {day['headline']} #Shorts"
+    """Generate Shorts-friendly title, description, and tags from a day dict.
+
+    Title leads with the item's TEASE — it's the scroll-stopper, and it makes
+    the title unique per item (was previously "<parent_law>: <headline>" which
+    meant AM and PM of the same Law produced the IDENTICAL title and broke
+    per-item YT idempotency). The Law label moves into the description body."""
+    from twemoji_local import strip_emoji
+    tease = strip_emoji(day.get("tease", "")).strip().rstrip(" .—-:")
+    if tease:
+        title = f"{tease} #Shorts"
+    else:
+        title = f"{day.get('title','')}: {day.get('headline','')} #Shorts"
     if len(title) > 100:
         title = title[:97] + "..."
 
@@ -115,6 +125,30 @@ def upload_short(video_path: Path, title: str, description: str, tags: list[str]
 
 def short_url(video_id: str) -> str:
     return f"https://www.youtube.com/shorts/{video_id}"
+
+
+def yt_has_title(target_title: str) -> tuple[bool, str]:
+    """Per-item YT idempotency: True if a video with this exact title is
+    already in the channel's recent uploads. Equivalent of ig_has_caption
+    for YouTube — replaces the old "any post today" guard which broke
+    once youtube.force-ssl unlocked the channel-uploads listing and started
+    skipping PM after AM had posted. Fail-open on any error: a recoverable
+    duplicate is better than a silently-missed post."""
+    try:
+        creds = get_credentials()
+        yt = build("youtube", "v3", credentials=creds, cache_discovery=False)
+        ch = yt.channels().list(part="contentDetails", mine=True).execute()
+        uploads_pl = ch["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+        pl = yt.playlistItems().list(part="snippet", playlistId=uploads_pl, maxResults=25).execute()
+        target = (target_title or "").strip()[:100]
+        if not target:
+            return False, "YT dedupe skipped (empty target title)"
+        for item in pl.get("items", []):
+            if item["snippet"]["title"].strip() == target:
+                return True, f"YT: this slot's item already uploaded ({target[:50]}...)"
+        return False, "YT: this slot not yet uploaded — proceeding"
+    except Exception as e:
+        return False, f"YT dedupe unavailable (fail-open): {type(e).__name__}"
 
 
 # Rotating closer lines — keep the "if you miss, you regret" pattern fresh so
