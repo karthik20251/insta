@@ -168,10 +168,12 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
     # otherwise (day*K) % len collapses to a single index and the same
     # painting plays every day. Old K=7 broke against rules-pool size 7
     # (every day_num resolved to index 3 -> only dore_inferno shown for
-    # 49 days). 11 is prime and coprime with 2-10,12-14 — covers any
-    # realistic future pool. Book offset adds variety across books so
+    # 49 days). 11 was unsafe once 48laws grew to 11 entries —
+    # gcd(11,11)=11 collapses the formula to a constant. 23 is prime
+    # and coprime with every pool size 1-22, leaving headroom for any
+    # realistic future growth. Book offset adds variety across books so
     # AM/PM on the same day don't drift toward the same relative index.
-    K = 11
+    K = 23
     book_offset = sum(ord(c) for c in slug) % len(backgrounds)
     bg_path = backgrounds[(day_num * K + 3 + book_offset) % len(backgrounds)]
     try:
