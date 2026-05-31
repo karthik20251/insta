@@ -248,6 +248,24 @@ def _mp3_duration(mp3_path: Path) -> float:
     return float(r.stdout.strip())
 
 
+def _ensure_silence_mp3(silence_path: Path, duration_sec: float = 1.0) -> Path:
+    """Generate a silent MP3 of the requested duration, matching edge-tts's
+    output format (24kHz mono 48kbps) so concat is lossless. Cached: only
+    regenerates if missing or empty."""
+    import subprocess
+    if silence_path.exists() and silence_path.stat().st_size > 256:
+        return silence_path
+    silence_path.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["ffmpeg", "-y", "-f", "lavfi",
+         "-i", f"anullsrc=r=24000:cl=mono",
+         "-t", str(duration_sec), "-c:a", "libmp3lame", "-b:a", "48k",
+         str(silence_path)],
+        capture_output=True, check=True,
+    )
+    return silence_path
+
+
 def _concat_mp3s(input_paths: list[Path], out_path: Path) -> None:
     """Concatenate MP3 files lossless via ffmpeg's concat demuxer. All inputs
     must share codec/sample-rate (edge-tts output does)."""
@@ -317,6 +335,14 @@ def synthesize_pitched(day: dict, out_path: Path, srt_path: Path | None = None,
     segments = narration_segments(day)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # 1-second silence between segments — gives the narrator breathing room
+    # between the tease, the explanation, and the CTA. Without it the voice
+    # runs continuously and feels like reading; with it, the pauses LAND
+    # each segment like a real explainer would.
+    SEGMENT_GAP = 1.0
+    silence_path = out_path.parent / "_silence_1s.mp3"
+    _ensure_silence_mp3(silence_path, SEGMENT_GAP)
+
     tmp_mp3s: list[Path] = []
     all_events: list[tuple[float, float, str]] = []
     cumulative = 0.0
@@ -332,9 +358,20 @@ def synthesize_pitched(day: dict, out_path: Path, srt_path: Path | None = None,
             for off, dur, t in seg_events:
                 all_events.append((off + cumulative, dur, t))
             cumulative += seg_dur
+            # Account for the silence gap that will be inserted AFTER this
+            # segment in the concat (except after the final segment) — keeps
+            # SRT caption timings aligned with the gapped audio.
+            if i < len(segments) - 1:
+                cumulative += SEGMENT_GAP
             tmp_mp3s.append(tmp)
 
-        _concat_mp3s(tmp_mp3s, out_path)
+        # Interleave silence between segments: [seg0, silence, seg1, silence, seg2]
+        audio_inputs: list[Path] = []
+        for i, p in enumerate(tmp_mp3s):
+            if i > 0:
+                audio_inputs.append(silence_path)
+            audio_inputs.append(p)
+        _concat_mp3s(audio_inputs, out_path)
 
         if srt_path is not None and all_events:
             _write_srt(all_events, srt_path)
