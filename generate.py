@@ -245,22 +245,26 @@ def wrap_text(text: str, font: ImageFont.FreeTypeFont, max_width: int) -> list[s
 
 
 def render_image(day: dict, out_path: Path) -> None:
-    """Render the main quote frame — headline-only.
+    """Render the main quote frame — headline + compact body + footer.
 
-    Body text was stripped once burned-in captions were added: captions deliver
-    the body content (kinetic, in sync with the voice), so a static body
-    paragraph on top of that = redundant clutter that hides the painting.
-    Now: headline alone, painting visible around it, captions own delivery.
+    Body text was briefly stripped (let captions deliver it) but user feedback
+    was the frame felt "blank" with only headline. Restored body in a more
+    compact form (smaller font, tighter spacing) positioned in the upper-
+    middle so the lower strip (~y=1450+) stays clear for the burned-in
+    captions and the gold day label (y=HEIGHT-240).
 
     Visual hierarchy (top → bottom):
-      1. HEADLINE (the iconic law statement, the visual anchor)
-      2. (painting visible below — captions land in this strip during playback)
-      3. Day label (small gold) + author/book attribution (italic dim) — footer
+      1. HEADLINE (gold/white, big — the iconic law statement)
+      2. Gold divider
+      3. Body text (white, compact — explains the principle)
+      4. (captions land below, in the lower-third strip)
+      5. Day label (gold) + author/book (italic) — footer at the bottom
     """
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
-    font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 78, weight=900)
+    font_head = pick_font(["Cinzel.ttf", "Cinzel-Bold.ttf", "PlayfairDisplay.ttf"], 72, weight=900)
+    font_body = pick_font(["PlayfairDisplay.ttf", "PlayfairDisplay-Regular.ttf"], 42, weight=500)
     font_day = pick_font(["Cinzel.ttf"], 36, weight=600)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 38, weight=500)
 
@@ -268,26 +272,41 @@ def render_image(day: dict, out_path: Path) -> None:
     max_w = WIDTH - 2 * margin
 
     head_lines = wrap_text(day["headline"].upper(), font_head, max_w)
+    body_lines = wrap_text(day["body"], font_body, max_w)
 
     def line_h(font: ImageFont.FreeTypeFont, line: str = "Mg") -> int:
         bbox = draw.textbbox((0, 0), line, font=font)
         return bbox[3] - bbox[1]
 
-    h_head = sum(line_h(font_head, l) + 18 for l in head_lines) - 18
+    # Pre-pass: total height of headline + divider + body
+    h_head = sum(line_h(font_head, l) + 16 for l in head_lines) - 16
+    gap_to_divider = 28
+    h_divider = 3
+    gap_to_body = 48
+    h_body = sum(line_h(font_body, l) + 12 for l in body_lines) - 12
+    total = h_head + gap_to_divider + h_divider + gap_to_body + h_body
 
-    # Position the headline in the UPPER-MIDDLE so the lower-middle stays
-    # clear for the burned-in caption strip (~y=1450) and the day label
-    # (y=HEIGHT-240). top_margin pushes headline down from the very top so
-    # it doesn't fight the gold book kicker if/when a frame layers it.
-    top_margin = 280
-    footer_zone = 700  # ensure headline stays above the caption strip
+    # Push the whole block into the UPPER region so the body text ends above
+    # the caption strip (~y=1450). top_margin=200 starts it high; footer_zone
+    # reserves the bottom 540px for captions + day label + footer.
+    top_margin = 200
+    footer_zone = 540
     available = HEIGHT - top_margin - footer_zone
-    y = top_margin + max(0, (available - h_head) // 2)
+    y = top_margin + max(0, (available - total) // 2)
 
     for line in head_lines:
         bbox = draw.textbbox((0, 0), line, font=font_head)
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_head)
-        y += line_h(font_head, line) + 18
+        y += line_h(font_head, line) + 16
+
+    y += gap_to_divider - 16
+    draw.line([(WIDTH / 2 - 80, y), (WIDTH / 2 + 80, y)], fill=GOLD, width=h_divider)
+    y += gap_to_body
+
+    for line in body_lines:
+        bbox = draw.textbbox((0, 0), line, font=font_body)
+        draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
+        y += line_h(font_body, line) + 12
 
     # Footer block (day label in gold + author/book in italic) — unchanged.
     day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
@@ -397,29 +416,39 @@ def render_intro_frame(day: dict, out_path: Path) -> None:
 
 
 def render_example_frame(day: dict, out_path: Path) -> None:
-    """Frame 3: gold action header — 'YOUR MOVE' over '👇 COMMENT BELOW'.
+    """Frame 3: gold action header + compact question text + footer.
 
-    Question text was stripped once burned-in captions were added: captions
-    deliver the question kinetically in sync with the voice, so showing the
-    same question as static frame text = visual redundancy that hides the
-    painting and competes with the captions in the bottom strip.
-
-    Now: just the banded gold action header at the top, painting visible
-    below, captions deliver the question, footer at the bottom. The pinned-
-    first-comment in the post pack still carries the literal question text
-    so it lives somewhere persistent for sound-off viewers who scroll to
-    comments before re-watching with sound."""
+    Question text was briefly stripped (let captions deliver it) but user
+    feedback was the frame felt "blank" with only the gold header. Restored
+    in compact form: header band at top (YOUR MOVE / COMMENT BELOW), question
+    in the upper-middle, captions own the lower strip, footer at the bottom.
+    """
     from pilmoji import Pilmoji
     from twemoji_local import LocalTwemoji, strip_emoji
 
     img = make_background(day["day"], day.get("book", ""))
     draw = ImageDraw.Draw(img)
 
+    margin = 90
+    max_w = WIDTH - 2 * margin
     font_label = pick_font(["Cinzel.ttf"], 56, weight=800)
     font_cta = pick_font(["Cinzel.ttf"], 52, weight=800)
+    font_q = pick_font(["PlayfairDisplay.ttf"], 60, weight=800)
     font_foot = pick_font(["PlayfairDisplay-Italic.ttf"], 36, weight=500)
     CTA_TEXT = "👇 COMMENT BELOW"
     CTA_INTRA_GAP = 20    # tight gap between YOUR MOVE and CTA (one band)
+    HEADER_TO_Q_GAP = 70  # space between gold header band and the question
+
+    q = strip_emoji(day.get("comment_q", ""))
+
+    # Wrap the question; step the font down if it would take more than 3 lines
+    # (keeps the centered block compact so it doesn't push into the caption
+    # strip).
+    for size in (60, 52, 46):
+        font_q = pick_font(["PlayfairDisplay.ttf"], size, weight=800)
+        q_lines = wrap_text(q, font_q, max_w)
+        if len(q_lines) <= 3 or size == 46:
+            break
 
     def line_h(font, s: str = "Mg") -> int:
         b = draw.textbbox((0, 0), s, font=font)
@@ -427,14 +456,16 @@ def render_example_frame(day: dict, out_path: Path) -> None:
 
     h_label = line_h(font_label)
     h_cta = line_h(font_cta)
-    total = h_label + CTA_INTRA_GAP + h_cta
+    h_q = sum(line_h(font_q, ln) + 14 for ln in q_lines) - 14
+    total = h_label + CTA_INTRA_GAP + h_cta + HEADER_TO_Q_GAP + h_q
 
-    # Pin the header band to the UPPER third (not vertical-centered) — with
-    # only ~150px of text in 1920px of canvas, true centering would float it
-    # awkwardly in the middle. Upper-third reads as a deliberate header and
-    # leaves the lower 60% of the frame for the painting + caption strip.
-    top_margin = 260
-    y0 = top_margin
+    # Pin to UPPER region so the question ends above the caption strip
+    # (~y=1450). top_margin starts the gold header band high; footer_zone
+    # reserves the bottom 540px for captions + footer.
+    top_margin = 220
+    footer_zone = 540
+    available = HEIGHT - top_margin - footer_zone
+    y0 = top_margin + max(0, (available - total) // 2)
 
     def centered(text, y, font, fill, drawer):
         b = draw.textbbox((0, 0), text, font=font)
@@ -445,6 +476,10 @@ def render_example_frame(day: dict, out_path: Path) -> None:
         centered("YOUR MOVE", y, font_label, GOLD, drawer)
         y += h_label + CTA_INTRA_GAP
         centered(CTA_TEXT, y, font_cta, GOLD, drawer)
+        y += h_cta + HEADER_TO_Q_GAP
+        for ln in q_lines:
+            centered(ln, y, font_q, WHITE, drawer)
+            y += line_h(font_q, ln) + 14
 
     try:
         with Pilmoji(img, source=LocalTwemoji) as pm:
@@ -461,6 +496,11 @@ def render_example_frame(day: dict, out_path: Path) -> None:
         y += h_label + CTA_INTRA_GAP
         centered(strip_emoji(CTA_TEXT), y, font_cta, GOLD,
                  lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
+        y += h_cta + HEADER_TO_Q_GAP
+        for ln in q_lines:
+            centered(strip_emoji(ln), y, font_q, WHITE,
+                     lambda x, yy, t, ff, c: draw.text((x, yy), t, fill=c, font=ff))
+            y += line_h(font_q, ln) + 14
 
     foot = f"— {day.get('author', '')}, {day.get('book', '')}"
     b = draw.textbbox((0, 0), foot, font=font_foot)
@@ -531,7 +571,8 @@ def pick_music(book: str = "", mood: str = "") -> Path | None:
 def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: Path,
                music_path: Path | None, out_path: Path,
                voice_path: Path | None = None,
-               caption_srt: Path | None = None) -> None:
+               caption_srt: Path | None = None,
+               frame_durs: tuple[float, float, float, float] | None = None) -> None:
     """Build the Reel as four crossfaded frames. Durations are driven ENTIRELY
     by the constants at the top of this file (currently 2/4/4/2 = 12s); do not
     hardcode timings here — that comment rot is what bit us on the 24->12 revert.
@@ -547,13 +588,25 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     voice_path is None (TTS failed or disabled), music plays at full volume —
     the post still ships, just without narration (degrades gracefully).
     """
-    # Offsets are formulas, not numbers, so they cannot rot on the next retiming.
-    t_intro_to_main = INTRO_FRAME_SEC - 0.5                                       # = INTRO-0.5
-    t_main_to_example = INTRO_FRAME_SEC + MAIN_FRAME_SEC - 0.5                     # = INTRO+MAIN-0.5
-    t_example_to_end = INTRO_FRAME_SEC + MAIN_FRAME_SEC + EXAMPLE_FRAME_SEC - 0.5  # = INTRO+MAIN+EXAMPLE-0.5
+    # Per-build frame durations: caller (build()) sizes them from the actual
+    # voice narration length so video duration = voice + 0.5s tail — no dead
+    # air at the end, no mid-word cut. Falls back to module constants for
+    # call paths that don't synthesize voice (legacy / fallback / dry runs).
+    if frame_durs is None:
+        intro_s, main_s, example_s, end_s = (
+            INTRO_FRAME_SEC, MAIN_FRAME_SEC, EXAMPLE_FRAME_SEC, END_FRAME_SEC)
+    else:
+        intro_s, main_s, example_s, end_s = frame_durs
+    total_sec = intro_s + main_s + example_s + end_s
 
-    main_out_frames = int((MAIN_FRAME_SEC + 0.5) * 30)
-    example_out_frames = int((EXAMPLE_FRAME_SEC + 0.5) * 30)
+    # Offsets are formulas of the per-build durations — no global-constant
+    # rot, and they auto-track whatever sizing build() chose.
+    t_intro_to_main = intro_s - 0.5
+    t_main_to_example = intro_s + main_s - 0.5
+    t_example_to_end = intro_s + main_s + example_s - 0.5
+
+    main_out_frames = int((main_s + 0.5) * 30)
+    example_out_frames = int((example_s + 0.5) * 30)
 
     # Decide the final video-output label so we can optionally chain a
     # captions burn-in on top: [outv_pre] -> subtitles -> [outv].
@@ -602,10 +655,10 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
 
     cmd = [
         "ffmpeg", "-y",
-        "-framerate", "30", "-loop", "1", "-t", str(INTRO_FRAME_SEC + 0.5), "-i", str(intro_path),
-        "-framerate", "1",  "-loop", "1", "-t", "1",                          "-i", str(main_path),
-        "-framerate", "1",  "-loop", "1", "-t", "1",                          "-i", str(example_path),
-        "-framerate", "30", "-loop", "1", "-t", str(END_FRAME_SEC + 0.5),     "-i", str(end_path),
+        "-framerate", "30", "-loop", "1", "-t", str(intro_s + 0.5), "-i", str(intro_path),
+        "-framerate", "1",  "-loop", "1", "-t", "1",                "-i", str(main_path),
+        "-framerate", "1",  "-loop", "1", "-t", "1",                "-i", str(example_path),
+        "-framerate", "30", "-loop", "1", "-t", str(end_s + 0.5),   "-i", str(end_path),
     ]
     # Build audio inputs + filter chain dynamically based on what we have.
     # Music goes in input slot 4 (after the 4 video frames); voice (if any)
@@ -619,8 +672,8 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
         # synthesis runs slightly long (better than mid-word ffmpeg -t cut).
         audio_filter = (
             f"[4:a]loudnorm=I=-14:TP=-1.5:LRA=11,volume=0.25,"
-            f"afade=t=in:d=1,afade=t=out:st={DURATION_SEC - 1}:d=1[music];"
-            f"[5:a]volume=1.0,afade=t=out:st={DURATION_SEC - 0.5}:d=0.5[voice];"
+            f"afade=t=in:d=1,afade=t=out:st={total_sec - 1}:d=1[music];"
+            f"[5:a]volume=1.0,afade=t=out:st={total_sec - 0.5}:d=0.5[voice];"
             f"[music][voice]amix=inputs=2:duration=first:normalize=0[outa]"
         )
         audio_args = ["-map", "[outv]", "-map", "[outa]",
@@ -628,7 +681,7 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     elif voice_path:
         cmd += ["-i", str(voice_path)]
         audio_filter = (
-            f"[4:a]volume=1.0,afade=t=out:st={DURATION_SEC - 0.5}:d=0.5[outa]"
+            f"[4:a]volume=1.0,afade=t=out:st={total_sec - 0.5}:d=0.5[outa]"
         )
         audio_args = ["-map", "[outv]", "-map", "[outa]",
                       "-c:a", "aac", "-b:a", "192k"]
@@ -636,7 +689,7 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
         cmd += ["-i", str(music_path)]
         audio_filter = (
             f"[4:a]loudnorm=I=-14:TP=-1.5:LRA=11,"
-            f"afade=t=in:d=1,afade=t=out:st={DURATION_SEC - 1}:d=1[outa]"
+            f"afade=t=in:d=1,afade=t=out:st={total_sec - 1}:d=1[outa]"
         )
         audio_args = ["-map", "[outv]", "-map", "[outa]",
                       "-c:a", "aac", "-b:a", "192k"]
@@ -648,7 +701,7 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
         "-filter_complex", filter_complex,
         *audio_args,
         "-c:v", "libx264", "-tune", "stillimage", "-pix_fmt", "yuv420p",
-        "-t", str(DURATION_SEC),
+        "-t", str(total_sec),
         "-r", "30",
         str(out_path),
     ]
@@ -904,17 +957,36 @@ def build(day_num: int) -> dict:
     voice = None
     caption_srt = None
     try:
-        from tts import synthesize_pitched
-        # 3-segment pitch modulation: high (hook) -> normal (middle) -> deep
-        # (CTA). Same voice throughout (brand stays consistent); pitch shifts
-        # do the energy variety so the narrator never settles into monotone.
+        from tts import synthesize_pitched, _mp3_duration
         voice = synthesize_pitched(day, voice_path, srt_path=srt_path)
         if voice is not None and srt_path.exists() and srt_path.stat().st_size > 16:
             caption_srt = srt_path
     except Exception as e:
         print(f"!! TTS_IMPORT_FAILED day={day_num} err={type(e).__name__}: {e}")
+
+    # Dynamic per-item video duration — sized to the actual narration length
+    # so EVERY video is fully completed (voice never cut, no dead-air tail).
+    # Andrew voice at -15% rate runs ~0.5s/word; item word counts vary 28-52,
+    # so narration lengths span ~14-26s. Scale frames proportionally from the
+    # base 3:7:7:5 ratio. Falls back to constants if voice missing.
+    frame_durs = None
+    if voice is not None and voice_path.exists():
+        try:
+            voice_dur = _mp3_duration(voice_path)
+            target = max(voice_dur + 0.5, 16.0)  # never below 16s
+            target = min(target, 60.0)            # platform hard cap (Shorts)
+            BASE = 22.0
+            frame_durs = (
+                target * INTRO_FRAME_SEC / BASE,
+                target * MAIN_FRAME_SEC / BASE,
+                target * EXAMPLE_FRAME_SEC / BASE,
+                target * END_FRAME_SEC / BASE,
+            )
+        except Exception as e:
+            print(f"!! VOICE_DUR_MEASURE_FAILED day={day_num} err={type(e).__name__}: {e}")
     make_video(intro_image_path, image_path, example_image_path, end_image_path,
-               music, video_path, voice_path=voice, caption_srt=caption_srt)
+               music, video_path, voice_path=voice, caption_srt=caption_srt,
+               frame_durs=frame_durs)
     write_bio_guide()
     emit_post_pack(day, video_path, post_path)
     return {

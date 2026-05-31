@@ -28,25 +28,17 @@ from pathlib import Path
 #   en-US-GuyNeural          - warmer male
 #   en-GB-RyanNeural         - British, gravelly senior-mentor
 #   en-IN-PrabhatNeural      - Indian English male
-DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-US-ChristopherNeural")
+DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-US-AndrewMultilingualNeural")
 
-# Pitch modulation across the narration — same voice, three energies:
-#   HOOK (start): slightly higher pitch → excited, attention-grabbing
-#   MIDDLE:       neutral pitch → content delivery, authority
-#   CTA (close):  slightly lower pitch → deep, dramatic, drives action
-# Classic narrator technique (news anchors, podcasters): vary energy through
-# a segment so the listener never settles into background-mode. Single voice
-# keeps the brand consistent; pitch alone does the variety work.
-#
-# Pitch range calibrated empirically:
+# Pitch modulation history (kept for context):
 #   ±25Hz: read as THREE DIFFERENT PEOPLE (user feedback round 1)
-#   ±10Hz: closer, but the -10Hz CTA still sounded "bit odd" (user round 2)
-# Pitch DOWN on TTS produces more artifacts than pitch UP — the human voice
-# naturally lifts in pitch when excited but doesn't drop in linear Hz when
-# settling (it lowers via slower rate + weighted emphasis, not pure pitch).
-# So: keep a small +10Hz hook lift, but leave both MIDDLE and CTA at 0Hz so
-# the CTA returns cleanly to the narrator's natural register.
-_PITCH_HOOK = "+10Hz"
+#   ±10Hz: closer, but the -10Hz CTA still sounded "bit odd" (round 2)
+#   +10Hz hook only: too high — user wanted deeper not higher (round 3)
+# Final call: ALL segments at 0Hz. The voice swap (Christopher -> Andrew
+# Multilingual) gives the deeper, more conversational delivery without
+# pitch shifts that always sound processed. Same voice + uniform pitch =
+# one person explaining, no AI tell.
+_PITCH_HOOK = "+0Hz"
 _PITCH_MIDDLE = "+0Hz"
 _PITCH_CTA = "+0Hz"
 # Rate calibrated empirically: at -5% a 27-word script of Item 4 landed 14.16s
@@ -54,7 +46,7 @@ _PITCH_CTA = "+0Hz"
 # any faster (-15% / -20%) starts to feel rushed for an "authoritative senior"
 # narrator and undercuts the brand. Combined with the tighter narration_script
 # word cap, this lands narrations in the 11.5-12.5s sweet spot.
-DEFAULT_RATE = os.environ.get("TTS_RATE", "-10%")
+DEFAULT_RATE = os.environ.get("TTS_RATE", "-15%")
 
 
 def _strip_for_speech(text: str) -> str:
