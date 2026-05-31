@@ -28,7 +28,7 @@ from pathlib import Path
 #   en-US-GuyNeural          - warmer male
 #   en-GB-RyanNeural         - British, gravelly senior-mentor
 #   en-IN-PrabhatNeural      - Indian English male
-DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-US-AndrewMultilingualNeural")
+DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-IE-ConnorNeural")
 
 # Pitch modulation history (kept for context):
 #   ±25Hz: read as THREE DIFFERENT PEOPLE (user feedback round 1)
