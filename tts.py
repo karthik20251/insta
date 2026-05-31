@@ -46,7 +46,7 @@ _PITCH_CTA = "+0Hz"
 # any faster (-15% / -20%) starts to feel rushed for an "authoritative senior"
 # narrator and undercuts the brand. Combined with the tighter narration_script
 # word cap, this lands narrations in the 11.5-12.5s sweet spot.
-DEFAULT_RATE = os.environ.get("TTS_RATE", "-15%")
+DEFAULT_RATE = os.environ.get("TTS_RATE", "-10%")
 
 
 def _strip_for_speech(text: str) -> str:
