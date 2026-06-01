@@ -636,16 +636,16 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     # output dir so the SRT path stays a bare filename, avoiding libass's
     # well-known Windows colon-escaping pain on absolute paths.
     if caption_srt is not None:
-        # libass scales font/margin against its internal script resolution
-        # (default ~384x288), not the 1920x1080 video. Calibrated empirically:
-        # MarginV=30 collided with the gold day label at y=HEIGHT-240; MarginV=
-        # 75 lifts captions to ~y=1450 — cleanly ABOVE the day label (y=1680)
-        # and BELOW the body text (y<=900), in the open lower-third strip.
-        # BorderStyle=1 + Outline=4 gives the thick black outline that keeps
-        # white text legible on any background painting.
+        # User feedback after first live post: the prior Arial + thick Outline=4
+        # combo read as "90s YouTube default" — utilitarian, unbranded.
+        # Modern Shorts captions = bold sans with thinner outline + subtle
+        # shadow for depth. Bumped FontSize 16->20 (more readable on phone),
+        # Outline 4->2 (thinner, less chunky), added Shadow=1 (clean depth),
+        # PrimaryColour explicit alpha (FF=opaque). libass on Ubuntu runners
+        # falls back Arial -> Liberation Sans which is cleaner than DejaVu.
         style = (
-            "FontName=Arial,FontSize=16,PrimaryColour=&HFFFFFF&,"
-            "OutlineColour=&H000000&,BorderStyle=1,Outline=4,Shadow=0,"
+            "FontName=Arial,FontSize=16,PrimaryColour=&H00FFFFFF&,"
+            "OutlineColour=&H00000000&,BorderStyle=1,Outline=2,Shadow=1,"
             "Bold=1,Alignment=2,MarginV=75"
         )
         vfilter += (

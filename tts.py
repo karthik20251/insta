@@ -136,7 +136,7 @@ def _fmt_ts(seconds: float) -> str:
 
 
 def _write_srt(sentences: list[tuple[float, float, str]], srt_path: Path,
-               max_words_per_phrase: int = 4) -> None:
+               max_words_per_phrase: int = 5) -> None:
     """Group sentence-boundary events into readable phrases, write SRT.
 
     edge-tts 7.x emits SentenceBoundary (not WordBoundary by default), so we
@@ -152,21 +152,41 @@ def _write_srt(sentences: list[tuple[float, float, str]], srt_path: Path,
 
     phrases_with_time: list[tuple[float, float, str]] = []
     for sent_start, sent_dur, sent_text in sentences:
+        # Strip em-dashes for the CAPTION text only (audio still pauses at
+        # them via TTS's natural prosody). Em-dashes in burned-in captions
+        # read as broken layout — replace with a comma which is visually
+        # clean and keeps the prosody hint for any future parser.
+        sent_text = sent_text.replace(" — ", ", ").replace("—", ",")
         words = sent_text.split()
         if not words:
             continue
         # Split into phrases of <=max_words_per_phrase, breaking early on
         # punctuation so a comma/semicolon ends a phrase even mid-sentence.
+        # Phrase break on commas/semicolons/colons OR at word-count cap.
+        # Removed em-dash from break triggers: em-dashes inside narrated
+        # headlines (e.g. "Make Other People Come to You — Use Bait if
+        # Necessary") were creating orphan caption fragments like "to You —"
+        # which look broken on a Short. Em-dash is a stylistic pause, not a
+        # structural sentence break — let it ride within the phrase.
+        # Min-words floor: don't emit a chunk with <2 words even on
+        # punctuation (avoids "Hey." being a whole caption line by itself).
         chunks: list[list[str]] = []
         current: list[str] = []
         for w in words:
             current.append(w)
-            ends_punctuation = w.rstrip().endswith((",", ";", ":", "—"))
-            if ends_punctuation or len(current) >= max_words_per_phrase:
+            ends_punctuation = w.rstrip().endswith((",", ";", ":"))
+            should_break = (ends_punctuation and len(current) >= 2) or \
+                           len(current) >= max_words_per_phrase
+            if should_break:
                 chunks.append(current)
                 current = []
         if current:
-            chunks.append(current)
+            # Tail handling: if the tail is a single word/fragment, glue it
+            # onto the previous chunk so we don't leave dangling 1-word caps.
+            if len(current) == 1 and chunks:
+                chunks[-1].extend(current)
+            else:
+                chunks.append(current)
         # Distribute the sentence's audio time by word-count proportion.
         total_words = sum(len(c) for c in chunks)
         cursor = sent_start
