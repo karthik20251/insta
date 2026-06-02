@@ -24,8 +24,9 @@ TOKEN_FILE = ROOT / "yt_token.json"
 # test). The new token is a SUPERSET of the old one — upload capability is
 # retained, never replaced.
 SCOPES = [
-    "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/yt-analytics.readonly",
+    "https://www.googleapis.com/auth/youtube.upload",          # upload Shorts
+    "https://www.googleapis.com/auth/youtube.force-ssl",       # post auto-comments
+    "https://www.googleapis.com/auth/yt-analytics.readonly",   # retention/watch-time metrics
 ]
 
 
