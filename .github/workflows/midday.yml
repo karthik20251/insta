@@ -1,0 +1,69 @@
+name: Midday Image (email-only)
+
+on:
+  schedule:
+    - cron: "30 5 * * *"     # 05:30 UTC = 11:00 IST (target: late-morning / lunch-hour delivery)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: midday-image
+  cancel-in-progress: false
+
+jobs:
+  midday:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Capture today's UTC date
+        # generate_midday.py names its output files using date.today(), which in
+        # CI is UTC. Pin the same UTC date here so subsequent steps can resolve
+        # the file path without races at the UTC midnight boundary.
+        run: echo "MIDDAY_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+
+      - name: Build today's midday image
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: python generate_midday.py
+
+      - name: Stage caption .txt as email body
+        id: caption
+        run: |
+          BODY=$(cat "output/midday_${{ env.MIDDAY_DATE }}.txt")
+          {
+            echo 'CAPTION<<EOF'
+            echo "$BODY"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Email — midday image ready for manual IG upload
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_APP_PASSWORD }}
+          from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: "[MIDDAY] Image ready — upload to IG with trending audio"
+          body: |
+            Today's midday motivational image is attached. Upload it to Instagram as a single-image post (or Reel with a still) with a trending audio of your choice.
+
+            Paste this as the caption:
+            ----------------------------------------------
+            ${{ steps.caption.outputs.CAPTION }}
+            ----------------------------------------------
+
+            Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          attachments: output/midday_${{ env.MIDDAY_DATE }}.png

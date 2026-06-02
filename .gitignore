@@ -18,3 +18,7 @@ output/item_*
 output/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]_*
 # brand assets are deliverables, regenerable via scripts/make_brand_assets.py
 output/brand_*.png
+# midday image factory — daily renders + Pexels bg cache, all regenerable
+output/midday_*
+output/test_*
+output/bg_cache/

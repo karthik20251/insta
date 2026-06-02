@@ -1,0 +1,38 @@
+{
+  "lines": [
+    { "id": 1,  "text": "Build in silence. Let your results make the noise.",                       "mood": "hustle" },
+    { "id": 2,  "text": "Discipline weighs ounces. Regret weighs tons.",                            "mood": "hustle" },
+    { "id": 3,  "text": "The reps you skip today are the regrets you carry tomorrow.",              "mood": "hustle" },
+    { "id": 4,  "text": "Hustle quietly. Win loudly.",                                              "mood": "hustle" },
+    { "id": 5,  "text": "Wake up early enough to scare your competition.",                          "mood": "hustle" },
+    { "id": 6,  "text": "Comfort is a slow death. Discomfort is the rent for the life you want.",   "mood": "hustle" },
+    { "id": 7,  "text": "You can't manifest what you won't work for.",                              "mood": "hustle" },
+    { "id": 8,  "text": "Distraction is the new addiction. Focus is the new luxury.",               "mood": "hustle" },
+
+    { "id": 9,  "text": "Become the person you needed when you were younger.",                       "mood": "mindset" },
+    { "id": 10, "text": "Don't shrink. Make the world deal with your light.",                        "mood": "mindset" },
+    { "id": 11, "text": "Your future self is watching. Don't disappoint them.",                      "mood": "mindset" },
+    { "id": 12, "text": "You don't need permission to start over.",                                  "mood": "mindset" },
+    { "id": 13, "text": "Stop scrolling. Start building.",                                           "mood": "mindset" },
+    { "id": 14, "text": "The dream you chase is on the other side of the habits you avoid.",         "mood": "mindset" },
+    { "id": 15, "text": "Some days you create the magic. Some days you just survive. Both count.",   "mood": "mindset" },
+
+    { "id": 16, "text": "Some chapters are lessons, not love stories.",                              "mood": "resilience" },
+    { "id": 17, "text": "Healing isn't linear. Neither is winning.",                                 "mood": "resilience" },
+    { "id": 18, "text": "The version of you that quit was tired. Try again rested.",                 "mood": "resilience" },
+    { "id": 19, "text": "You're not behind. You're just on your own timeline.",                      "mood": "resilience" },
+    { "id": 20, "text": "Storms don't last. People who survive them do.",                            "mood": "resilience" },
+
+    { "id": 21, "text": "Stop dimming your light for people who refuse to grow.",                    "mood": "worth" },
+    { "id": 22, "text": "Energy is currency. Stop spending it on people who don't pay you back.",   "mood": "worth" },
+    { "id": 23, "text": "You're allowed to outgrow rooms you used to fit in.",                       "mood": "worth" },
+    { "id": 24, "text": "Choose people who choose you back.",                                        "mood": "worth" },
+    { "id": 25, "text": "Some people will only love you when you're losing. Walk away.",             "mood": "worth" },
+
+    { "id": 26, "text": "Hard times don't last. Hard people do.",                                    "mood": "truth" },
+    { "id": 27, "text": "Real luxury is freedom from people who drain you.",                         "mood": "truth" },
+    { "id": 28, "text": "Pay attention to what they tolerate when no one's watching.",               "mood": "truth" },
+    { "id": 29, "text": "Don't let yesterday take up too much of today.",                            "mood": "truth" },
+    { "id": 30, "text": "Some friendships are seasonal. Stop forcing them into evergreen.",          "mood": "truth" }
+  ]
+}
