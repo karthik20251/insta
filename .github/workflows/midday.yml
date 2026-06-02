@@ -36,17 +36,21 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: python generate_midday.py
 
-      - name: Stage caption .txt as email body
-        id: caption
+      - name: Stage IG + YT captions for email body
+        id: captions
         run: |
-          BODY=$(cat "output/midday_${{ env.MIDDAY_DATE }}.txt")
+          IG=$(cat "output/midday_${{ env.MIDDAY_DATE }}_ig.txt")
+          YT=$(cat "output/midday_${{ env.MIDDAY_DATE }}_yt.txt")
           {
-            echo 'CAPTION<<EOF'
-            echo "$BODY"
+            echo 'IG_CAPTION<<EOF'
+            echo "$IG"
+            echo EOF
+            echo 'YT_CAPTION<<EOF'
+            echo "$YT"
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      - name: Email — midday image ready for manual IG upload
+      - name: Email — midday image + IG/YT captions
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -56,14 +60,24 @@ jobs:
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
-          subject: "[MIDDAY] Image ready — upload to IG with trending audio"
+          subject: "[MIDDAY] Image ready — IG + YT captions below"
           body: |
-            Today's midday motivational image is attached. Upload it to Instagram as a single-image post (or Reel with a still) with a trending audio of your choice.
+            Today's midday motivational image is attached.
 
-            Paste this as the caption:
-            ----------------------------------------------
-            ${{ steps.caption.outputs.CAPTION }}
-            ----------------------------------------------
+            Upload to BOTH platforms — same image, different captions.
 
+            ============================================================
+            INSTAGRAM caption (paste into post/reel):
+            ============================================================
+            ${{ steps.captions.outputs.IG_CAPTION }}
+
+
+            ============================================================
+            YOUTUBE caption (paste into Shorts upload — or community post):
+            ============================================================
+            ${{ steps.captions.outputs.YT_CAPTION }}
+
+
+            ============================================================
             Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           attachments: output/midday_${{ env.MIDDAY_DATE }}.png

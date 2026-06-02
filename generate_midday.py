@@ -50,7 +50,6 @@ from generate import (
     GOLD,
     WHITE,
     pick_font,
-    wrap_text,
 )
 
 ROOT = Path(__file__).parent
@@ -72,22 +71,44 @@ MOOD_KEYWORDS = {
     "truth":      ["dramatic dark clouds", "fog city street dawn", "moody mountain landscape", "abandoned road desert", "single light dark room"],
 }
 
-# Caption templates — rotate by line id so consecutive posts don't repeat phrasing.
-CAPTION_TEMPLATES = [
-    "{line}\n\nDrop a \U0001F525 if this hit.\n\nFollow @nandetroll_ for daily lessons.\n\n{hashtags}\n",
-    "{line}\n\nSave this. Send it to someone who needs it today.\n\n@nandetroll_ for more.\n\n{hashtags}\n",
-    "{line}\n\nRead it twice. Then close the app and go build.\n\n@nandetroll_ — daily wisdom, no fluff.\n\n{hashtags}\n",
-    "{line}\n\nComment \"YES\" if this is exactly what you needed today.\n\nFollow @nandetroll_ for daily motivation.\n\n{hashtags}\n",
-]
+# Instagram handle + YouTube handle (kept in code, not in image data) — image
+# stays platform-agnostic; handles only appear in the caption text.
+HANDLE_IG = "@nandetroll_"
+HANDLE_YT = "@getunwrittenrules"
 
-# Hashtag pools — universal + per-mood. Each post mixes both.
-HASHTAGS_UNIVERSAL = ["#motivation", "#mindset", "#notetoself", "#dailywisdom"]
-HASHTAGS_BY_MOOD = {
+# ---- INSTAGRAM caption templates ---------------------------------------------
+# 4 rotating templates; ~10 hashtags per post (IG norm).
+IG_TEMPLATES = [
+    "{line}\n\nDrop a \U0001F525 if this hit.\n\nFollow {h} for daily lessons.\n\n{hashtags}\n",
+    "{line}\n\nSave this. Send it to someone who needs it today.\n\n{h} for more.\n\n{hashtags}\n",
+    "{line}\n\nRead it twice. Then close the app and go build.\n\n{h} — daily wisdom, no fluff.\n\n{hashtags}\n",
+    "{line}\n\nComment \"YES\" if this is exactly what you needed today.\n\nFollow {h} for daily motivation.\n\n{hashtags}\n",
+]
+IG_HASHTAGS_UNIVERSAL = ["#motivation", "#mindset", "#notetoself", "#dailywisdom"]
+IG_HASHTAGS_BY_MOOD = {
     "hustle":     ["#hustle", "#grindset", "#discipline", "#selfmade", "#ambition", "#betteryou"],
     "mindset":    ["#growthmindset", "#selfgrowth", "#personalgrowth", "#mindsetshift", "#reinvention", "#becoming"],
     "resilience": ["#resilience", "#keepgoing", "#neverquit", "#strongerthanyesterday", "#risingup", "#nevergiveup"],
     "worth":      ["#knowyourworth", "#selflove", "#boundaries", "#standards", "#worthit", "#respectyourself"],
     "truth":      ["#realtalk", "#harshreality", "#lifelessons", "#wisdom", "#truthbomb", "#lifequotes"],
+}
+
+# ---- YOUTUBE (Shorts) caption templates --------------------------------------
+# YT prefers FEWER hashtags (3-5 ideal), with #shorts ALWAYS first (drives
+# Shorts ranking). CTAs use "Subscribe" not "Follow".
+YT_TEMPLATES = [
+    "{line}\n\nDrop a \U0001F525 if this hit. Subscribe {h} for daily drops.\n\n{hashtags}\n",
+    "{line}\n\nSave this. Share it with someone who needs it today.\nSubscribe {h} for more.\n\n{hashtags}\n",
+    "{line}\n\nRead it twice. Then close YouTube and go build.\n{h} — daily wisdom, no fluff.\n\n{hashtags}\n",
+    "{line}\n\nComment \"YES\" if this is exactly what you needed today.\nSubscribe {h} for daily motivation.\n\n{hashtags}\n",
+]
+YT_HASHTAGS_UNIVERSAL = ["#shorts", "#motivation"]
+YT_HASHTAGS_BY_MOOD = {
+    "hustle":     ["#hustle", "#discipline", "#mindset"],
+    "mindset":    ["#mindset", "#growth", "#selfgrowth"],
+    "resilience": ["#resilience", "#mindset", "#keepgoing"],
+    "worth":      ["#selfworth", "#selflove", "#mindset"],
+    "truth":      ["#wisdom", "#lifelessons", "#mindset"],
 }
 
 
@@ -184,14 +205,116 @@ def _apply_scrim(img: Image.Image, alpha: int = 150) -> Image.Image:
 # ---------------------------------------------------------------------------
 # Typography
 # ---------------------------------------------------------------------------
+def _line_w(draw: ImageDraw.ImageDraw, text: str, font) -> int:
+    b = draw.textbbox((0, 0), text, font=font)
+    return b[2] - b[0]
+
+
+def _greedy_wrap(words: list[str], draw: ImageDraw.ImageDraw, font, max_w: int) -> list[str]:
+    """Standard greedy word-wrap — used only to discover the minimum line count."""
+    out: list[str] = []
+    line: list[str] = []
+    for w in words:
+        candidate = " ".join(line + [w])
+        if not line or _line_w(draw, candidate, font) <= max_w:
+            line.append(w)
+        else:
+            out.append(" ".join(line))
+            line = [w]
+    if line:
+        out.append(" ".join(line))
+    return out
+
+
+_PUNCT_ENDS = (".", ",", ";", ":", "!", "?", "—")
+# Per-bad-break penalty (pixels-equivalent). Punctuation-aligned layouts win
+# over alphabetic-split layouts even when slightly wider.
+_BAD_BREAK_PENALTY = 250
+# Word-count variance penalty. Strong enough to favor balanced word-counts
+# (e.g. [3,3] over [4,2]) when widths are close — kills orphan "YOU" endings.
+_BALANCE_PENALTY = 150
+
+
+def _is_good_break(word: str) -> bool:
+    """A break is 'good' if the word ending the line terminates a clause."""
+    return word.endswith(_PUNCT_ENDS)
+
+
+def _wrap_one_segment(words: list[str], draw: ImageDraw.ImageDraw, font, max_w: int) -> list[str]:
+    """Balanced wrap of a single segment (no hard \\n inside). Score combines:
+      max_line_width + bad-break-penalty + word-count-balance-penalty
+    Picks the layout that's wide-balanced AND clause-aligned AND word-balanced."""
+    if not words:
+        return [""]
+    greedy = _greedy_wrap(words, draw, font, max_w)
+    n_lines = len(greedy)
+    if n_lines <= 1:
+        return greedy
+
+    from itertools import combinations
+
+    def score(chunks: list[str], splits: tuple[int, ...]) -> int:
+        widest = max(_line_w(draw, c, font) for c in chunks)
+        bad = sum(_BAD_BREAK_PENALTY for s in splits if not _is_good_break(words[s - 1]))
+        counts = [len(c.split()) for c in chunks]
+        if len(counts) > 1:
+            mean = sum(counts) / len(counts)
+            variance = sum((c - mean) ** 2 for c in counts) / len(counts)
+            balance = int(variance * _BALANCE_PENALTY)
+        else:
+            balance = 0
+        return widest + bad + balance
+
+    best = greedy
+    best_score = score(greedy, tuple(
+        sum(len(g.split()) for g in greedy[:i + 1]) for i in range(n_lines - 1)
+    ))
+
+    for splits in combinations(range(1, len(words)), n_lines - 1):
+        chunks = []
+        prev = 0
+        for s in splits:
+            chunks.append(" ".join(words[prev:s]))
+            prev = s
+        chunks.append(" ".join(words[prev:]))
+        if any(_line_w(draw, c, font) > max_w for c in chunks):
+            continue
+        sc = score(chunks, splits)
+        if sc < best_score:
+            best = chunks
+            best_score = sc
+    return best
+
+
+def _balanced_wrap(text: str, draw: ImageDraw.ImageDraw, font, max_w: int) -> list[str]:
+    """Wrap text into balanced lines. Honors `\\n` in source as hard breaks
+    (editorial control). Each segment is wrapped independently and joined."""
+    # Hard breaks first — editorial overrides everything else.
+    segments = text.split("\n")
+    out: list[str] = []
+    for seg in segments:
+        seg = seg.strip()
+        if not seg:
+            continue
+        out.extend(_wrap_one_segment(seg.split(), draw, font, max_w))
+    return out or [""]
+
+
 def _fit_font(text: str, draw: ImageDraw.ImageDraw, max_w: int, max_lines: int = 3):
-    """Step font 80 -> 68 -> 56 until text wraps to <= max_lines."""
-    for size in (80, 68, 56):
-        font = pick_font(["Cinzel.ttf"], size, weight=700)
-        lines = wrap_text(text, font, max_w)
-        if len(lines) <= max_lines or size == 56:
-            return font, lines
-    return font, lines  # type: ignore[possibly-undefined]
+    """Prefer FEWER lines over bigger font — fewer lines means the natural break
+    points fall on stronger semantic boundaries (e.g. 'skip today' stays together
+    on a 2-line layout, but greedy-splits across a 3-line one). Tries every
+    font size at 2 lines first, then 3 as fallback."""
+    sizes = (80, 68, 56)
+    for target_lines in range(2, max_lines + 1):
+        for size in sizes:
+            font = pick_font(["Cinzel.ttf"], size, weight=700)
+            lines = _balanced_wrap(text, draw, font, max_w)
+            if len(lines) <= target_lines:
+                return font, lines
+    # Ultimate fallback: smallest font, whatever the balanced wrap yields.
+    font = pick_font(["Cinzel.ttf"], sizes[-1], weight=700)
+    return font, _balanced_wrap(text, draw, font, max_w)
 
 
 # ---------------------------------------------------------------------------
@@ -239,9 +362,11 @@ def render(line: dict, out_png: Path) -> None:
         draw.text((x, y), s, fill=WHITE, font=font)
         y += lh(s) + line_gap
 
-    # Gold IG-handle watermark at the bottom.
-    wm_font = pick_font(["Cinzel.ttf"], 32, weight=600)
-    wm = "@nandetroll_"
+    # Dual-handle gold watermark at bottom — both IG and YT handles with short
+    # platform labels so viewers know which is which. Image stays usable on
+    # either platform without re-rendering.
+    wm_font = pick_font(["Cinzel.ttf"], 26, weight=600)
+    wm = f"IG  {HANDLE_IG}     YT  {HANDLE_YT}"
     b = draw.textbbox((0, 0), wm, font=wm_font)
     wm_x = (WIDTH - (b[2] - b[0])) // 2
     draw.text((wm_x, HEIGHT - 180), wm, fill=GOLD, font=wm_font)
@@ -253,15 +378,30 @@ def render(line: dict, out_png: Path) -> None:
 # ---------------------------------------------------------------------------
 # Caption
 # ---------------------------------------------------------------------------
-def build_caption(line: dict) -> str:
+def _resolve_body(line: dict) -> str:
+    """Strip the editorial \\n hard-break markers — captions read as one
+    continuous sentence; the \\n only affects on-image wrap."""
+    return str(line.get("text", "")).strip().replace("\n", " ")
+
+
+def build_caption_ig(line: dict) -> str:
     line_id = int(line.get("id", 1))
     mood = str(line.get("mood", "")).strip().lower() or "mindset"
-    body = str(line.get("text", "")).strip()
+    body = _resolve_body(line)
+    template = IG_TEMPLATES[line_id % len(IG_TEMPLATES)]
+    mood_tags = IG_HASHTAGS_BY_MOOD.get(mood, IG_HASHTAGS_BY_MOOD["mindset"])
+    hashtags = " ".join(IG_HASHTAGS_UNIVERSAL + mood_tags)
+    return template.format(line=body, h=HANDLE_IG, hashtags=hashtags)
 
-    template = CAPTION_TEMPLATES[line_id % len(CAPTION_TEMPLATES)]
-    mood_tags = HASHTAGS_BY_MOOD.get(mood, HASHTAGS_BY_MOOD["mindset"])
-    hashtags = " ".join(HASHTAGS_UNIVERSAL + mood_tags)
-    return template.format(line=body, hashtags=hashtags)
+
+def build_caption_yt(line: dict) -> str:
+    line_id = int(line.get("id", 1))
+    mood = str(line.get("mood", "")).strip().lower() or "mindset"
+    body = _resolve_body(line)
+    template = YT_TEMPLATES[line_id % len(YT_TEMPLATES)]
+    mood_tags = YT_HASHTAGS_BY_MOOD.get(mood, YT_HASHTAGS_BY_MOOD["mindset"])
+    hashtags = " ".join(YT_HASHTAGS_UNIVERSAL + mood_tags)
+    return template.format(line=body, h=HANDLE_YT, hashtags=hashtags)
 
 
 # ---------------------------------------------------------------------------
@@ -278,14 +418,17 @@ def main(argv: list[str] | None = None) -> int:
 
     today = _dt.date.today().isoformat()
     out_png = OUT_DIR / f"midday_{today}.png"
-    out_txt = OUT_DIR / f"midday_{today}.txt"
+    out_ig = OUT_DIR / f"midday_{today}_ig.txt"
+    out_yt = OUT_DIR / f"midday_{today}_yt.txt"
 
     render(chosen, out_png)
-    out_txt.write_text(build_caption(chosen), encoding="utf-8")
+    out_ig.write_text(build_caption_ig(chosen), encoding="utf-8")
+    out_yt.write_text(build_caption_yt(chosen), encoding="utf-8")
 
     print(f"line id={chosen.get('id')} mood={chosen.get('mood')!r}")
     print(f"image: {out_png}")
-    print(f"caption: {out_txt}")
+    print(f"ig caption: {out_ig}")
+    print(f"yt caption: {out_yt}")
     return 0
 
 

@@ -6,7 +6,7 @@ A fully autonomous daily multi-platform content bot. Builds a 24-second video ea
 
 Currently queued: **92 days** of content across 3 books → posts daily at **5:30 PM IST** (lands 5:30–6:00 PM with GitHub Actions delay) to:
 - Instagram → **@nandetroll_**
-- YouTube → **@nandetroll_gk**
+- YouTube → **@getunwrittenrules**
 
 ---
 

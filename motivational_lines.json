@@ -2,7 +2,7 @@
   "lines": [
     { "id": 1,  "text": "Build in silence. Let your results make the noise.",                       "mood": "hustle" },
     { "id": 2,  "text": "Discipline weighs ounces. Regret weighs tons.",                            "mood": "hustle" },
-    { "id": 3,  "text": "The reps you skip today are the regrets you carry tomorrow.",              "mood": "hustle" },
+    { "id": 3,  "text": "The reps you skip today\nare the regrets you carry tomorrow.",            "mood": "hustle" },
     { "id": 4,  "text": "Hustle quietly. Win loudly.",                                              "mood": "hustle" },
     { "id": 5,  "text": "Wake up early enough to scare your competition.",                          "mood": "hustle" },
     { "id": 6,  "text": "Comfort is a slow death. Discomfort is the rent for the life you want.",   "mood": "hustle" },
