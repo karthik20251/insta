@@ -3,8 +3,12 @@ name: Daily 48 Laws Post
 on:
   schedule:
     # 2 posts/day. GH Actions cron drifts 15-90 min late under load.
-    - cron: "30 2 * * *"     # MORNING slot (02:30 UTC = 08:00 IST; drift -> lands ~08:00-09:30, never before 8)
-    - cron: "30 12 * * *"    # EVENING slot (12:30 UTC = 18:00 IST; drift -> lands ~18:30-20:00)
+    # Shifted 2026-06-04 (SMM audit): old 08:00 IST AM missed all peak windows
+    # (morning commute = low scroll volume). New schedule hits BOTH India peaks:
+    #   LUNCH peak:   12:00-14:00 IST (lunch break scrolling)
+    #   EVENING peak: 19:00-22:00 IST (highest engagement window of the day)
+    - cron: "0 7 * * *"      # LUNCH slot   (07:00 UTC = 12:30 IST; drift -> lands ~12:45-14:00 IST)
+    - cron: "0 14 * * *"     # EVENING slot (14:00 UTC = 19:30 IST; drift -> lands ~19:45-21:00 IST)
   workflow_dispatch:
     inputs:
       slot:
