@@ -68,28 +68,52 @@ def build_youtube_metadata(day: dict) -> dict:
     if len(title) > 100:
         title = title[:97] + "..."
 
+    # 2026-06-04 SMM rewrite: tags now mix author/book brand-tags (for
+    # discovery via author search) with NICHE tags where small channels can
+    # rank. Dropped "shorts" (redundant — already in title #Shorts), dropped
+    # "self improvement"/"mindset"/"philosophy" (mega-saturated, channels
+    # under 10K subs are invisible there).
     book_lower = day["book"].lower()
     if "atomic habits" in book_lower:
         tags = ["atomic habits", "james clear", "habits", "discipline",
-                "productivity", "mindset", "self improvement", "shorts"]
+                "daily habits", "habit building", "compound effect",
+                "small habits big results", "productivity tips"]
     elif "12 rules" in book_lower or "jordan peterson" in book_lower:
-        tags = ["12 rules for life", "jordan peterson", "philosophy", "meaning",
-                "responsibility", "mindset", "self improvement", "shorts"]
+        tags = ["12 rules for life", "jordan peterson", "stoicism",
+                "stoic wisdom", "meaning", "responsibility", "modern stoicism",
+                "wisdom for men", "life lessons"]
     else:
-        tags = ["48 laws of power", "robert greene", "power", "wisdom",
-                "strategy", "philosophy", "mindset", "self improvement", "shorts"]
+        tags = ["48 laws of power", "robert greene", "office politics",
+                "career advice", "corporate survival", "managing up",
+                "power dynamics", "workplace wisdom", "getting promoted"]
 
-    hook = day.get("caption_hook", "")
-    description = "\n\n".join([
-        hook,
-        f"{day['title'].upper()}: {day['headline'].upper()}",
-        day["body"],
-        f"— {day['author']}, {day['book']}",
+    # 2026-06-04 SMM rewrite of YT description:
+    # 1) Body line moved to TOP so the first ~125 chars (what shows in YT
+    #    search previews) is the actual content PUNCH, not the bookmark
+    #    label "Law 1:". Previously the description led with the label,
+    #    which made the preview generic and skippable.
+    # 2) Removed "Follow @nandetroll_ on Instagram" CTA — triple-penalized
+    #    (Follow-bait pattern + drives traffic OFF YouTube + wrong handle
+    #    for YT viewers, who would search @getunwrittenrules anyway).
+    # 3) Dropped uppercase headline (was reading as shouting/spam).
+    # 4) Dropped empty caption_hook line that was inserting 2 blank lines
+    #    at the top of every description (caption_hook field doesn't exist
+    #    in quotes.json data).
+    # 5) Added "From {book} by {author}" SEO line packed with searchable
+    #    keywords (the YT search index loves author/book name matches).
+    parts = [
+        day["body"],                                            # PUNCH first (preview)
+        f"From {day['book']} by {day['author']}.",              # SEO keywords
+        f"{day['title']}: {day['headline']}",                   # context label
+        "@getunwrittenrules — the rules nobody teaches at work.",
         f"Day {day.get('book_day', day['day'])} of {day.get('book_total', '?')} · {day['book']}",
-        "Music: Kevin MacLeod + ccMixter artists (CC-BY)",
-        "Follow @nandetroll_ on Instagram for daily posts.",
+        "Music: Kevin MacLeod + ccMixter artists (CC-BY)",      # required CC-BY attribution
         "#Shorts #" + " #".join(t.replace(" ", "") for t in tags),
-    ])
+    ]
+    hook = day.get("caption_hook", "").strip()
+    if hook:
+        parts.insert(0, hook)
+    description = "\n\n".join(parts)
     description = description[:4900]  # YT cap is 5000
 
     return {"title": title, "description": description, "tags": tags}
