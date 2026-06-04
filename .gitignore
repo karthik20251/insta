@@ -21,4 +21,5 @@ output/brand_*.png
 # midday image factory — daily renders + Pexels bg cache, all regenerable
 output/midday_*
 output/test_*
+output/audit/
 output/bg_cache/

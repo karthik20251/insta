@@ -197,9 +197,24 @@ def _crop_to_canvas(img: Image.Image) -> Image.Image:
 
 
 def _apply_scrim(img: Image.Image, alpha: int = 150) -> Image.Image:
-    """Solid dark overlay so white text stays readable over any photo."""
-    overlay = Image.new("RGBA", img.size, (0, 0, 0, alpha))
-    return Image.alpha_composite(img.convert("RGBA"), overlay).convert("RGB")
+    """Two-layer dark overlay so the text + watermark stay legible on any photo:
+      1) uniform alpha=`alpha` scrim across the full image for body-text contrast
+      2) bottom-anchored gradient (transparent at y=HEIGHT-340 → opaque at bottom)
+         so the gold watermark at HEIGHT-180 always sits on near-black, even
+         when the source photo has a bright lower third (sunsets, rocks, etc.)
+    """
+    w, h = img.size
+    full = Image.new("RGBA", (w, h), (0, 0, 0, alpha))
+    bottom_band_h = 340
+    band = Image.new("RGBA", (w, bottom_band_h), (0, 0, 0, 0))
+    band_draw = ImageDraw.Draw(band)
+    for row in range(bottom_band_h):
+        a = int(180 * (row / max(1, bottom_band_h - 1)))
+        band_draw.line([(0, row), (w - 1, row)], fill=(0, 0, 0, a))
+    base = img.convert("RGBA")
+    base = Image.alpha_composite(base, full)
+    base.paste(band, (0, h - bottom_band_h), band)
+    return base.convert("RGB")
 
 
 # ---------------------------------------------------------------------------
@@ -301,18 +316,17 @@ def _balanced_wrap(text: str, draw: ImageDraw.ImageDraw, font, max_w: int) -> li
 
 
 def _fit_font(text: str, draw: ImageDraw.ImageDraw, max_w: int, max_lines: int = 3):
-    """Prefer FEWER lines over bigger font — fewer lines means the natural break
-    points fall on stronger semantic boundaries (e.g. 'skip today' stays together
-    on a 2-line layout, but greedy-splits across a 3-line one). Tries every
-    font size at 2 lines first, then 3 as fallback."""
-    sizes = (80, 68, 56)
+    """Prefer FEWER lines over bigger font — fewer lines means natural break
+    points fall on stronger semantic boundaries. Tries 2 lines at each size,
+    then 3 as fallback. 48pt is the emergency rung for long lines with hard
+    \\n breaks that can't fit otherwise."""
+    sizes = (80, 68, 56, 48)
     for target_lines in range(2, max_lines + 1):
         for size in sizes:
             font = pick_font(["Cinzel.ttf"], size, weight=700)
             lines = _balanced_wrap(text, draw, font, max_w)
             if len(lines) <= target_lines:
                 return font, lines
-    # Ultimate fallback: smallest font, whatever the balanced wrap yields.
     font = pick_font(["Cinzel.ttf"], sizes[-1], weight=700)
     return font, _balanced_wrap(text, draw, font, max_w)
 
