@@ -81,12 +81,19 @@ HANDLE_IG = "@nandetroll_"
 HANDLE_YT = "@getunwrittenrules"
 
 # ---- INSTAGRAM caption templates ---------------------------------------------
-# 4 rotating templates; ~10 hashtags per post (IG norm).
+# 4 rotating templates; ~10 hashtags per post (IG sweet spot in 2026).
+# Engagement-tuned: save/share/reply drivers, NO explicit "follow" asks (IG
+# anti-bait detection penalizes those), NO "close the app" CTAs (kills dwell
+# time, which IG rewards). Handle appears as identity ("{h} —"), not a request.
 IG_TEMPLATES = [
-    "{line}\n\nDrop a \U0001F525 if this hit.\n\nFollow {h} for daily lessons.\n\n{hashtags}\n",
-    "{line}\n\nSave this. Send it to someone who needs it today.\n\n{h} for more.\n\n{hashtags}\n",
-    "{line}\n\nRead it twice. Then close the app and go build.\n\n{h} — daily wisdom, no fluff.\n\n{hashtags}\n",
-    "{line}\n\nComment \"YES\" if this is exactly what you needed today.\n\nFollow {h} for daily motivation.\n\n{hashtags}\n",
+    # A — save-driver (#1 IG algorithm signal)
+    "{line}\n\nSave this for the day you almost give up.\n\n{h} — daily lessons that hit.\n\n{hashtags}\n",
+    # B — save + share (KEPT — best performer of the original set)
+    "{line}\n\nSave this. Send it to someone who needs it today.\n\n{h} — more like this every day.\n\n{hashtags}\n",
+    # C — read + apply (in-app action, no exit signal)
+    "{line}\n\nRead it twice. Screenshot it. Use it tomorrow.\n\n{h} — wisdom you can actually use.\n\n{hashtags}\n",
+    # D — open question (drives comments without bait-pattern phrasing)
+    "{line}\n\nWhich part of this hit hardest? \U0001F447\n\n{h} — for the ones building quietly.\n\n{hashtags}\n",
 ]
 IG_HASHTAGS_UNIVERSAL = ["#motivation", "#mindset", "#notetoself", "#dailywisdom"]
 IG_HASHTAGS_BY_MOOD = {
@@ -100,13 +107,19 @@ IG_HASHTAGS_BY_MOOD = {
 }
 
 # ---- YOUTUBE (Shorts) caption templates --------------------------------------
-# YT prefers FEWER hashtags (3-5 ideal), with #shorts ALWAYS first (drives
-# Shorts ranking). CTAs use "Subscribe" not "Follow".
+# YT Shorts: #shorts ALWAYS first (mandatory for Shorts ranking), 3-5 tags
+# total. No explicit "subscribe" asks (YT penalizes pattern-bait similar to
+# IG). Handle appears as channel identity, not a CTA. Engagement asks favor
+# in-app actions (comment/replay) over "go do X elsewhere".
 YT_TEMPLATES = [
-    "{line}\n\nDrop a \U0001F525 if this hit. Subscribe {h} for daily drops.\n\n{hashtags}\n",
-    "{line}\n\nSave this. Share it with someone who needs it today.\nSubscribe {h} for more.\n\n{hashtags}\n",
-    "{line}\n\nRead it twice. Then close YouTube and go build.\n{h} — daily wisdom, no fluff.\n\n{hashtags}\n",
-    "{line}\n\nComment \"YES\" if this is exactly what you needed today.\nSubscribe {h} for daily motivation.\n\n{hashtags}\n",
+    # A — replay-driver (YT rewards rewatches on Shorts)
+    "{line}\n\nWatch it twice. The second one hits different.\n{h} — daily lessons.\n\n{hashtags}\n",
+    # B — share-driver
+    "{line}\n\nShare this with one person who needs to hear it today.\n{h} — more like this every day.\n\n{hashtags}\n",
+    # C — apply (in-app screenshot, no exit signal)
+    "{line}\n\nScreenshot it. Use it tomorrow.\n{h} — wisdom you can actually use.\n\n{hashtags}\n",
+    # D — open comment question (not bait-pattern)
+    "{line}\n\nWhich part hit hardest? Tell me below.\n{h} — for the ones building quietly.\n\n{hashtags}\n",
 ]
 YT_HASHTAGS_UNIVERSAL = ["#shorts", "#motivation"]
 YT_HASHTAGS_BY_MOOD = {
