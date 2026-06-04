@@ -1,16 +1,15 @@
 name: Midday Image (email-only)
 
 on:
-  schedule:
-    # 2026-06-04: shifted from 11:00 IST to 06:00 IST. This image is now the
-    # user's MORNING post (manual upload to IG Reels + YT Shorts with trending
-    # audio). Email needs to arrive BEFORE the 7-10 AM IST morning peak so
-    # user has 1-4 hours to build the video + post during peak.
-    - cron: "30 0 * * *"     # 00:30 UTC = 06:00 IST (drift -> lands ~06:15-07:30 IST, before morning peak)
+  # 2026-06-04: cron removed per user direction — midday image is now MANUAL
+  # ONLY. Each workflow_dispatch invocation advances state/midday_cursor.json
+  # to the next line in the curated rotation. Run it once -> line 1. Run it
+  # twice -> line 2. Run it five times in a day -> 5 distinct images emailed.
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # 'write' required so we can commit the advanced cursor back to the repo.
+  contents: write
 
 concurrency:
   group: midday-image
@@ -35,20 +34,34 @@ jobs:
         # the file path without races at the UTC midnight boundary.
         run: echo "MIDDAY_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
 
-      - name: Build today's midday image
+      - name: Build today's midday image (advances cursor by 1)
         id: build
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
           OUTPUT=$(python generate_midday.py)
           echo "$OUTPUT"
-          # Extract day-in-cycle and mood for use in email subject/body
-          DAY=$(echo "$OUTPUT" | grep -oP 'day_in_cycle=\K[0-9]+/[0-9]+')
+          # Extract post-number-in-cycle and mood for the email subject/body
+          DAY=$(echo "$OUTPUT" | grep -oP 'post=\K[0-9]+/[0-9]+')
           MOOD=$(echo "$OUTPUT" | grep -oP '^mood=\K\w+' | head -1)
           {
             echo "DAY=$DAY"
             echo "MOOD=$MOOD"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Commit cursor advance
+        # Persists the rotation cursor across workflow runs so a second
+        # invocation picks the next line (not the same line again).
+        run: |
+          if git diff --quiet state/midday_cursor.json 2>/dev/null; then
+            echo "cursor unchanged — skipping commit (likely --line-id override)"
+            exit 0
+          fi
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add state/midday_cursor.json
+          git commit -m "midday: advance cursor [skip ci]"
+          git push origin HEAD
 
       - name: Stage IG + YT captions for email body
         id: captions

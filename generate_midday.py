@@ -56,6 +56,10 @@ ROOT = Path(__file__).parent
 LINES_JSON = ROOT / "motivational_lines.json"
 OUT_DIR = ROOT / "output"
 BG_CACHE = OUT_DIR / "bg_cache"
+# Cursor file: tracks which line to render NEXT. Advances by 1 on each render
+# (manual workflow_dispatch). Lives in state/ so it's git-tracked and persists
+# across ephemeral GitHub Actions runners.
+CURSOR_FILE = ROOT / "state" / "midday_cursor.json"
 OUT_DIR.mkdir(exist_ok=True)
 BG_CACHE.mkdir(exist_ok=True, parents=True)
 
@@ -163,16 +167,41 @@ def _load_lines() -> list[dict]:
     return lines
 
 
-def _pick_line(lines: list[dict], line_id: int | None) -> dict:
+def _read_cursor() -> int:
+    """Read the cursor index. Defaults to 0 if file missing/corrupt."""
+    if not CURSOR_FILE.exists():
+        return 0
+    try:
+        data = json.loads(CURSOR_FILE.read_text(encoding="utf-8"))
+        return int(data.get("next_idx", 0))
+    except (json.JSONDecodeError, ValueError, KeyError):
+        return 0
+
+
+def _write_cursor(next_idx: int) -> None:
+    """Persist the cursor for the next manual run."""
+    CURSOR_FILE.parent.mkdir(exist_ok=True, parents=True)
+    CURSOR_FILE.write_text(
+        json.dumps({"next_idx": next_idx}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _pick_line(lines: list[dict], line_id: int | None) -> tuple[dict, int | None]:
+    """Pick the next line to render.
+
+    Returns (line, new_cursor). If line_id is provided (explicit override for
+    testing), new_cursor is None — caller should NOT advance the cursor.
+    Otherwise the cursor is advanced by 1 (and wraps at len(lines))."""
     if line_id is not None:
         for ln in lines:
             if int(ln.get("id", -1)) == int(line_id):
-                return ln
+                return ln, None
         raise ValueError(f"No line with id={line_id} in {LINES_JSON.name}")
-    today = _dt.date.today()
-    epoch = _dt.date(2026, 1, 1)
-    idx = (today - epoch).days % len(lines)
-    return lines[idx]
+
+    idx = _read_cursor() % len(lines)
+    next_idx = (idx + 1) % len(lines)
+    return lines[idx], next_idx
 
 
 # ---------------------------------------------------------------------------
@@ -476,7 +505,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     lines = _load_lines()
-    chosen = _pick_line(lines, args.line_id)
+    chosen, new_cursor = _pick_line(lines, args.line_id)
 
     today = _dt.date.today().isoformat()
     out_png = OUT_DIR / f"midday_{today}.png"
@@ -487,14 +516,19 @@ def main(argv: list[str] | None = None) -> int:
     out_ig.write_text(build_caption_ig(chosen), encoding="utf-8")
     out_yt.write_text(build_caption_yt(chosen), encoding="utf-8")
 
-    # Day-in-cycle counter for email header — gives the user a sense of
-    # progress through the 65-day rotation (today is day N/65).
-    epoch = _dt.date(2026, 1, 1)
-    day_in_cycle = ((_dt.date.today() - epoch).days % len(lines)) + 1
+    # Post-number-in-cycle: the position of THIS image in the rotation. If
+    # the picker advanced the cursor (no --line-id override), new_cursor is
+    # set; we report the position BEFORE the advance ("post 5/65" means this
+    # render is the 5th in the cycle).
+    if new_cursor is not None:
+        post_num = ((new_cursor - 1) % len(lines)) + 1
+        _write_cursor(new_cursor)
+    else:
+        post_num = 0  # 0 indicates an override (--line-id) render, not part of the rotation
     cycle_len = len(lines)
 
     print(f"line id={chosen.get('id')} mood={chosen.get('mood')!r}")
-    print(f"day_in_cycle={day_in_cycle}/{cycle_len}")
+    print(f"post={post_num}/{cycle_len}")
     print(f"mood={chosen.get('mood')}")
     print(f"image: {out_png}")
     print(f"ig caption: {out_ig}")
