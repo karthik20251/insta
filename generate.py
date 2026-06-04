@@ -421,8 +421,11 @@ def render_image(day: dict, out_path: Path) -> None:
         draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, y), line, fill=WHITE, font=font_body)
         y += line_h(font_body, line) + 12
 
-    # Footer block (day label in gold + author/book in italic) — unchanged.
-    day_label = f"{day['title'].upper()}  ·  DAY {day['book_day']} OF {day['book_total']}"
+    # 2026-06-04 SMM fix: dropped "DAY 2 OF 49" tail — misleading now that
+    # the queue is curated (20 of 48 Laws, 8 of 30 Habits, 5 of 13 Rules).
+    # Also dropped the headline tail (was duplicating the body heading above).
+    # Just the title now — clean chapter marker, gold accent, no redundancy.
+    day_label = day['title'].upper()
     bbox = draw.textbbox((0, 0), day_label, font=font_day)
     draw.text(((WIDTH - (bbox[2] - bbox[0])) / 2, HEIGHT - 240), day_label, fill=GOLD, font=font_day)
 
