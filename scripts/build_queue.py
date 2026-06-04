@@ -1,8 +1,13 @@
-"""Generate the full deterministic posting queue (the consume-down plan).
+"""Generate the deterministic posting queue (the consume-down plan).
 
-276 items -> 138 days x {AM, PM}. The order guarantees a law's
-TACTIC/MISTAKE/SCENARIO never post back-to-back (they land ~92 posts /
-~46 days apart) and that books + variant types stay mixed post-to-post.
+CURATED 2026-06-04: dropped from 276 -> 66 items based on engagement data.
+Generic motivation posts plateaued at 10-50 views/post (engagement rate ~2%,
+0 organic comments across 7 days). Best performers were SPECIFIC NARRATIVE
+posts on workplace/power dynamics (May 28: 182 views, May 30: 106 views).
+
+Curation = (only viral-worthy parents) x (only narrative variants).
+  Kept variants: SCENARIO, MISTAKE  (TACTIC variants dropped — too generic)
+  Kept parents: 33 of 92 — listed in KEEP_* sets below
 
 This writes output/queue.json — a pure plan, no rendering. stock_drive.py
 consumes it to materialize + upload the next ~2 weeks of dated files.
@@ -22,8 +27,34 @@ from pathlib import Path
 ROOT = Path(__file__).parent.parent
 QUOTES = ROOT / "quotes.json"
 OUT = ROOT / "output" / "queue.json"
-VARIANTS = ("TACTIC", "MISTAKE", "SCENARIO")
+# TACTIC variants are dry/principle-based — dropped because SCENARIO + MISTAKE
+# variants outperformed them by 3-10x in real engagement data.
+VARIANTS = ("MISTAKE", "SCENARIO")
 SLOTS = ("AM", "PM")
+
+# Curated parent lists per book. To tune, edit these sets and re-run
+# build_queue.py — every change here propagates through to the daily posts.
+KEEP_48LAWS = {f"Law {n}" for n in (
+    1, 3, 4, 6, 7, 11, 13, 14, 15, 16, 17, 20, 25, 27, 33, 36, 38, 45, 46, 47
+)}
+KEEP_ATOMIC = {
+    "Identity", "Compound Effect", "The Plateau", "Habit Stacking",
+    "Two-Minute Rule", "Environment", "Never Miss Twice", "Goldilocks",
+}
+KEEP_RULES = {f"Rule {n}" for n in (1, 2, 4, 6, 8)}
+
+
+def _keep_item(it: dict) -> bool:
+    """Filter an item from quotes.json: viral-worthy parent + narrative variant."""
+    if it["variant_type"] not in VARIANTS:
+        return False
+    if it["book"] == "The 48 Laws of Power":
+        return it["parent_law"] in KEEP_48LAWS
+    if it["book"] == "Atomic Habits":
+        return it["parent_law"] in KEEP_ATOMIC
+    if it["book"] == "12 Rules for Life":
+        return it["parent_law"] in KEEP_RULES
+    return False
 
 
 def _next_monday(d: date) -> date:
@@ -57,18 +88,25 @@ def parent_order(items: list[dict]) -> list[str]:
 
 def main() -> int:
     data = json.loads(QUOTES.read_text(encoding="utf-8"))
-    items = data["items"]
-    # index by (parent_law, variant_type) -> item number
+    items = [it for it in data["items"] if _keep_item(it)]
     by_key = {(it["parent_law"], it["variant_type"]): it for it in items}
     porder = parent_order(items)
-    assert len(porder) == 92, f"expected 92 parents, got {len(porder)}"
+    n_parents = len(porder)
+    n_variants = len(VARIANTS)
+    # Sanity: filtered set should be exactly (kept-parents x kept-variants).
+    expected = (len(KEEP_48LAWS) + len(KEEP_ATOMIC) + len(KEEP_RULES)) * n_variants
+    assert len(items) == expected, f"expected {expected} items after curation, got {len(items)}"
 
     sd = start_date()
     queue = []
     for k in range(len(items)):
-        variant = VARIANTS[k % 3]
-        parent = porder[k % 92]
-        it = by_key[(parent, variant)]
+        variant = VARIANTS[k % n_variants]
+        parent = porder[k % n_parents]
+        it = by_key.get((parent, variant))
+        if it is None:
+            # Should not happen if quotes.json has all expected (parent, variant)
+            # pairs for the curated set — guard anyway so it fails loud, not silent.
+            raise KeyError(f"missing quote for parent={parent!r} variant={variant!r}")
         day_idx, slot = divmod(k, 2)
         d = sd + timedelta(days=day_idx)
         base = f"{d.isoformat()}_{SLOTS[slot]}"
