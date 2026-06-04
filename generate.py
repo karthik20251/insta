@@ -835,15 +835,25 @@ _AMPLIFIERS = [
     "Notice who in your office already does this.",
     "Read it twice. Then watch your office differently.",
     "They won't say this in the all-hands.",
-    "This one took me three jobs to figure out.",
+    # 2026-06-04 SMM swap: previous line ("This one took me three jobs to
+    # figure out") faked a personal narrative on an anonymous account —
+    # audience smells the inauthenticity. Replaced with a tactical observe-
+    # the-world prompt that works for an anonymous brand voice.
+    "Watch the next promotion at your org. You'll see this play out.",
 ]
-_FOLLOW_CTAS = [
-    "Follow for daily corporate survival.",
-    "Follow if office politics is draining you.",
-    "Daily tactics so you stop getting played — follow.",
-    "Read by people who got promoted last quarter. Up to you.",
-    "Follow before the person after your job does.",
+# 2026-06-04 SMM rewrite: previous CTAs used explicit "Follow" 4/5 times.
+# IG/YT 2026 algorithms pattern-detect "Follow for X" as bait and downrank.
+# New CTAs drive saves/shares/tags (the actual ranking signals) — no
+# "follow" anywhere. Brand positioning is implicit via the content style.
+_CTAS = [
+    "Save this. You'll need it next time HR calls you in.",
+    "Send this to the colleague who needs to read it.",
+    "Save it. Re-read it before your next 1:1.",
+    "Tag the friend whose boss just promoted the wrong person.",
+    "Save this. The next reorg won't wait.",
 ]
+# Backward-compat alias so older imports don't break.
+_FOLLOW_CTAS = _CTAS
 _FUNNEL = "The 3 books this comes from: linktr.ee/unwrittenrules"
 # Tight core (always) + a rotating pack so no two posts share the same tag set.
 _HASHTAG_CORE = ["#officepolitics", "#managingup", "#48lawsofpower",
@@ -991,7 +1001,7 @@ def corporate_caption(day: dict) -> str:
     from twemoji_local import strip_emoji
     i = int(day.get("item", 1))
     amp = _AMPLIFIERS[i % len(_AMPLIFIERS)]
-    cta = _FOLLOW_CTAS[(i // 2) % len(_FOLLOW_CTAS)]
+    cta = _CTAS[(i // 2) % len(_CTAS)]
     # Rotating window over the pool so each post's tag set differs (kills the
     # identical-hashtags-every-post throttle) — core tags always present.
     start = (i * 3) % len(_HASHTAG_POOL)
