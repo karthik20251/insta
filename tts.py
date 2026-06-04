@@ -54,7 +54,11 @@ _PITCH_CTA = "+0Hz"
 # any faster (-15% / -20%) starts to feel rushed for an "authoritative senior"
 # narrator and undercuts the brand. Combined with the tighter narration_script
 # word cap, this lands narrations in the 11.5-12.5s sweet spot.
-DEFAULT_RATE = os.environ.get("TTS_RATE", "-10%")
+# 2026-06-04: rate moved from -10% -> 0% alongside the Connor -> Sonia voice
+# switch. Sonia (British female) already carries natural gravitas through her
+# RP cadence; slowing her -10% was adding drag without adding authority.
+# Neutral 0% is the "less but impactful" pace the user asked for.
+DEFAULT_RATE = os.environ.get("TTS_RATE", "0%")
 
 
 def _strip_for_speech(text: str) -> str:
@@ -363,12 +367,14 @@ def synthesize_pitched(day: dict, out_path: Path, srt_path: Path | None = None,
     segments = narration_segments(day)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # 1-second silence between segments — gives the narrator breathing room
-    # between the tease, the explanation, and the CTA. Without it the voice
-    # runs continuously and feels like reading; with it, the pauses LAND
-    # each segment like a real explainer would.
-    SEGMENT_GAP = 1.0
-    silence_path = out_path.parent / "_silence_1s.mp3"
+    # 0.4-second silence between segments. 2026-06-04 tightened from 1.0s:
+    # 1s read as draggy on a 22s Short. 0.4s still lets each segment land
+    # but moves the video forward. 2 gaps x 0.6s shaved = 1.2s shorter video
+    # per render, which materially boosts completion-rate on a 22s base.
+    # The silence_path includes the duration so a stale cache from the old
+    # 1s setting can't shadow the new shorter file.
+    SEGMENT_GAP = 0.4
+    silence_path = out_path.parent / f"_silence_{int(SEGMENT_GAP * 1000)}ms.mp3"
     _ensure_silence_mp3(silence_path, SEGMENT_GAP)
 
     tmp_mp3s: list[Path] = []
