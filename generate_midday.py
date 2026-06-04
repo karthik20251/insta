@@ -69,6 +69,10 @@ MOOD_KEYWORDS = {
     "resilience": ["stormy ocean waves", "lone tree storm", "lightning dramatic sky", "lighthouse storm", "mountain peak climber"],
     "worth":      ["golden hour silhouette portrait", "elegant night city lights", "gold sunset bridge", "marble statue dramatic light", "luxury rooftop sunset"],
     "truth":      ["dramatic dark clouds", "fog city street dawn", "moody mountain landscape", "abandoned road desert", "single light dark room"],
+    # Office politics: corporate, suit, boardroom, glass tower energy.
+    "office":     ["executive boardroom dark", "suit silhouette city window", "modern office tower night", "corporate skyline dusk", "marble lobby corporate"],
+    # Wisdom / philosophy: timeless, contemplative, ancient + classical energy.
+    "wisdom":     ["marble statue ancient", "old library books wooden", "candle dark room contemplation", "ancient temple columns", "sunset mountain reflection"],
 }
 
 # Instagram handle + YouTube handle (kept in code, not in image data) — image
@@ -91,6 +95,8 @@ IG_HASHTAGS_BY_MOOD = {
     "resilience": ["#resilience", "#keepgoing", "#neverquit", "#strongerthanyesterday", "#risingup", "#nevergiveup"],
     "worth":      ["#knowyourworth", "#selflove", "#boundaries", "#standards", "#worthit", "#respectyourself"],
     "truth":      ["#realtalk", "#harshreality", "#lifelessons", "#wisdom", "#truthbomb", "#lifequotes"],
+    "office":     ["#officepolitics", "#corporatelife", "#careergrowth", "#climbingtheladder", "#workwisdom", "#careeradvice"],
+    "wisdom":     ["#stoicism", "#philosophy", "#timelesswisdom", "#ancientwisdom", "#lifequotes", "#dailyquote"],
 }
 
 # ---- YOUTUBE (Shorts) caption templates --------------------------------------
@@ -109,6 +115,8 @@ YT_HASHTAGS_BY_MOOD = {
     "resilience": ["#resilience", "#mindset", "#keepgoing"],
     "worth":      ["#selfworth", "#selflove", "#mindset"],
     "truth":      ["#wisdom", "#lifelessons", "#mindset"],
+    "office":     ["#officepolitics", "#career", "#corporatelife"],
+    "wisdom":     ["#stoicism", "#philosophy", "#wisdom"],
 }
 
 
