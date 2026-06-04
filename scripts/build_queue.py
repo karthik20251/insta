@@ -30,7 +30,11 @@ OUT = ROOT / "output" / "queue.json"
 # TACTIC variants are dry/principle-based — dropped because SCENARIO + MISTAKE
 # variants outperformed them by 3-10x in real engagement data.
 VARIANTS = ("MISTAKE", "SCENARIO")
-SLOTS = ("AM", "PM")
+# 2026-06-04: dropped AM slot per user direction. Morning post is now manual
+# (midday-image + trending audio in CapCut, uploaded by user). The automated
+# pipeline ships only the evening post.
+SLOTS = ("PM",)
+PER_DAY = len(SLOTS)
 
 # Curated parent lists per book. To tune, edit these sets and re-run
 # build_queue.py — every change here propagates through to the daily posts.
@@ -107,9 +111,9 @@ def main() -> int:
             # Should not happen if quotes.json has all expected (parent, variant)
             # pairs for the curated set — guard anyway so it fails loud, not silent.
             raise KeyError(f"missing quote for parent={parent!r} variant={variant!r}")
-        day_idx, slot = divmod(k, 2)
+        day_idx, slot_idx = divmod(k, PER_DAY)
         d = sd + timedelta(days=day_idx)
-        base = f"{d.isoformat()}_{SLOTS[slot]}"
+        base = f"{d.isoformat()}_{SLOTS[slot_idx]}"
         queue.append({
             "pos": k + 1,
             "date": d.isoformat(),
@@ -129,13 +133,13 @@ def main() -> int:
     OUT.write_text(json.dumps({
         "start_date": sd.isoformat(),
         "total": len(queue),
-        "per_day": 2,
+        "per_day": PER_DAY,
         "queue": queue,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     last = queue[-1]
     print(f"queue: {len(queue)} posts, {sd.isoformat()} -> {last['date']} "
-          f"({len(queue)//2} days @ 2/day) -> {OUT}")
+          f"({len(queue)//PER_DAY} days @ {PER_DAY}/day) -> {OUT}")
     print("first 6:")
     for q in queue[:6]:
         print(f"  {q['basename']}  item {q['item']:>3}  {q['variant_type']:<8} "

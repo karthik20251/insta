@@ -2,7 +2,11 @@ name: Midday Image (email-only)
 
 on:
   schedule:
-    - cron: "30 5 * * *"     # 05:30 UTC = 11:00 IST (target: late-morning / lunch-hour delivery)
+    # 2026-06-04: shifted from 11:00 IST to 06:00 IST. This image is now the
+    # user's MORNING post (manual upload to IG Reels + YT Shorts with trending
+    # audio). Email needs to arrive BEFORE the 7-10 AM IST morning peak so
+    # user has 1-4 hours to build the video + post during peak.
+    - cron: "30 0 * * *"     # 00:30 UTC = 06:00 IST (drift -> lands ~06:15-07:30 IST, before morning peak)
   workflow_dispatch:
 
 permissions:
@@ -74,14 +78,17 @@ jobs:
           body: |
             DAY ${{ steps.build.outputs.DAY }} of the rotation — mood: ${{ steps.build.outputs.MOOD }}
 
-            ============================================================
-            BEST POSTING TIMES (India)
-            ============================================================
-              Instagram Reels:   7:00 - 10:00 PM IST  (peak engagement)
-              YouTube Shorts:    6:00 - 9:00 PM IST   (peak watch time)
+            This is your MORNING post. Evening post auto-publishes at ~19:30
+            IST from the video pipeline — you don't need to touch that one.
 
-              Email arrives at 11 AM so you can build the video early
-              and schedule/post during the evening peak window.
+            ============================================================
+            BEST POSTING TIMES (India) — for THIS morning post
+            ============================================================
+              IG Reels morning peak:  7:00 - 10:00 AM IST  (commute + breakfast)
+              YT Shorts morning peak: 8:00 - 10:00 AM IST  (start-of-day scroll)
+
+              Email arrives ~06:00-07:30 IST so you have 1-4 hours to build
+              the video + post during morning peak.
 
             ============================================================
             WORKFLOW (3 min)
