@@ -32,9 +32,19 @@ jobs:
         run: echo "MIDDAY_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
 
       - name: Build today's midday image
+        id: build
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: python generate_midday.py
+        run: |
+          OUTPUT=$(python generate_midday.py)
+          echo "$OUTPUT"
+          # Extract day-in-cycle and mood for use in email subject/body
+          DAY=$(echo "$OUTPUT" | grep -oP 'day_in_cycle=\K[0-9]+/[0-9]+')
+          MOOD=$(echo "$OUTPUT" | grep -oP '^mood=\K\w+' | head -1)
+          {
+            echo "DAY=$DAY"
+            echo "MOOD=$MOOD"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Stage IG + YT captions for email body
         id: captions
@@ -60,24 +70,46 @@ jobs:
           password: ${{ secrets.MAIL_APP_PASSWORD }}
           from: instaautomatic <${{ secrets.MAIL_USERNAME }}>
           to: ${{ secrets.MAIL_TO }}
-          subject: "[MIDDAY] Image ready — IG + YT captions below"
+          subject: "Midday Day ${{ steps.build.outputs.DAY }} [${{ steps.build.outputs.MOOD }}] — ready to post"
           body: |
-            Today's midday motivational image is attached.
-
-            Upload to BOTH platforms — same image, different captions.
+            DAY ${{ steps.build.outputs.DAY }} of the rotation — mood: ${{ steps.build.outputs.MOOD }}
 
             ============================================================
-            INSTAGRAM caption (paste into post/reel):
+            BEST POSTING TIMES (India)
+            ============================================================
+              Instagram Reels:   7:00 - 10:00 PM IST  (peak engagement)
+              YouTube Shorts:    6:00 - 9:00 PM IST   (peak watch time)
+
+              Email arrives at 11 AM so you can build the video early
+              and schedule/post during the evening peak window.
+
+            ============================================================
+            WORKFLOW (3 min)
+            ============================================================
+              1. Download the PNG attachment
+              2. Open CapCut → import PNG → add trending audio (7-15s)
+              3. Export 1080x1920 → save to phone
+              4. Paste the IG caption below into Instagram Reels
+              5. Paste the YT caption below into YouTube Shorts
+
+              TIP: pick a trending audio you saved from Instagram Reels
+              earlier in the day — IG-native audio drives IG discovery.
+
+            ============================================================
+            INSTAGRAM caption (also attached as _ig.txt for offline save)
             ============================================================
             ${{ steps.captions.outputs.IG_CAPTION }}
 
 
             ============================================================
-            YOUTUBE caption (paste into Shorts upload — or community post):
+            YOUTUBE caption (also attached as _yt.txt for offline save)
             ============================================================
             ${{ steps.captions.outputs.YT_CAPTION }}
 
 
             ============================================================
             Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          attachments: output/midday_${{ env.MIDDAY_DATE }}.png
+          attachments: |
+            output/midday_${{ env.MIDDAY_DATE }}.png
+            output/midday_${{ env.MIDDAY_DATE }}_ig.txt
+            output/midday_${{ env.MIDDAY_DATE }}_yt.txt

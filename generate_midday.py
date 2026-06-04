@@ -471,7 +471,15 @@ def main(argv: list[str] | None = None) -> int:
     out_ig.write_text(build_caption_ig(chosen), encoding="utf-8")
     out_yt.write_text(build_caption_yt(chosen), encoding="utf-8")
 
+    # Day-in-cycle counter for email header — gives the user a sense of
+    # progress through the 65-day rotation (today is day N/65).
+    epoch = _dt.date(2026, 1, 1)
+    day_in_cycle = ((_dt.date.today() - epoch).days % len(lines)) + 1
+    cycle_len = len(lines)
+
     print(f"line id={chosen.get('id')} mood={chosen.get('mood')!r}")
+    print(f"day_in_cycle={day_in_cycle}/{cycle_len}")
+    print(f"mood={chosen.get('mood')}")
     print(f"image: {out_png}")
     print(f"ig caption: {out_ig}")
     print(f"yt caption: {out_yt}")
