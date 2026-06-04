@@ -23,3 +23,5 @@ output/midday_*
 output/test_*
 output/audit/
 output/bg_cache/
+# video pipeline — Pexels-downloaded background cache (downloaded on render)
+backgrounds/pexels_cache/
