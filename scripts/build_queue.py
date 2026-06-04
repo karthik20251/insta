@@ -117,7 +117,7 @@ def main() -> int:
         queue.append({
             "pos": k + 1,
             "date": d.isoformat(),
-            "slot": SLOTS[slot],
+            "slot": SLOTS[slot_idx],
             "basename": base,
             "item": it["item"],
             "book": it["book"],
