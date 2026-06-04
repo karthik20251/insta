@@ -636,8 +636,23 @@ def render_end_frame(day: dict, out_path: Path) -> None:
     font_sub = pick_font(["Cinzel.ttf"], 34, weight=700)
     font_books = pick_font(["Cinzel.ttf"], 30, weight=600)
 
-    line1 = day.get("series_label", "SUBSCRIBE FOR THE REST")  # book-aware, stable parent
-    line2 = "BOOKS  ·  LINK IN BIO"
+    # 2026-06-04 SMM fix (round 2): the queue is curated — not all 48 Laws,
+    # not all 30 habits, not all 13 rules. The old "LAW 1/48" framing implied
+    # "watch all 48" which is misleading. New framing: "BEST OF {book}" —
+    # communicates explicit curation, sets up "you're getting the curated
+    # best, not the firehose" perception. Also removes the algorithm-
+    # penalized "SUBSCRIBE FOR THE REST" tail that was burned into every
+    # video before.
+    book_lower = day.get("book", "").lower()
+    if "48 laws" in book_lower:
+        line1 = "BEST OF 48 LAWS OF POWER"
+    elif "atomic" in book_lower:
+        line1 = "BEST OF ATOMIC HABITS"
+    elif "12 rules" in book_lower or "jordan peterson" in book_lower:
+        line1 = "BEST OF 12 RULES FOR LIFE"
+    else:
+        line1 = "THE UNWRITTEN RULES"
+    line2 = "LINK IN BIO"
 
     b = draw.textbbox((0, 0), line1, font=font_sub)
     draw.text(((WIDTH - (b[2] - b[0])) / 2, HEIGHT - 200), line1, fill=GOLD, font=font_sub)
