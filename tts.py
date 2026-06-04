@@ -23,12 +23,20 @@ import os
 from pathlib import Path
 
 # Default = best free voice with no API key. Override via TTS_VOICE env var.
+# 2026-06-04 SMM switch: female British voice (Sonia) chosen as the strategic
+# differentiator. Motivation niche is ~95% male voices on IG/YT — a premium
+# British female reads as "executive mentor woman giving you the unwritten
+# rules of the boardroom." Distinctive + brand-aligned + still authoritative.
+#
 # Tested-good neural voices (Microsoft Edge endpoint, no auth needed):
-#   en-US-ChristopherNeural  - newscaster male, authoritative  (default)
-#   en-US-GuyNeural          - warmer male
-#   en-GB-RyanNeural         - British, gravelly senior-mentor
-#   en-IN-PrabhatNeural      - Indian English male
-DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-IE-ConnorNeural")
+#   en-GB-SoniaNeural         - British female, premium executive (default)
+#   en-US-AvaMultilingualNeural - modern conversational US female
+#   en-US-MichelleNeural      - US newscaster female, authoritative
+#   en-IN-NeerjaNeural        - Indian English female
+#   en-US-ChristopherNeural   - US newscaster male, authoritative
+#   en-GB-RyanNeural          - British male, gravelly senior-mentor
+#   en-IE-ConnorNeural        - Irish male, warm/storytelling (previous default)
+DEFAULT_VOICE = os.environ.get("TTS_VOICE", "en-GB-SoniaNeural")
 
 # Pitch modulation history (kept for context):
 #   ±25Hz: read as THREE DIFFERENT PEOPLE (user feedback round 1)
