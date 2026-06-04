@@ -86,8 +86,9 @@ HANDLE_YT = "@getunwrittenrules"
 # anti-bait detection penalizes those), NO "close the app" CTAs (kills dwell
 # time, which IG rewards). Handle appears as identity ("{h} —"), not a request.
 IG_TEMPLATES = [
-    # A — save-driver (#1 IG algorithm signal)
-    "{line}\n\nSave this for the day you almost give up.\n\n{h} — daily lessons that hit.\n\n{hashtags}\n",
+    # A — save-driver (#1 IG algorithm signal). Universal across moods —
+    # "you'll need it again" works for hustle/resilience AND office/wisdom.
+    "{line}\n\nSave this. You'll need it again.\n\n{h} — daily lessons that hit.\n\n{hashtags}\n",
     # B — save + share (KEPT — best performer of the original set)
     "{line}\n\nSave this. Send it to someone who needs it today.\n\n{h} — more like this every day.\n\n{hashtags}\n",
     # C — read + apply (in-app action, no exit signal)
