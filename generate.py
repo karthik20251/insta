@@ -149,41 +149,152 @@ PER_IMAGE_POSTPROCESS: dict[str, dict] = {
 }
 
 
-def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Image.Image:
-    """Pick a (deterministic-per-day) background painting from the book's subfolder.
+# Pexels keyword pools per book — same idea as generate_midday.py but tuned
+# for video-frame backgrounds (less text-heavy, more atmospheric). 8 keywords
+# per book so day-to-day rotation gets visual variety even for one book.
+PEXELS_BOOK_KEYWORDS = {
+    "48laws": [
+        "dark corporate office building night",
+        "executive suit silhouette city",
+        "moody city skyline at night",
+        "marble lobby corporate dark",
+        "chess board strategy dramatic light",
+        "luxury penthouse night view",
+        "boardroom dark wood table",
+        "modern office tower at dusk",
+    ],
+    "atomic": [
+        "morning workout sunrise outdoor",
+        "lone runner dawn city",
+        "minimalist workspace coffee",
+        "person reading by window morning",
+        "early morning fog mountain trail",
+        "habit journal notebook minimalist",
+        "discipline workout gym dim",
+        "morning meditation calm light",
+    ],
+    "rules": [
+        "marble statue ancient philosophy",
+        "ancient stone temple columns",
+        "old library wooden books warm light",
+        "candle dark room contemplation",
+        "classical sculpture dramatic shadow",
+        "ancient ruins moody light",
+        "philosophical bust marble close-up",
+        "monk monastery stone arches",
+    ],
+}
 
-    Falls back to top-level backgrounds/ then gradient if subfolder is empty."""
-    slug = book_slug(book) if book else "48laws"
-    book_dir = BG_DIR / slug
-    backgrounds = sorted(book_dir.glob("*.jpg")) + sorted(book_dir.glob("*.png"))
-    if not backgrounds:
-        backgrounds = sorted(BG_DIR.glob("*.jpg")) + sorted(BG_DIR.glob("*.png"))
-    if not backgrounds:
-        img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
-        draw_gradient(img)
-        return img
 
-    # Deterministic per day so re-renders look identical.
-    # MULTIPLIER must be coprime with every pool size we'll ever ship,
-    # otherwise (day*K) % len collapses to a single index and the same
-    # painting plays every day. Old K=7 broke against rules-pool size 7
-    # (every day_num resolved to index 3 -> only dore_inferno shown for
-    # 49 days). 11 was unsafe once 48laws grew to 11 entries —
-    # gcd(11,11)=11 collapses the formula to a constant. 23 is prime
-    # and coprime with every pool size 1-22, leaving headroom for any
-    # realistic future growth. Book offset adds variety across books so
-    # AM/PM on the same day don't drift toward the same relative index.
-    K = 23
-    book_offset = sum(ord(c) for c in slug) % len(backgrounds)
-    bg_path = backgrounds[(day_num * K + 3 + book_offset) % len(backgrounds)]
+def _try_pexels_background(book: str, day_num: int) -> Image.Image | None:
+    """Fetch a Pexels portrait photo matched to the book's energy. Returns the
+    cropped 1080x1920 image, or None if Pexels is unavailable (no key, network
+    error, no results). Caller falls back to painting on None.
+
+    Cached to backgrounds/pexels_cache/ so the 4 frames of a single video share
+    one API call, and re-renders of the same (book, day) are free."""
+    api_key = os.environ.get("PEXELS_API_KEY", "").strip()
+    if not api_key:
+        return None
+
+    import hashlib
+    import io
     try:
-        bg = Image.open(bg_path).convert("RGB")
-    except OSError as e:
-        import sys
-        print(f"[generate] WARN: could not open {bg_path.name}: {e} — using gradient", file=sys.stderr)
-        img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
-        draw_gradient(img)
-        return img
+        import requests
+    except ImportError:
+        return None
+
+    slug = book_slug(book) if book else "48laws"
+    keywords = PEXELS_BOOK_KEYWORDS.get(slug, PEXELS_BOOK_KEYWORDS["48laws"])
+    keyword = keywords[day_num % len(keywords)]
+
+    digest = hashlib.md5(f"{slug}:{day_num}:{keyword}".encode()).hexdigest()[:10]
+    cache_dir = BG_DIR / "pexels_cache"
+    cache_dir.mkdir(exist_ok=True)
+    cache_file = cache_dir / f"video_{slug}_d{day_num:03d}_{digest}.jpg"
+    if cache_file.exists():
+        return Image.open(cache_file).convert("RGB")
+
+    last_err: Exception | None = None
+    for attempt in (1, 2):
+        try:
+            r = requests.get(
+                "https://api.pexels.com/v1/search",
+                headers={"Authorization": api_key},
+                params={"query": keyword, "orientation": "portrait", "per_page": 15, "size": "large"},
+                timeout=20,
+            )
+            r.raise_for_status()
+            photos = r.json().get("photos", [])
+            if not photos:
+                return None
+            photo = photos[day_num % len(photos)]
+            img_url = photo["src"].get("large2x") or photo["src"].get("large") or photo["src"]["original"]
+            ir = requests.get(img_url, timeout=45)
+            ir.raise_for_status()
+            img = Image.open(io.BytesIO(ir.content)).convert("RGB")
+            # Resize-and-center-crop to 1080x1920
+            sw, sh = img.size
+            target_ratio = WIDTH / HEIGHT
+            src_ratio = sw / sh
+            if src_ratio > target_ratio:
+                new_h, new_w = HEIGHT, int(round(sw * (HEIGHT / sh)))
+            else:
+                new_w, new_h = WIDTH, int(round(sh * (WIDTH / sw)))
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+            left, top = (new_w - WIDTH) // 2, (new_h - HEIGHT) // 2
+            img = img.crop((left, top, left + WIDTH, top + HEIGHT))
+            img.save(cache_file, "JPEG", quality=88, optimize=True)
+            return img
+        except (requests.RequestException, OSError) as e:
+            last_err = e
+            if attempt == 1:
+                continue
+    import sys
+    print(f"[generate] Pexels failed for {keyword!r}: {last_err}", file=sys.stderr)
+    return None
+
+
+def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Image.Image:
+    """Build a 1080x1920 video-frame background.
+
+    PRIMARY:  Pexels photo matched to the book's energy (modern, atmospheric).
+    FALLBACK: deterministic painting from backgrounds/<book>/ (if Pexels
+              unavailable — no key, network down, no results, etc).
+    ULTIMATE: gradient (if even paintings are missing)."""
+    slug = book_slug(book) if book else "48laws"
+
+    # Try Pexels first — modern photographic backgrounds.
+    pexels_bg = _try_pexels_background(book, day_num)
+    if pexels_bg is not None:
+        bg = pexels_bg
+        bg_name = "pexels"  # disables PER_IMAGE_* overrides (those key on filename)
+    else:
+        # Fallback: deterministic painting from book's subfolder.
+        # K=23 is coprime with every pool size we'll ship (gcd-safe).
+        # Book offset adds variety so AM/PM on the same day don't drift to
+        # the same relative index across books.
+        book_dir = BG_DIR / slug
+        backgrounds = sorted(book_dir.glob("*.jpg")) + sorted(book_dir.glob("*.png"))
+        if not backgrounds:
+            backgrounds = sorted(BG_DIR.glob("*.jpg")) + sorted(BG_DIR.glob("*.png"))
+        if not backgrounds:
+            img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
+            draw_gradient(img)
+            return img
+        K = 23
+        book_offset = sum(ord(c) for c in slug) % len(backgrounds)
+        bg_path = backgrounds[(day_num * K + 3 + book_offset) % len(backgrounds)]
+        try:
+            bg = Image.open(bg_path).convert("RGB")
+            bg_name = bg_path.name
+        except OSError as e:
+            import sys
+            print(f"[generate] WARN: could not open {bg_path.name}: {e} — using gradient", file=sys.stderr)
+            img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
+            draw_gradient(img)
+            return img
+
     if bg.size != (WIDTH, HEIGHT):
         bg = bg.resize((WIDTH, HEIGHT), Image.LANCZOS)
 
@@ -200,7 +311,9 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
         edge_dark = 0.20 if slug == "atomic" else 0.22
     # Per-image override: bright atomic paintings get pulled to 48laws-strength
     # so white hook text stays readable on the y=720-1200 band.
-    override = PER_IMAGE_SCRIM.get(bg_path.name)
+    # PER_IMAGE_* overrides only apply to known painting files. For Pexels
+    # photos, bg_name is "pexels" which never matches — overrides are bypassed.
+    override = PER_IMAGE_SCRIM.get(bg_name)
     if override:
         if scrim == "bright":
             base_dark, edge_dark = override[0], override[1]
@@ -216,7 +329,7 @@ def make_background(day_num: int, book: str = "", scrim: str = "standard") -> Im
     mask = mask_col.resize((WIDTH, HEIGHT))
     black = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
     result = Image.composite(black, bg, mask)
-    post = PER_IMAGE_POSTPROCESS.get(bg_path.name)
+    post = PER_IMAGE_POSTPROCESS.get(bg_name)
     if post:
         from PIL import ImageEnhance
         if "contrast" in post:
