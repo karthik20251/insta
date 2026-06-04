@@ -1,31 +1,43 @@
 # instaautomatic
 
-> **Manual posting active; API auto-poster on standby.** The pipeline is a content factory — it renders the video and emits a paste-ready post pack (`output/item_NN_post.txt`); a human posts via the native app for trending audio. The reliability patch + API poster remain intact and revertible.
+> **Hybrid pipeline (post-2026-06-04 SMM overhaul):** 1 automated evening
+> video + 1 manual morning image. Daily content delivery to both Instagram
+> and YouTube. Runs on GitHub Actions — no server.
 
-A fully autonomous daily multi-platform content bot. Builds a 24-second video each day from a book quote, picks a mood-matched royalty-free track, publishes to **Instagram Reels + Stories + YouTube Shorts**, and emails you both URLs. Runs on GitHub Actions — no server, no maintenance.
+A daily content factory built around the **Unwritten Rules** brand. Curated
+narratives from 3 books, posted as short video at evening peak and as
+motivation-image at morning peak (manual upload with trending audio).
 
-Currently queued: **92 days** of content across 3 books → posts daily at **5:30 PM IST** (lands 5:30–6:00 PM with GitHub Actions delay) to:
+**Curated queue:** 66 items (from 276 — only narrative MISTAKE + SCENARIO
+variants of the 33 most viral-friendly laws/concepts/rules):
 - Instagram → **@nandetroll_**
 - YouTube → **@getunwrittenrules**
 
 ---
 
-## What it posts
+## Daily flow
 
-| Days | Book | Author | Aesthetic |
-|---|---|---|---|
-| 1 – 49 | *The 48 Laws of Power* | Robert Greene | Dark / regal — classical paintings + cinematic dark instrumentals |
-| 50 – 79 | *Atomic Habits* | James Clear | Bright / optimistic — Hokusai/Monet/Van Gogh + uplifting classical |
-| 80 – 92 | *12 Rules for Life* | Jordan Peterson | Contemplative / philosophical — Friedrich/Doré + Bach/Brahms classical |
+| Time (IST) | What fires | Action needed |
+|---|---|---|
+| ~06:00 AM | `midday.yml` workflow_dispatch (manual trigger by you) | Email lands with PNG + IG/YT captions → build video in CapCut with trending audio → post to IG Reels + YT Shorts during 7-10 AM morning peak |
+| ~19:30 PM | `daily.yml` cron auto-fires | Renders curated video (Sonia voice, Pexels background) → auto-uploads to IG Reels + YT Shorts |
+| Throughout day | IG Stories (manual) | Optional, you decide |
 
-Schedule (with `START_DATE = 2026-05-09`):
+---
 
-- **2026-05-10** → Day 2: Law 1 *Never Outshine the Master*
-- **2026-06-26** → Day 49: Law 48 *Assume Formlessness*
-- **2026-06-27** → Atomic Habits Day 1
-- **2026-07-26** → Atomic Habits Day 30
-- **2026-07-27** → 12 Rules Day 1
-- **2026-08-08** → 12 Rules Day 13 (final post)
+## Curated content pool (66 items, ~2 months at 1/day before repeat)
+
+| Book | Kept laws/concepts/rules | Total variants (2 per parent) |
+|---|---|---|
+| **The 48 Laws of Power** (Robert Greene) | 20 of 49: 1, 3, 4, 6, 7, 11, 13, 14, 15, 16, 17, 20, 25, 27, 33, 36, 38, 45, 46, 47 | 40 |
+| **Atomic Habits** (James Clear) | 8 of 30: Identity, Compound Effect, The Plateau, Habit Stacking, Two-Minute Rule, Environment, Never Miss Twice, Goldilocks | 16 |
+| **12 Rules for Life** (Jordan Peterson) | 5 of 13: Rule 1, 2, 4, 6, 8 | 10 |
+
+Variants kept: **MISTAKE** + **SCENARIO** only (dropped **TACTIC** — too
+dry, principle-based; the narrative variants outperform 3-10x in engagement).
+
+Tune at `scripts/build_queue.py` — `KEEP_48LAWS` / `KEEP_ATOMIC` /
+`KEEP_RULES` sets at top of file.
 
 ---
 

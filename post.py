@@ -16,6 +16,12 @@ GRAPH = "https://graph.facebook.com/v21.0"
 
 
 # Rotating CTAs — variety keeps captions feeling fresh and tests which style drives engagement.
+# 2026-06-04 SMM cleanup: removed "Follow for daily wisdom 🌅" — Follow-bait
+# CTA pattern that IG/YT 2026 algos pattern-detect and downrank. This module
+# is dormant in production (main.py uses corporate_caption from generate.py)
+# but kept here in case a preflight or manual path calls build_caption, so
+# clean code = no future footguns. All CTAs below drive save/share/comment/
+# tag — the actual algorithm-rewarded signals.
 CTAS = [
     "Share your thoughts ⬇️",
     "Drop your take in the comments 👇",
@@ -26,7 +32,7 @@ CTAS = [
     "What would you add? 💭",
     "Send to a friend who needs it 📤",
     "Bookmark and reread tomorrow 📍",
-    "Follow for daily wisdom 🌅",
+    "Save this. You'll need it next week.",
     "Curious — drop a 🔥 if this rings true",
     "Your turn — share your story below 👇",
 ]
