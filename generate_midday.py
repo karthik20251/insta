@@ -96,7 +96,7 @@ IG_TEMPLATES = [
     # D — open question (drives comments without bait-pattern phrasing)
     "{line}\n\nWhich part of this hit hardest? \U0001F447\n\n{h} — for the ones building quietly.\n\n{hashtags}\n",
 ]
-IG_HASHTAGS_UNIVERSAL = ["#motivation", "#mindset", "#notetoself", "#dailywisdom"]
+IG_HASHTAGS_UNIVERSAL = ["#motivation", "#mindset", "#notetoself", "#unwrittenrules"]
 IG_HASHTAGS_BY_MOOD = {
     "hustle":     ["#hustle", "#grindset", "#discipline", "#selfmade", "#ambition", "#betteryou"],
     "mindset":    ["#growthmindset", "#selfgrowth", "#personalgrowth", "#mindsetshift", "#reinvention", "#becoming"],
@@ -122,7 +122,7 @@ YT_TEMPLATES = [
     # D — open comment question (not bait-pattern)
     "{line}\n\nWhich part hit hardest? Tell me below.\n{h} — for the ones building quietly.\n\n{hashtags}\n",
 ]
-YT_HASHTAGS_UNIVERSAL = ["#shorts", "#motivation"]
+YT_HASHTAGS_UNIVERSAL = ["#shorts", "#motivation", "#unwrittenrules"]
 YT_HASHTAGS_BY_MOOD = {
     "hustle":     ["#hustle", "#discipline", "#mindset"],
     "mindset":    ["#mindset", "#growth", "#selfgrowth"],
@@ -163,7 +163,9 @@ def _pick_line(lines: list[dict], line_id: int | None) -> dict:
 # Background: Pexels fetch + cache + crop + scrim
 # ---------------------------------------------------------------------------
 def _fetch_pexels(mood: str, line_id: int) -> Image.Image:
-    """Query Pexels for a portrait photo matching the mood, cache it, return PIL."""
+    """Query Pexels for a portrait photo matching the mood, cache it, return PIL.
+    Retries once on transient network errors so a flaky Pexels call doesn't
+    silently degrade the daily render to the solid-fallback path."""
     api_key = os.environ.get("PEXELS_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError(
@@ -174,30 +176,38 @@ def _fetch_pexels(mood: str, line_id: int) -> Image.Image:
     keywords = MOOD_KEYWORDS.get((mood or "").strip().lower(), MOOD_KEYWORDS["mindset"])
     keyword = keywords[line_id % len(keywords)]
 
-    # Cache key: mood + line id + keyword digest, so changing keyword pool re-fetches.
     digest = hashlib.md5(f"{mood}:{line_id}:{keyword}".encode()).hexdigest()[:10]
     cache_file = BG_CACHE / f"midday_{line_id}_{digest}.jpg"
     if cache_file.exists():
         return Image.open(cache_file).convert("RGB")
 
-    r = requests.get(
-        "https://api.pexels.com/v1/search",
-        headers={"Authorization": api_key},
-        params={"query": keyword, "orientation": "portrait", "per_page": 15, "size": "large"},
-        timeout=20,
-    )
-    r.raise_for_status()
-    photos = r.json().get("photos", [])
-    if not photos:
-        raise RuntimeError(f"No Pexels results for query: {keyword!r}")
+    last_err: Exception | None = None
+    for attempt in (1, 2):
+        try:
+            r = requests.get(
+                "https://api.pexels.com/v1/search",
+                headers={"Authorization": api_key},
+                params={"query": keyword, "orientation": "portrait", "per_page": 15, "size": "large"},
+                timeout=20,
+            )
+            r.raise_for_status()
+            photos = r.json().get("photos", [])
+            if not photos:
+                raise RuntimeError(f"No Pexels results for query: {keyword!r}")
 
-    photo = photos[line_id % len(photos)]
-    img_url = photo["src"].get("large2x") or photo["src"].get("large") or photo["src"]["original"]
-    img_resp = requests.get(img_url, timeout=45)
-    img_resp.raise_for_status()
-    img = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
-    img.save(cache_file, "JPEG", quality=88, optimize=True)
-    return img
+            photo = photos[line_id % len(photos)]
+            img_url = photo["src"].get("large2x") or photo["src"].get("large") or photo["src"]["original"]
+            img_resp = requests.get(img_url, timeout=45)
+            img_resp.raise_for_status()
+            img = Image.open(io.BytesIO(img_resp.content)).convert("RGB")
+            img.save(cache_file, "JPEG", quality=88, optimize=True)
+            return img
+        except (requests.RequestException, RuntimeError) as e:
+            last_err = e
+            if attempt == 1:
+                continue
+            raise
+    raise last_err  # unreachable but satisfies the type checker
 
 
 def _crop_to_canvas(img: Image.Image) -> Image.Image:
