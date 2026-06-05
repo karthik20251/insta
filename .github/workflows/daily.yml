@@ -41,6 +41,16 @@ jobs:
       - name: Install Python deps
         run: pip install -r requirements.txt
 
+      - name: Build the deterministic queue (idempotent)
+        # CRITICAL: output/queue.json is gitignored, so the CI runner doesn't
+        # have it on checkout. scheduled_item() reads queue.json at build time
+        # — without this step it raises RuntimeError and tonight's post fails.
+        # build_queue.py is deterministic from the KEEP_* sets in its source;
+        # running it here always produces the same 66-item curated queue.
+        env:
+          QUEUE_START_DATE: ${{ vars.QUEUE_START_DATE }}
+        run: python scripts/build_queue.py
+
       - name: Resolve posting slot
         run: |
           # 2026-06-05: AM cron removed (only PM exists now: "0 14 * * *").

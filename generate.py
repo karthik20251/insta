@@ -996,17 +996,18 @@ def scheduled_item(day: int, slot: int) -> int:
     if not queue:
         raise RuntimeError("Curated queue is empty — check scripts/build_queue.py.")
 
-    # Day-based picker using the queue's own start_date as anchor (NOT the
-    # main.py START_DATE — those are different epochs). Cycles perpetually
-    # past the queue's last entry.
-    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    # FIXED EPOCH for stable indexing regardless of when queue was regenerated.
+    # Using queue.start_date as the anchor would mean a Sunday stock_drive
+    # regeneration (which uses _next_monday() as default start) would shift
+    # tonight's pick by however many days — that's exactly the kind of
+    # non-determinism we don't want in a daily cron. Anchoring at a hard
+    # epoch (Jan 1 2026) means today's pick is the same regardless of when
+    # the queue file was last written.
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td, date as _date
     _IST = _tz(_td(hours=5, minutes=30))
     today = _dt.now(_tz.utc).astimezone(_IST).date()
-    queue_start = _dt.strptime(qd["start_date"], "%Y-%m-%d").date()
-    days_since = (today - queue_start).days
-    if days_since < 0:
-        # Queue hasn't started yet (manual run on past date) — pick first.
-        return queue[0]["item"]
+    EPOCH = _date(2026, 1, 1)
+    days_since = (today - EPOCH).days
     return queue[days_since % len(queue)]["item"]
 
 
