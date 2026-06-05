@@ -704,16 +704,21 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
                voice_path: Path | None = None,
                caption_srt: Path | None = None,
                frame_durs: tuple[float, float, float, float] | None = None) -> None:
-    """Build the Reel as four crossfaded frames. Durations are driven ENTIRELY
-    by the constants at the top of this file (currently 2/4/4/2 = 12s); do not
-    hardcode timings here — that comment rot is what bit us on the 24->12 revert.
+    """Build the Reel as four crossfaded frames. Durations are driven by
+    `frame_durs` if provided (the dynamic path: scaled to actual voice
+    narration length so video = voice + 0.5s tail), else fall back to the
+    module constants (INTRO=3, MAIN=7, EXAMPLE=7, END=5 = 22s base).
 
-       intro    INTRO_FRAME_SEC      tease (curiosity hook, no law reveal)
-       main     MAIN_FRAME_SEC       law/principle reveal (Ken Burns zoom)
-       example  EXAMPLE_FRAME_SEC    real-life application (subtle zoom)
-       end      END_FRAME_SEC        CTA + tomorrow teaser
+       intro    tease (curiosity hook, no law reveal)
+       main     law/principle reveal (Ken Burns zoom)
+       example  real-life application (subtle zoom)
+       end      CTA + tomorrow teaser
 
-    Each transition is a 0.5-sec crossfade; total = DURATION_SEC.
+    Each transition is a 0.5-sec crossfade.
+
+    Post-2026-06-04 SMM pacing (Sonia 0% rate, 0.4s segment gap) puts
+    typical narration at ~13-19s, so total video lands ~16-22s after the
+    voice+0.5s scaling. Final cap at 60s for Shorts compliance.
 
     Audio: music ducks to 0.25 volume so the voice sits on top clearly. If
     voice_path is None (TTS failed or disabled), music plays at full volume —
@@ -767,13 +772,14 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     # output dir so the SRT path stays a bare filename, avoiding libass's
     # well-known Windows colon-escaping pain on absolute paths.
     if caption_srt is not None:
-        # User feedback after first live post: the prior Arial + thick Outline=4
-        # combo read as "90s YouTube default" — utilitarian, unbranded.
-        # Modern Shorts captions = bold sans with thinner outline + subtle
-        # shadow for depth. Bumped FontSize 16->20 (more readable on phone),
-        # Outline 4->2 (thinner, less chunky), added Shadow=1 (clean depth),
-        # PrimaryColour explicit alpha (FF=opaque). libass on Ubuntu runners
-        # falls back Arial -> Liberation Sans which is cleaner than DejaVu.
+        # 2026-06-04 SMM iteration: prior Arial + thick Outline=4 combo read
+        # as "90s YouTube default" — utilitarian, unbranded. Modern Shorts
+        # captions use bold sans with thinner outline + subtle shadow. After
+        # 3 live-feedback rounds settled on FontSize=16 (briefly bumped to 20
+        # but overflowed onto the q-frame CTA band), Outline=2 (thinner),
+        # Shadow=1 (clean depth), PrimaryColour explicit alpha (FF=opaque).
+        # libass on Ubuntu runners falls back Arial -> Liberation Sans which
+        # is cleaner than DejaVu.
         style = (
             "FontName=Arial,FontSize=16,PrimaryColour=&H00FFFFFF&,"
             "OutlineColour=&H00000000&,BorderStyle=1,Outline=2,Shadow=1,"
