@@ -987,29 +987,49 @@ _SLOT_CACHE: dict[int, list[int]] | None = None
 
 
 def scheduled_item(day: int, slot: int) -> int:
-    """Fixed slot themes (NOT random): morning(slot 0)=technique-y, evening
-    (slot 1)=book/story. Balanced over the full corpus, every item used once:
+    """Return the item ID for today's video, from the CURATED queue.json.
 
-      AM = all 92 TACTIC + 46 MISTAKE   (the move + the trap)
-      PM = all 92 SCENARIO + 46 MISTAKE (the story + the rest of the bait)
+    2026-06-05 rewrite (CRITICAL BUG FIX): the old implementation wove the
+    full 276-item AM/PM corpus directly from quotes.json. That bypassed the
+    curated queue.json (commit 2357d60) entirely — the live auto-poster was
+    picking items from ALL 276 (including TACTIC variants we explicitly
+    dropped, and laws we explicitly excluded from the curation). Every
+    'curation' commit affected only the stock_drive Drive backup, not the
+    live posting.
 
-    SCENARIO is only 1/3 of items but PM is 1/2 the slots, so the 92 MISTAKEs
-    are split 46/46 across AM/PM — that's the one unavoidable adjustment to
-    keep both slots full for the whole run instead of PM drying up at day 92.
+    Now the function reads output/queue.json (66 curated items, narrative
+    variants only, viral-worthy laws/concepts/rules only). Day-based
+    indexing: maps the current IST date to the queue position, cycling
+    perpetually past queue end so posting never stops.
+
+    `slot` is preserved in the signature for backward compat with daily.yml
+    but is now ignored (the queue is PM-only, per_day=1, post-SMM overhaul).
     """
-    global _SLOT_CACHE
-    if _SLOT_CACHE is None:
-        porder, by_key = _parent_order()
-        tac = [by_key[(p, "TACTIC")] for p in porder]
-        mis = [by_key[(p, "MISTAKE")] for p in porder]
-        scn = [by_key[(p, "SCENARIO")] for p in porder]
-        half = len(mis) // 2
-        _SLOT_CACHE = {
-            0: _weave(tac, mis[:half]),          # AM: technique-y
-            1: _weave(scn, mis[half:]),          # PM: book/story
-        }
-    seq = _SLOT_CACHE[1 if slot else 0]
-    return seq[(day - 1) % len(seq)]
+    queue_path = ROOT / "output" / "queue.json"
+    if not queue_path.exists():
+        # Stock-drive Sunday cron hasn't populated the queue yet — surface
+        # loudly rather than silently fall back to the old broken logic.
+        raise RuntimeError(
+            f"{queue_path} missing. Run scripts/build_queue.py to populate it, "
+            "or wait for the stock_drive.yml cron (Sundays 06:00 UTC)."
+        )
+    qd = json.loads(queue_path.read_text(encoding="utf-8"))
+    queue = qd["queue"]
+    if not queue:
+        raise RuntimeError("Curated queue is empty — check scripts/build_queue.py.")
+
+    # Day-based picker using the queue's own start_date as anchor (NOT the
+    # main.py START_DATE — those are different epochs). Cycles perpetually
+    # past the queue's last entry.
+    from datetime import datetime as _dt, timezone as _tz, timedelta as _td
+    _IST = _tz(_td(hours=5, minutes=30))
+    today = _dt.now(_tz.utc).astimezone(_IST).date()
+    queue_start = _dt.strptime(qd["start_date"], "%Y-%m-%d").date()
+    days_since = (today - queue_start).days
+    if days_since < 0:
+        # Queue hasn't started yet (manual run on past date) — pick first.
+        return queue[0]["item"]
+    return queue[days_since % len(queue)]["item"]
 
 
 def corporate_caption(day: dict) -> str:

@@ -43,10 +43,15 @@ jobs:
 
       - name: Resolve posting slot
         run: |
-          if [ "${{ github.event.schedule }}" = "30 12 * * *" ]; then
+          # 2026-06-05: AM cron removed (only PM exists now: "0 14 * * *").
+          # The old condition checked the old PM cron string "30 12 * * *",
+          # so after the cron change every triggered run was defaulting to
+          # AM — completely wrong. Now any cron trigger is PM (because only
+          # the PM cron exists). Manual runs default to PM too.
+          if [ -n "${{ github.event.schedule }}" ]; then
             echo "POST_SLOT=PM" >> "$GITHUB_ENV"
           else
-            echo "POST_SLOT=${{ inputs.slot || 'AM' }}" >> "$GITHUB_ENV"
+            echo "POST_SLOT=${{ inputs.slot || 'PM' }}" >> "$GITHUB_ENV"
           fi
           echo "Resolved POST_SLOT=$(grep POST_SLOT "$GITHUB_ENV" | tail -1)"
 

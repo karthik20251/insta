@@ -68,10 +68,13 @@ def ig_has_caption(first_line: str) -> bool | None:
 
 def current_day() -> int:
     """Day number since START_DATE (1-based). PERPETUAL: there is no end /
-    'series complete' stop. scheduled_item() cycles the full corpus through
-    AM(technique) / PM(book-story) every 138 days, so after the corpus is
-    exhausted it simply repeats from the top — nothing is ever dropped or
-    deleted, posting continues forever."""
+    'series complete' stop. scheduled_item() now indexes into the CURATED
+    queue.json (66 items, narrative variants only, viral-worthy parents
+    only) and cycles perpetually past its end — nothing is ever dropped or
+    deleted, posting continues forever.
+
+    Note: scheduled_item internally uses queue.json's own start_date as the
+    anchor (NOT this function's START_DATE) — different epochs, both work."""
     start = os.environ.get("START_DATE")
     if not start:
         raise RuntimeError("START_DATE not set (format YYYY-MM-DD)")
