@@ -116,20 +116,17 @@ jobs:
               earlier in the day — IG-native audio drives IG discovery.
 
             ============================================================
-            INSTAGRAM caption (also attached as _ig.txt for offline save)
+            INSTAGRAM caption (copy-paste from below)
             ============================================================
             ${{ steps.captions.outputs.IG_CAPTION }}
 
 
             ============================================================
-            YOUTUBE caption (also attached as _yt.txt for offline save)
+            YOUTUBE caption (copy-paste from below)
             ============================================================
             ${{ steps.captions.outputs.YT_CAPTION }}
 
 
             ============================================================
             Workflow run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          attachments: |
-            output/midday_${{ env.MIDDAY_DATE }}.png
-            output/midday_${{ env.MIDDAY_DATE }}_ig.txt
-            output/midday_${{ env.MIDDAY_DATE }}_yt.txt
+          attachments: output/midday_${{ env.MIDDAY_DATE }}.png

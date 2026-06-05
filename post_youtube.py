@@ -190,18 +190,27 @@ _COMMENT_CLOSERS = (
 def build_yt_comment(day: dict) -> str:
     """The pinned engagement comment posted right after each upload.
 
-    Structure: the item's own divisive question (forces a reply) -> the
-    like/subscribe ask -> the rotating FOMO closer. Short on purpose; long
-    pinned comments read as desperate. The 👇 is the only emoji — same as the
-    caption — to keep the human voice."""
+    2026-06-05 SMM rewrite: previous version had a literal triple-bait line
+    ("LIKE if this lands. SHARE with whoever needs the heads-up. SUBSCRIBE
+    — daily corporate tactics...") in the middle of every pinned comment.
+    YT algorithm detects explicit Like/Share/Subscribe asks in pinned
+    comments and downranks. Replaced with brand-positioning that drives
+    genuine conversation:
+
+      - the item's divisive question (forces a reply)
+      - brand positioning line (no explicit ask)
+      - rotating FOMO closer (urgency without bait)
+
+    Short on purpose; long pinned comments read as desperate. The 👇 is the
+    only emoji to keep the human voice."""
     q = (day.get("comment_q") or "").strip()
     if q.endswith("👇"):
         q = q[:-1].strip()
     closer = _COMMENT_CLOSERS[int(day.get("item", 1)) % len(_COMMENT_CLOSERS)]
     return "\n".join([
-        f"{q} 👇 Drop your call in the replies.",
+        f"{q} 👇 Drop your take in the replies.",
         "",
-        "LIKE if this lands. SHARE with whoever needs the heads-up. SUBSCRIBE — daily corporate tactics decoded from the 3 books office politics actually runs on.",
+        "Daily tactical reads from the 3 books office politics actually runs on.",
         "",
         closer,
     ])
