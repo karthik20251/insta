@@ -955,35 +955,13 @@ def ordered_item(pos: int) -> int:
     return _ORDER_CACHE[(pos - 1) % len(_ORDER_CACHE)]
 
 
-def _parent_order() -> tuple[list[str], dict]:
-    """92 parents, book-interleaved (shared with ordered_item's logic)."""
-    data = json.loads(QUOTES.read_text(encoding="utf-8"))
-    items = data["items"]
-    by_key = {(it["parent_law"], it["variant_type"]): it["item"] for it in items}
-    by_book: dict[str, list[str]] = {}
-    for it in items:
-        by_book.setdefault(it["book"], [])
-        if it["parent_law"] not in by_book[it["book"]]:
-            by_book[it["book"]].append(it["parent_law"])
-    spread = []
-    for book, parents in by_book.items():
-        n = len(parents)
-        for i, p in enumerate(parents):
-            spread.append(((i + 0.5) / n, -n, book, p))
-    spread.sort()
-    return [p for _, _, _, p in spread], by_key
-
-
-def _weave(a: list[int], b: list[int]) -> list[int]:
-    """Deterministically interleave two lists by even position-fraction so the
-    shorter one is spread through the longer (no clumping)."""
-    tagged = [((i + 0.5) / len(a), x) for i, x in enumerate(a)] + \
-             [((i + 0.5) / len(b), x) for i, x in enumerate(b)]
-    tagged.sort(key=lambda t: t[0])
-    return [x for _, x in tagged]
-
-
-_SLOT_CACHE: dict[int, list[int]] | None = None
+# 2026-06-05: removed _parent_order(), _weave(), _SLOT_CACHE module-level dict.
+# They were the internals of the OLD scheduled_item that wove items directly
+# from the 276-item quotes.json corpus into AM/PM sequences. After
+# scheduled_item was rewritten to read output/queue.json (commit 764be62),
+# these helpers had zero remaining callers — verified by grep across all
+# *.py files. Dead code; removed to prevent future maintainers from
+# resurrecting it.
 
 
 def scheduled_item(day: int, slot: int) -> int:

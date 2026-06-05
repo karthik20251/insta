@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-from generate import build, corporate_caption, load_day, scheduled_item, total_days
+from generate import build, corporate_caption, load_day, scheduled_item
 from post import post_reel  # post_story intentionally not imported (manual Stories)
 from post_youtube import build_youtube_metadata, upload_short, short_url, post_comment, build_yt_comment, yt_has_title
 
@@ -91,15 +91,11 @@ def current_slot() -> int:
     return 1 if os.environ.get("POST_SLOT", "AM").strip().upper() == "PM" else 0
 
 
-def current_position() -> int:
-    """1-based posting position for 2/day: two slots per day. Single source
-    of truth shared by the workflow's build step AND main(), so the
-    committed/raw-URL video is exactly the one that gets posted."""
-    pos = (current_day() - 1) * 2 + current_slot() + 1
-    total = total_days()
-    if pos > total:
-        raise SystemExit(f"Series complete (position {pos} > {total}).")
-    return pos
+# 2026-06-05: removed current_position(). It computed a 1-based posting
+# position assuming 2/day cadence: (day-1)*2 + slot + 1. After the cadence
+# shift to 1/day (commit 5e4a46c) the math is wrong; after scheduled_item
+# was rewritten to use queue.json (commit 764be62) the function had no
+# remaining callers either way — verified by grep. Removed.
 
 
 def upload_to_public_url(local_video: Path) -> str:
