@@ -83,36 +83,46 @@ def _strip_for_speech(text: str) -> str:
     return " ".join(cleaned.split())
 
 
-# Loss-aversion CTAs — rotated by item, so 276 posts don't sound identical
+# 2026-06-05 SMM CRITICAL: previous CTAs had explicit "Follow now" and
+# "Like if this stings" spoken aloud in the audio narration on the end
+# frame. YT audio analysis detects spoken Follow/Like/Subscribe CTAs and
+# downranks — and these were reading aloud on ~50% of videos (rotation
+# by item index, 2 of 4 CTAs were bait). Spoken bait is arguably worse
+# than visual: a viewer with sound on cannot miss it.
+#
+# Loss-aversion CTAs — rotated by item so 66 posts don't sound identical
 # (the content-farm "every post ends the same" tell that throttles reach).
-# Each is ~12-15 words, ~5-6 sec at -10% rate. Frames the cost of NOT acting,
-# never the benefit of acting — Cialdini-correct, the strongest CTA mode.
+# Each is ~12-15 words, ~5-6 sec at neutral Sonia rate. Frames the cost
+# of NOT acting (Cialdini-correct). All 4 drive save/share — the algo-
+# rewarded signals — no explicit Follow/Like/Subscribe asks anywhere.
 _LOSS_AVERSION_CTAS = [
     # SAVE — fear of needing it later
     "Save this before your next one-on-one. Or be the one who needed it, and forgot.",
-    # FOLLOW — fear of falling behind a peer
-    "Follow now. The next move drops tomorrow. Don't watch someone else get there first.",
+    # SAVE — fear of being unprepared for a reorg
+    "Save this. The next reorg announcement won't wait for you to be ready.",
     # SHARE — fear of a colleague stumbling
     "Send this to the coworker who's about to learn this the hard way.",
-    # LIKE + COMMENT — fear of being the quiet one who doesn't engage
-    "Like if this stings. Comment your move. The quiet ones get left behind.",
+    # SAVE — fear of the meeting you can't undo
+    "Save this for the meeting you're definitely going to have.",
 ]
 
 
 def narration_script(day: dict) -> str:
-    """Build a ~45-50 word script tuned for the 22s video at the -10% rate:
-    tease (hook) -> headline (the law) -> one-sentence body -> divisive
-    question (drives comments) -> ONE rotating loss-aversion CTA (drives
-    save/follow/share/like).
+    """Build a ~45-50 word script tuned for the ~19s video at 0% rate
+    (post-2026-06-04 SMM pacing): tease (hook) -> headline (the law) ->
+    one-sentence body -> divisive question (drives comments) -> ONE
+    rotating loss-aversion CTA (drives save/share — no Follow/Like asks
+    after 2026-06-05 algorithm-bait cleanup).
 
-    Time landing target:
-      0-3s   tease (hook)
-      3-10s  headline + body
-      10-17s comment question
-      17-22s loss-aversion CTA
+    Time landing target (approximate, depends on word count):
+      0-3s    tease (hook)
+      3-10s   headline + body
+      10-15s  comment question
+      15-19s  loss-aversion CTA
 
-    The CTA rotates by item index so consecutive posts don't repeat the same
-    line — variety prevents the "this is a bot" sniff that kills reach.
+    The CTA rotates by item index so consecutive posts don't repeat the
+    same line — variety prevents the "this is a bot" sniff that kills
+    reach.
     """
     tease = _strip_for_speech(day.get("tease", "")).rstrip(".")
     headline = _strip_for_speech(day.get("headline", "")).rstrip(".")
@@ -120,8 +130,8 @@ def narration_script(day: dict) -> str:
     question = _strip_for_speech(day.get("comment_q", "")).rstrip("?") + "?"
     body_first = body.split(".", 1)[0].strip()
 
-    # Loss-aversion CTA rotates 1 of 4 by item index (covers save/follow/
-    # share/like+comment across 4 consecutive posts).
+    # Loss-aversion CTA rotates 1 of 4 by item index. All 4 drive save/
+    # share signals — no Follow/Like asks after the bait cleanup.
     item_idx = int(day.get("item", 1))
     cta = _LOSS_AVERSION_CTAS[(item_idx - 1) % len(_LOSS_AVERSION_CTAS)]
 
