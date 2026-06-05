@@ -901,58 +901,68 @@ def _series_tag(series_label: str) -> str:
 
 
 def write_bio_guide() -> Path:
-    """The single affiliate DESTINATION (put behind one bio link / Linktree).
-    'Which of these 3 should you read first' captures intent without a hard
-    sell and 3x's the qualifying-sale surface for Amazon's 3/180-day gate."""
+    """The single Link-in-Bio DESTINATION (deploy to Linktree / Stan / etc).
+
+    2026-06-05 SMM rewrite: previous content was "Start here: which book
+    should you read first?" — positioned the account as a generic affiliate
+    book seller, wasting the highest-value real estate when a follower
+    clicks through. New content leads with BRAND positioning (Unwritten
+    Rules — the corporate-survival lessons nobody teaches at work),
+    cross-platform discovery (both IG + YT handles), and reframes the 3
+    books as 'behind every post' rather than 'buy these'. Affiliate
+    disclosure preserved.
+
+    Called by build() on every render — so the latest brand-positioning
+    version is always written out. If user runs build() locally, they get
+    the new content for re-deploy to Linktree."""
     tag = _affiliate_tag()
     books = [
-        ("The 48 Laws of Power", "you're being out-maneuvered and don't know the rules"),
-        ("Atomic Habits", "you know what to do but can't stay consistent"),
-        ("12 Rules for Life", "the chaos is getting to you and you need an anchor"),
+        ("The 48 Laws of Power", "Robert Greene",
+         "For the moves you're supposed to figure out alone (until you don't)."),
+        ("Atomic Habits", "James Clear",
+         "For the discipline part nobody talks about until it's too late."),
+        ("12 Rules for Life", "Jordan Peterson",
+         "For the anchor when the corporate chaos pulls you under."),
     ]
     lines = [
-        "# Start here: which book should you read first?",
+        "# Unwritten Rules",
+        "**The corporate-survival lessons nobody teaches you at work.**",
         "",
-        "Three books, one question — where are you actually stuck right now?",
+        "Curated daily — power, discipline, and resilience from the 3 books that actually move careers.",
+        "",
+        "---",
+        "",
+        "## Daily content on both platforms",
+        "",
+        "- **Instagram** → [@nandetroll_](https://instagram.com/nandetroll_) — Reels + Stories",
+        "- **YouTube** → [@getunwrittenrules](https://youtube.com/@getunwrittenrules) — Shorts + Community",
+        "",
+        "Save the ones that hit. Share the ones that didn't get said in the all-hands.",
+        "",
+        "---",
+        "",
+        "## The 3 books behind every post",
+        "Not summaries — the *best of* each, applied to modern work.",
         "",
     ]
-    for b, who in books:
-        lines += [f"## {b}", f"Read this first if **{who}**.", f"→ {_amazon_link(b, tag)}", ""]
-    lines += ["_As an Amazon Associate, qualifying purchases support the channel._", ""]
+    for b, author, who in books:
+        lines += [f"### {b} — {author}", who, f"→ [Read on Amazon]({_amazon_link(b, tag)})", ""]
+    lines += [
+        "---",
+        "",
+        "_As an Amazon Associate, qualifying purchases support the daily posts. No extra cost to you._",
+        "",
+    ]
     p = OUT_DIR / "_bio_guide.md"
     p.write_text("\n".join(lines), encoding="utf-8")
     return p
 
 
-_ORDER_CACHE: list[int] | None = None
-
-
-def ordered_item(pos: int) -> int:
-    """Map 1-based posting position -> item number, using the SAME deterministic
-    interleave as scripts/build_queue.py (a law's TACTIC/MISTAKE/SCENARIO never
-    post back-to-back; books stay mixed). The automatic poster uses this so a
-    hands-off feed has the same variety as the planned queue."""
-    global _ORDER_CACHE
-    if _ORDER_CACHE is None:
-        data = json.loads(QUOTES.read_text(encoding="utf-8"))
-        items = data["items"]
-        by_key = {(it["parent_law"], it["variant_type"]): it["item"] for it in items}
-        by_book: dict[str, list[str]] = {}
-        for it in items:
-            by_book.setdefault(it["book"], [])
-            if it["parent_law"] not in by_book[it["book"]]:
-                by_book[it["book"]].append(it["parent_law"])
-        spread = []
-        for book, parents in by_book.items():
-            n = len(parents)
-            for i, p in enumerate(parents):
-                spread.append(((i + 0.5) / n, -n, book, p))
-        spread.sort()
-        porder = [p for _, _, _, p in spread]
-        variants = ("TACTIC", "MISTAKE", "SCENARIO")
-        _ORDER_CACHE = [by_key[(porder[k % len(porder)], variants[k % 3])]
-                        for k in range(len(items))]
-    return _ORDER_CACHE[(pos - 1) % len(_ORDER_CACHE)]
+# 2026-06-05: removed ordered_item() + _ORDER_CACHE. Defined but had zero
+# callers across the codebase — verified by grep on all *.py files.
+# Dead code that duplicated the planned-but-now-unused TACTIC/MISTAKE/
+# SCENARIO interleave logic (same family as the removed scheduled_item
+# internals — commit b577b6a).
 
 
 # 2026-06-05: removed _parent_order(), _weave(), _SLOT_CACHE module-level dict.
@@ -1106,9 +1116,11 @@ def build(day_num: int) -> dict:
 
     # Dynamic per-item video duration — sized to the actual narration length
     # so EVERY video is fully completed (voice never cut, no dead-air tail).
-    # Andrew voice at -15% rate runs ~0.5s/word; item word counts vary 28-52,
-    # so narration lengths span ~14-26s. Scale frames proportionally from the
-    # base 3:7:7:5 ratio. Falls back to constants if voice missing.
+    # 2026-06-05: voice is now Sonia (British female) at 0% rate, ~0.4s
+    # inter-segment gap (commits 8eb8bb8, 0fee1ee). Item word counts vary
+    # 28-52, so narration lengths now span ~13-22s (faster than the prior
+    # -10% rate). Scale frames proportionally from the base 3:7:7:5 ratio.
+    # Falls back to constants if voice missing.
     frame_durs = None
     if voice is not None and voice_path.exists():
         try:
