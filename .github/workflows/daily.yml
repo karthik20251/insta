@@ -68,19 +68,36 @@ jobs:
       - name: Build this slot's video
         env:
           START_DATE: ${{ vars.START_DATE }}
-          # 2026-06-05 CRITICAL: PEXELS_API_KEY was missing here, so the
-          # Pexels background fetcher (commit 69be9ae) returned None on
-          # every cron run and FELL BACK to the old book paintings. User
-          # saw paintings on every auto-posted video for 24+ hours despite
-          # the "Pexels backgrounds" commit being live. Same secret as
-          # midday.yml already uses.
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          python -c "from generate import build, scheduled_item; from main import current_day, current_slot; print('::VIDEO::'+build(scheduled_item(current_day(), current_slot()))['video'].name)" 2>/dev/null | grep '^::VIDEO::' > /tmp/v
+          # 2026-06-07: keep stderr (don't 2>/dev/null) so TTS_FALLBACK_FIRED
+          # / TTS_IMPORT_FAILED / PEXELS errors actually surface in the
+          # workflow log. Previously silenced -> 36-hour rate-format bug
+          # went undetected. Stdout still parsed for the ::VIDEO:: marker.
+          python -c "from generate import build, scheduled_item; from main import current_day, current_slot; print('::VIDEO::'+build(scheduled_item(current_day(), current_slot()))['video'].name)" | tee /tmp/build.log | grep '^::VIDEO::' > /tmp/v || true
           name="$(sed 's/^::VIDEO:://' /tmp/v)"
           test -n "$name" || { echo "could not resolve built video name" >&2; exit 1; }
           echo "VIDEO_FILE=$name" >> "$GITHUB_ENV"
           echo "built: $name"
+
+          # ============================================================
+          # CI GUARDS — fail loudly if voice/SRT missing (else: voiceless
+          # video silently ships, like 2026-06-05/06 with the rate bug).
+          # ============================================================
+          stem="${name%.mp4}"
+          voice_mp3="output/${stem}_voice.mp3"
+          srt_file="output/${stem}.srt"
+          if [ ! -s "$voice_mp3" ]; then
+            echo "FAIL: voice mp3 missing/empty ($voice_mp3) — TTS silently failed." >&2
+            echo "(check the build log above for TTS_FALLBACK_FIRED / TTS_IMPORT_FAILED)" >&2
+            grep -E "TTS_|PILMOJI_|VOICE_DUR_" /tmp/build.log >&2 || true
+            exit 1
+          fi
+          if [ ! -s "$srt_file" ]; then
+            echo "FAIL: SRT missing/empty ($srt_file) — captions won't be burned in." >&2
+            exit 1
+          fi
+          echo "guards: voice=$(stat -c '%s' "$voice_mp3" 2>/dev/null || stat -f '%z' "$voice_mp3") bytes, srt=$(stat -c '%s' "$srt_file" 2>/dev/null || stat -f '%z' "$srt_file") bytes ✓"
 
       - name: Commit the posted video so its raw URL resolves
         run: |
