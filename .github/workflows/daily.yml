@@ -68,6 +68,13 @@ jobs:
       - name: Build this slot's video
         env:
           START_DATE: ${{ vars.START_DATE }}
+          # 2026-06-05 CRITICAL: PEXELS_API_KEY was missing here, so the
+          # Pexels background fetcher (commit 69be9ae) returned None on
+          # every cron run and FELL BACK to the old book paintings. User
+          # saw paintings on every auto-posted video for 24+ hours despite
+          # the "Pexels backgrounds" commit being live. Same secret as
+          # midday.yml already uses.
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
           python -c "from generate import build, scheduled_item; from main import current_day, current_slot; print('::VIDEO::'+build(scheduled_item(current_day(), current_slot()))['video'].name)" 2>/dev/null | grep '^::VIDEO::' > /tmp/v
           name="$(sed 's/^::VIDEO:://' /tmp/v)"
@@ -107,6 +114,11 @@ jobs:
         id: post
         env:
           START_DATE: ${{ vars.START_DATE }}
+          # main.py calls build() again (idempotent — re-renders use the
+          # bg cache from the prior step). PEXELS_API_KEY needed here too
+          # so the cache lookup + any miss-path falls through Pexels, not
+          # paintings.
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           UPLOAD_BACKEND: github
