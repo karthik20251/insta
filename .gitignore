@@ -25,3 +25,5 @@ output/audit/
 output/bg_cache/
 # video pipeline — Pexels-downloaded background cache (downloaded on render)
 backgrounds/pexels_cache/
+# TTS inter-segment silence cache (regenerated per-render with current gap)
+output/_silence_*.mp3
