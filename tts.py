@@ -54,11 +54,18 @@ _PITCH_CTA = "+0Hz"
 # any faster (-15% / -20%) starts to feel rushed for an "authoritative senior"
 # narrator and undercuts the brand. Combined with the tighter narration_script
 # word cap, this lands narrations in the 11.5-12.5s sweet spot.
-# 2026-06-04: rate moved from -10% -> 0% alongside the Connor -> Sonia voice
+# 2026-06-04: rate moved from -10% -> +0% alongside the Connor -> Sonia voice
 # switch. Sonia (British female) already carries natural gravitas through her
 # RP cadence; slowing her -10% was adding drag without adding authority.
-# Neutral 0% is the "less but impactful" pace the user asked for.
-DEFAULT_RATE = os.environ.get("TTS_RATE", "0%")
+# Neutral +0% is the "less but impactful" pace the user asked for.
+#
+# 2026-06-07 CRITICAL FIX: was "0%" (no sign) for ~36 hours. edge-tts strictly
+# requires the SSML rate format with an explicit sign — "0%" raises
+# ValueError: Invalid rate '0%'. The synthesize exception was caught silently
+# by build() so voice became None on every CI render -> music-only videos
+# with NO voice and NO burned-in captions. User caught it ("Video hasn't the
+# voice"). Must always be "+0%" / "-N%" / "+N%".
+DEFAULT_RATE = os.environ.get("TTS_RATE", "+0%")
 
 
 def _strip_for_speech(text: str) -> str:
