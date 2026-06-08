@@ -36,8 +36,28 @@ VARIANTS = ("MISTAKE", "SCENARIO")
 SLOTS = ("PM",)
 PER_DAY = len(SLOTS)
 
-# Curated parent lists per book. To tune, edit these sets and re-run
-# build_queue.py — every change here propagates through to the daily posts.
+# 2026-06-08: TIER A only mode per user direction ("Use Tier A").
+# After scoring all 65 curated items on Trending + Useful, kept only the 8
+# items that scored T>=5 AND U>=4. Maximum signal density per post; cycles
+# every 8 days. Tradeoff: same teases repeat ~4x per month.
+#
+# To go back to broader curation: comment out KEEP_TIER_A_ITEMS and restore
+# the KEEP_48LAWS / KEEP_ATOMIC / KEEP_RULES sets below.
+# Ordered TUPLE not set — iteration order = posting order. Spread same-law
+# variants (5 and 6 are both Law 1) to opposite ends of the 8-day cycle so
+# the same parent doesn't post back-to-back.
+KEEP_TIER_A_ITEMS = (
+    5,    # Day 1: Law 1 MISTAKE  - "He corrected his boss in the all-hands..."
+    11,   # Day 2: Law 3 MISTAKE  - "You announced it Monday at all-hands..." (May 28 = 182v pattern)
+    21,   # Day 3: Law 6 SCENARIO - "Same code, same hours. One sends a Friday recap."
+    24,   # Day 4: Law 7 SCENARIO - "You wrote it. He demoed it..." (May 30 = 106v pattern)
+    35,   # Day 5: Law 11 MISTAKE - "She documented every process. They reorged her out..."
+    137,  # Day 6: Law 45 MISTAKE - "She took over as VP. Rebuilt everything in week 2..."
+    143,  # Day 7: Law 47 MISTAKE - "He got the promotion Friday. Asked for a bigger team Monday..."
+    6,    # Day 8: Law 1 SCENARIO - "Her boss took her idea to the exec..."  (far from #5)
+)
+
+# Tier B/C fallback sets (used only if KEEP_TIER_A_ITEMS commented out).
 KEEP_48LAWS = {f"Law {n}" for n in (
     1, 3, 4, 6, 7, 11, 13, 14, 15, 16, 17, 20, 25, 27, 33, 36, 38, 45, 46, 47
 )}
@@ -49,7 +69,10 @@ KEEP_RULES = {f"Rule {n}" for n in (1, 2, 4, 6, 8)}
 
 
 def _keep_item(it: dict) -> bool:
-    """Filter an item from quotes.json: viral-worthy parent + narrative variant."""
+    """Filter an item from quotes.json. Default mode: TIER A only (8 items).
+    Fallback mode: viral-worthy parent + narrative variant (65 items)."""
+    if KEEP_TIER_A_ITEMS:
+        return it["item"] in KEEP_TIER_A_ITEMS
     if it["variant_type"] not in VARIANTS:
         return False
     if it["book"] == "The 48 Laws of Power":
@@ -97,38 +120,69 @@ def main() -> int:
     porder = parent_order(items)
     n_parents = len(porder)
     n_variants = len(VARIANTS)
-    # Sanity: filtered set should be exactly (kept-parents x kept-variants).
-    expected = (len(KEEP_48LAWS) + len(KEEP_ATOMIC) + len(KEEP_RULES)) * n_variants
-    assert len(items) == expected, f"expected {expected} items after curation, got {len(items)}"
+    # Sanity: filtered set size depends on mode.
+    if KEEP_TIER_A_ITEMS:
+        assert len(items) == len(KEEP_TIER_A_ITEMS), (
+            f"expected {len(KEEP_TIER_A_ITEMS)} TIER A items, got {len(items)}"
+        )
+    else:
+        expected = (len(KEEP_48LAWS) + len(KEEP_ATOMIC) + len(KEEP_RULES)) * n_variants
+        assert len(items) == expected, f"expected {expected} items after curation, got {len(items)}"
 
     sd = start_date()
     queue = []
-    for k in range(len(items)):
-        variant = VARIANTS[k % n_variants]
-        parent = porder[k % n_parents]
-        it = by_key.get((parent, variant))
-        if it is None:
-            # Should not happen if quotes.json has all expected (parent, variant)
-            # pairs for the curated set — guard anyway so it fails loud, not silent.
-            raise KeyError(f"missing quote for parent={parent!r} variant={variant!r}")
-        day_idx, slot_idx = divmod(k, PER_DAY)
-        d = sd + timedelta(days=day_idx)
-        base = f"{d.isoformat()}_{SLOTS[slot_idx]}"
-        queue.append({
-            "pos": k + 1,
-            "date": d.isoformat(),
-            "slot": SLOTS[slot_idx],
-            "basename": base,
-            "item": it["item"],
-            "book": it["book"],
-            "parent_law": it["parent_law"],
-            "variant_type": variant,
-        })
+    if KEEP_TIER_A_ITEMS:
+        # TIER A mode: skip the (parent x variant) round-robin — Tier A items
+        # don't have all (parent, variant) combinations, so the round-robin
+        # would request missing combos and crash. Instead, enumerate items
+        # in the explicit KEEP_TIER_A_ITEMS order so the rotation honors
+        # user intent (highest-score items get the first cycle dates).
+        ordered_items = [next(it for it in items if it["item"] == iid)
+                         for iid in KEEP_TIER_A_ITEMS]
+        for k, it in enumerate(ordered_items):
+            day_idx, slot_idx = divmod(k, PER_DAY)
+            d = sd + timedelta(days=day_idx)
+            base = f"{d.isoformat()}_{SLOTS[slot_idx]}"
+            queue.append({
+                "pos": k + 1,
+                "date": d.isoformat(),
+                "slot": SLOTS[slot_idx],
+                "basename": base,
+                "item": it["item"],
+                "book": it["book"],
+                "parent_law": it["parent_law"],
+                "variant_type": it["variant_type"],
+            })
+    else:
+        # Curated-pool mode: round-robin interleave parents x variants so no
+        # parent's variants land adjacent (max variety per week).
+        for k in range(len(items)):
+            variant = VARIANTS[k % n_variants]
+            parent = porder[k % n_parents]
+            it = by_key.get((parent, variant))
+            if it is None:
+                raise KeyError(f"missing quote for parent={parent!r} variant={variant!r}")
+            day_idx, slot_idx = divmod(k, PER_DAY)
+            d = sd + timedelta(days=day_idx)
+            base = f"{d.isoformat()}_{SLOTS[slot_idx]}"
+            queue.append({
+                "pos": k + 1,
+                "date": d.isoformat(),
+                "slot": SLOTS[slot_idx],
+                "basename": base,
+                "item": it["item"],
+                "book": it["book"],
+                "parent_law": it["parent_law"],
+                "variant_type": variant,
+            })
 
-    # Hard-constraint self-check: no parent's variants adjacent.
-    bad = [q["pos"] for i, q in enumerate(queue[1:], 1)
-           if q["parent_law"] == queue[i - 1]["parent_law"]]
-    assert not bad, f"adjacency violation at {bad[:5]}"
+    # Hard-constraint self-check: no parent's variants adjacent. (Tier A mode
+    # may have adjacent same-parent items if KEEP_TIER_A_ITEMS lists them so —
+    # the user-controlled order wins over the no-adjacency constraint.)
+    if not KEEP_TIER_A_ITEMS:
+        bad = [q["pos"] for i, q in enumerate(queue[1:], 1)
+               if q["parent_law"] == queue[i - 1]["parent_law"]]
+        assert not bad, f"adjacency violation at {bad[:5]}"
 
     OUT.write_text(json.dumps({
         "start_date": sd.isoformat(),
