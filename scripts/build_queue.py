@@ -43,18 +43,22 @@ PER_DAY = len(SLOTS)
 #
 # To go back to broader curation: comment out KEEP_TIER_A_ITEMS and restore
 # the KEEP_48LAWS / KEEP_ATOMIC / KEEP_RULES sets below.
-# Ordered TUPLE not set — iteration order = posting order. Spread same-law
-# variants (5 and 6 are both Law 1) to opposite ends of the 8-day cycle so
-# the same parent doesn't post back-to-back.
+# 2026-06-08 v2: MARKET-TRENDING items only (user direction "market level
+# trending lines"). Researched June 2026 viral patterns in office/career
+# niche: quiet firing, stealth layoffs, AI-driven cuts, PIP warnings,
+# RTO-as-exit-pressure, workplace anxiety confessional. Each item was
+# brand-new-written (items 277-284) to target a specific 2026 zeitgeist
+# theme. Cycles every 8 days like before, but every tease now hits a
+# theme with active market saturation.
 KEEP_TIER_A_ITEMS = (
-    5,    # Day 1: Law 1 MISTAKE  - "He corrected his boss in the all-hands..."
-    11,   # Day 2: Law 3 MISTAKE  - "You announced it Monday at all-hands..." (May 28 = 182v pattern)
-    21,   # Day 3: Law 6 SCENARIO - "Same code, same hours. One sends a Friday recap."
-    24,   # Day 4: Law 7 SCENARIO - "You wrote it. He demoed it..." (May 30 = 106v pattern)
-    35,   # Day 5: Law 11 MISTAKE - "She documented every process. They reorged her out..."
-    137,  # Day 6: Law 45 MISTAKE - "She took over as VP. Rebuilt everything in week 2..."
-    143,  # Day 7: Law 47 MISTAKE - "He got the promotion Friday. Asked for a bigger team Monday..."
-    6,    # Day 8: Law 1 SCENARIO - "Her boss took her idea to the exec..."  (far from #5)
+    277,  # Day 1: QUIET FIRING — "Three things your boss does the week before quietly pushing you out"
+    278,  # Day 2: LAYOFF SIGNAL — "Her director stopped including her in decisions..."
+    279,  # Day 3: PIP WARNING — "He missed one deadline. By Friday his calendar was full of check-ins"
+    280,  # Day 4: AI LAYOFF — "Her job got optimized with AI in three months..."
+    281,  # Day 5: STEALTH FIRING — "His projects started getting reassigned temporarily..."
+    282,  # Day 6: WORKPLACE ANXIETY — "He looked unbothered in every all-hands. He was rage-applying..."
+    283,  # Day 7: RTO POLITICS — "She was the only one called back to the office full-time..."
+    284,  # Day 8: LAYOFF SURVIVOR — "Tech layoffs hit her team. She was the one who documented..."
 )
 
 # Tier B/C fallback sets (used only if KEEP_TIER_A_ITEMS commented out).
