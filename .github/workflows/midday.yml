@@ -1,10 +1,14 @@
 name: Midday Image (email-only)
 
 on:
-  # 2026-06-04: cron removed per user direction — midday image is now MANUAL
-  # ONLY. Each workflow_dispatch invocation advances state/midday_cursor.json
-  # to the next line in the curated rotation. Run it once -> line 1. Run it
-  # twice -> line 2. Run it five times in a day -> 5 distinct images emailed.
+  # 2026-06-08: cron re-added at 2:00 AM IST per user direction. Both auto-
+  # cron AND manual workflow_dispatch advance state/midday_cursor.json by 1.
+  # So a day with the cron + 1 manual click = 2 distinct images emailed.
+  # 2:00 AM IST = 20:30 UTC (previous day). GH Actions cron drifts 15-90
+  # min late, so the email actually lands 2:15-3:30 AM IST — ready in the
+  # user's inbox when they wake up to build the morning post.
+  schedule:
+    - cron: "30 20 * * *"   # 20:30 UTC = 02:00 IST (drift → 02:15-03:30 IST landing)
   workflow_dispatch:
 
 permissions:
