@@ -13,7 +13,7 @@
     { "id": 11, "text": "Your value didn't decrease\nthe day they cut your role.",                            "mood": "resilience" },
     { "id": 12, "text": "If your boss stopped asking your opinion,\nupdate your resume.",                     "mood": "office" },
     { "id": 13, "text": "Any fool can criticize and complain.\nMost do.",                                     "mood": "truth" },
-    { "id": 14, "text": "Talk to people about themselves\nand they'll listen for hours.",                     "mood": "office" },
-    { "id": 15, "text": "The only way to get the best of an argument\nis to avoid it.",                        "mood": "worth" }
+    { "id": 14, "text": "Quiet firing is the new\nperformance review.",                                       "mood": "office" },
+    { "id": 15, "text": "Three signs your role is about to be eliminated.\nSave this.",                       "mood": "office" }
   ]
 }

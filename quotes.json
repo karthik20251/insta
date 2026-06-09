@@ -3609,7 +3609,7 @@
       "parent_law": "Law 11",
       "book": "The 48 Laws of Power",
       "title": "Law 11",
-      "headline": "Read the Room Before They Read You Out",
+      "headline": "Slow-Fade Warning Signs",
       "author": "Robert Greene",
       "variant_type": "SCENARIO",
       "series_label": "LAYOFF SIGNAL",
@@ -3700,26 +3700,26 @@
       "parent_law": "Avoid Arguments",
       "book": "How to Win Friends and Influence People",
       "title": "Carnegie Principle 10",
-      "headline": "The Argument You Win Costs You the Promotion",
+      "headline": "The Quiet Survivor",
       "author": "Dale Carnegie",
       "variant_type": "SCENARIO",
-      "series_label": "BOUNDARIES",
-      "tease": "He stopped correcting people in meetings. Promoted in 8 months.",
-      "comment_q": "Win the argument or win the room? You can't have both. 👇",
-      "body": "Winning the point cost him the relationship every time. Walking away cost nothing — and the room noticed who held the line."
+      "series_label": "QUIET SURVIVAL",
+      "tease": "She stopped correcting her boss in meetings. Kept her role through 3 layoff rounds.",
+      "comment_q": "Save your point or save your job? You can't always do both. 👇",
+      "body": "Every argument she won cost her one ally. She picked the room over the point. Cuts came. Her seat stayed."
     },
     {
       "item": 286,
       "parent_law": "Let Them Feel It's Theirs",
       "book": "How to Win Friends and Influence People",
       "title": "Carnegie Principle 16",
-      "headline": "The Idea Plant",
+      "headline": "Make Your Boss the Hero",
       "author": "Dale Carnegie",
       "variant_type": "SCENARIO",
-      "series_label": "MANAGING UP",
-      "tease": "She planted her idea in her boss's coffee chat. He pitched it Friday.",
-      "comment_q": "Brilliant strategy or pure manipulation? 👇",
-      "body": "Same idea, his name on it. She kept her role through three rounds of cuts because the boss had a reputation to defend — hers."
+      "series_label": "LAYOFF SURVIVOR",
+      "tease": "She made her boss look good in every all-hands. She survived all 4 layoff rounds.",
+      "comment_q": "Strategic loyalty or pure manipulation? 👇",
+      "body": "Every quarter she fed her boss one win to claim. The day cuts hit, he had a reputation to defend — hers."
     },
     {
       "item": 287,
@@ -3746,6 +3746,19 @@
       "tease": "She asked the VP three small yeses before the big ask. Got the raise during a hiring freeze.",
       "comment_q": "Negotiation hack or basic manipulation? 👇",
       "body": "Yes to the project's value. Yes to her impact. Yes to retention being cheaper than backfill. By the fourth question, no was off the table."
+    },
+    {
+      "item": 289,
+      "parent_law": "Law 2",
+      "book": "The 48 Laws of Power",
+      "title": "Law 2",
+      "headline": "Make Critics Owe You",
+      "author": "Robert Greene",
+      "variant_type": "SCENARIO",
+      "series_label": "USE YOUR ENEMIES",
+      "tease": "She put her office rival on her own project. He had to win for her to win.",
+      "comment_q": "Co-opt your critic or cut them out? 👇",
+      "body": "Sharing credit with a doubter buys you a defender. Q3 reviews — he was her loudest advocate."
     }
   ]
 }
