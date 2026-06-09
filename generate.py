@@ -124,6 +124,11 @@ def book_slug(book_name: str) -> str:
         return "atomic"
     if "12 rules" in b or "jordan peterson" in b:
         return "rules"
+    # 2026-06-09: Carnegie items 285-288 share the 48laws aesthetic (dark
+    # corporate Pexels pool + 48laws music folder) — visually identical
+    # workplace setting. No separate asset folder needed.
+    if "win friends" in b or "dale carnegie" in b:
+        return "48laws"
     if book_name and "48 laws" not in b and "robert greene" not in b:
         import sys
         print(f"[generate] WARN: unknown book {book_name!r} -> falling back to '48laws' slug", file=sys.stderr)
@@ -653,6 +658,8 @@ def render_end_frame(day: dict, out_path: Path) -> None:
         line1 = "BEST OF ATOMIC HABITS"
     elif "12 rules" in book_lower or "jordan peterson" in book_lower:
         line1 = "BEST OF 12 RULES FOR LIFE"
+    elif "win friends" in book_lower or "dale carnegie" in book_lower:
+        line1 = "BEST OF DALE CARNEGIE"
     else:
         line1 = "THE UNWRITTEN RULES"
     line2 = "LINK IN BIO"

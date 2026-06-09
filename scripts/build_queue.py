@@ -51,14 +51,20 @@ PER_DAY = len(SLOTS)
 # theme. Cycles every 8 days like before, but every tease now hits a
 # theme with active market saturation.
 KEEP_TIER_A_ITEMS = (
-    277,  # Day 1: QUIET FIRING — "Three things your boss does the week before quietly pushing you out"
-    278,  # Day 2: LAYOFF SIGNAL — "Her director stopped including her in decisions..."
-    279,  # Day 3: PIP WARNING — "He missed one deadline. By Friday his calendar was full of check-ins"
-    280,  # Day 4: AI LAYOFF — "Her job got optimized with AI in three months..."
-    281,  # Day 5: STEALTH FIRING — "His projects started getting reassigned temporarily..."
-    282,  # Day 6: WORKPLACE ANXIETY — "He looked unbothered in every all-hands. He was rage-applying..."
-    283,  # Day 7: RTO POLITICS — "She was the only one called back to the office full-time..."
-    284,  # Day 8: LAYOFF SURVIVOR — "Tech layoffs hit her team. She was the one who documented..."
+    277,  # Day 1:  QUIET FIRING        — "Three things your boss does the week before quietly pushing you out"
+    278,  # Day 2:  LAYOFF SIGNAL       — "Her director stopped including her in decisions..."
+    279,  # Day 3:  PIP WARNING         — "He missed one deadline. By Friday his calendar was full of check-ins"
+    280,  # Day 4:  AI LAYOFF           — "Her job got optimized with AI in three months..."
+    281,  # Day 5:  STEALTH FIRING      — "His projects started getting reassigned temporarily..."
+    282,  # Day 6:  WORKPLACE ANXIETY   — "He looked unbothered in every all-hands. He was rage-applying..."
+    283,  # Day 7:  RTO POLITICS        — "She was the only one called back to the office full-time..."
+    284,  # Day 8:  LAYOFF SURVIVOR     — "Tech layoffs hit her team. She'd documented the system..."
+    # 2026-06-09: 4 Carnegie-trending items added. Map Carnegie principles to
+    # current viral themes (boundaries, managing-up, anti-toxic, negotiation).
+    285,  # Day 9:  CARNEGIE/BOUNDARIES — "He stopped correcting people in meetings. Promoted in 8 months"
+    286,  # Day 10: CARNEGIE/MANAGING-UP — "She planted her idea in her boss's coffee chat..."
+    287,  # Day 11: CARNEGIE/ANTI-TOXIC — "He complained about his manager every 1:1. Next reorg..."
+    288,  # Day 12: CARNEGIE/NEGOTIATION — "She asked the VP three small yeses before the big ask..."
 )
 
 # Tier B/C fallback sets (used only if KEEP_TIER_A_ITEMS commented out).

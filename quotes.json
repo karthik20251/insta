@@ -3694,6 +3694,58 @@
       "tease": "Tech layoffs hit her team. She'd documented the system nobody else knew.",
       "comment_q": "Knowledge hoarding or knowledge protection? 👇",
       "body": "Two roles, one budget. The org keeps the person whose departure breaks three things by Monday — every time."
+    },
+    {
+      "item": 285,
+      "parent_law": "Avoid Arguments",
+      "book": "How to Win Friends and Influence People",
+      "title": "Carnegie Principle 10",
+      "headline": "The Argument You Win Costs You the Promotion",
+      "author": "Dale Carnegie",
+      "variant_type": "SCENARIO",
+      "series_label": "BOUNDARIES",
+      "tease": "He stopped correcting people in meetings. Promoted in 8 months.",
+      "comment_q": "Win the argument or win the room? You can't have both. 👇",
+      "body": "Winning the point cost him the relationship every time. Walking away cost nothing — and the room noticed who held the line."
+    },
+    {
+      "item": 286,
+      "parent_law": "Let Them Feel It's Theirs",
+      "book": "How to Win Friends and Influence People",
+      "title": "Carnegie Principle 16",
+      "headline": "The Idea Plant",
+      "author": "Dale Carnegie",
+      "variant_type": "SCENARIO",
+      "series_label": "MANAGING UP",
+      "tease": "She planted her idea in her boss's coffee chat. He pitched it Friday.",
+      "comment_q": "Brilliant strategy or pure manipulation? 👇",
+      "body": "Same idea, his name on it. She kept her role through three rounds of cuts because the boss had a reputation to defend — hers."
+    },
+    {
+      "item": 287,
+      "parent_law": "Don't Criticize",
+      "book": "How to Win Friends and Influence People",
+      "title": "Carnegie Principle 1",
+      "headline": "The Complainer Reorg",
+      "author": "Dale Carnegie",
+      "variant_type": "MISTAKE",
+      "series_label": "ANTI-TOXIC",
+      "tease": "He complained about his manager in every 1:1. The next reorg eliminated his role first.",
+      "comment_q": "Was he the toxic one all along? 👇",
+      "body": "Complaining made him predictable. The org restructured around the complaint. Now he's looking for work — and still telling the same story."
+    },
+    {
+      "item": 288,
+      "parent_law": "Yes Yes Yes",
+      "book": "How to Win Friends and Influence People",
+      "title": "Carnegie Principle 14",
+      "headline": "The Three Yeses",
+      "author": "Dale Carnegie",
+      "variant_type": "SCENARIO",
+      "series_label": "NEGOTIATION",
+      "tease": "She asked the VP three small yeses before the big ask. Got the raise during a hiring freeze.",
+      "comment_q": "Negotiation hack or basic manipulation? 👇",
+      "body": "Yes to the project's value. Yes to her impact. Yes to retention being cheaper than backfill. By the fourth question, no was off the table."
     }
   ]
 }

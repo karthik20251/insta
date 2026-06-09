@@ -82,6 +82,13 @@ def build_youtube_metadata(day: dict) -> dict:
         tags = ["12 rules for life", "jordan peterson", "stoicism",
                 "stoic wisdom", "meaning", "responsibility", "modern stoicism",
                 "wisdom for men", "life lessons"]
+    elif "win friends" in book_lower or "dale carnegie" in book_lower:
+        # Carnegie-specific tags: discovery via book + niche office influence
+        # terms. Carnegie's audience overlaps with 48 Laws but tilts softer
+        # (managing up, influence, communication) — tags reflect that.
+        tags = ["how to win friends and influence people", "dale carnegie",
+                "influence", "managing up", "office politics", "soft skills",
+                "communication at work", "leadership", "career advice"]
     else:
         tags = ["48 laws of power", "robert greene", "office politics",
                 "career advice", "corporate survival", "managing up",
