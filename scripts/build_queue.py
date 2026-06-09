@@ -59,12 +59,18 @@ KEEP_TIER_A_ITEMS = (
     282,  # Day 6:  WORKPLACE ANXIETY   — "He looked unbothered in every all-hands. He was rage-applying..."
     283,  # Day 7:  RTO POLITICS        — "She was the only one called back to the office full-time..."
     284,  # Day 8:  LAYOFF SURVIVOR     — "Tech layoffs hit her team. She'd documented the system..."
-    # 2026-06-09: 4 Carnegie-trending items added. Map Carnegie principles to
-    # current viral themes (boundaries, managing-up, anti-toxic, negotiation).
-    285,  # Day 9:  CARNEGIE/BOUNDARIES — "He stopped correcting people in meetings. Promoted in 8 months"
-    286,  # Day 10: CARNEGIE/MANAGING-UP — "She planted her idea in her boss's coffee chat..."
-    287,  # Day 11: CARNEGIE/ANTI-TOXIC — "He complained about his manager every 1:1. Next reorg..."
-    288,  # Day 12: CARNEGIE/NEGOTIATION — "She asked the VP three small yeses before the big ask..."
+    # 2026-06-09: 4 Carnegie-trending items added (#285-288). #285 and #286
+    # then rewritten to add explicit 2026 zeitgeist hooks (layoff survival)
+    # per user "only trending" direction. Bodies tightened — applying Law 4
+    # "say less than necessary".
+    285,  # Day 9:  QUIET SURVIVAL    — "She stopped correcting her boss. Kept role through 3 layoff rounds"
+    286,  # Day 10: LAYOFF SURVIVOR   — "Made boss look good in every all-hands. Survived all 4 layoff rounds"
+    287,  # Day 11: ANTI-TOXIC        — "He complained about his manager every 1:1. Next reorg eliminated his role first"
+    288,  # Day 12: NEGOTIATION       — "She asked the VP three small yeses before the big ask. Got the raise during a hiring freeze"
+    # 2026-06-09 (later): Law 2 "Use Your Enemies" reinterpreted for 2026.
+    # Classic = use former enemies > friends. Fresh = co-opt your critic by
+    # putting them on YOUR project so they must win for you to win.
+    289,  # Day 13: USE YOUR ENEMIES  — "She put her office rival on her own project. He had to win for her to win"
 )
 
 # Tier B/C fallback sets (used only if KEEP_TIER_A_ITEMS commented out).
