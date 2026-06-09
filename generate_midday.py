@@ -105,23 +105,31 @@ IG_TEMPLATES = [
 # #mindset (100M). Strategy = mostly mid-volume (1M-30M, where small accounts
 # can rank) + niche (50K-500K, where small accounts can DOMINATE) + 1-2 high-
 # volume tags for ceiling discovery if a post breaks out.
+# 2026-06-09: hashtag pools refreshed to match the new 12 market-trending
+# lines (quiet firing / AI / layoffs / RTO / boundaries / anti-hustle). Old
+# generic-motivation tags (#hustlewisdom, #weatheredwisdom etc.) replaced
+# with current-discourse tags people actually search in 2026:
+#   #quietquitting, #worklifebalance, #boundaries, #layoffsurvivor,
+#   #burnout, #hustleculture, #ailayoffs, #protectyourpeace.
 IG_HASHTAGS_UNIVERSAL = [
     "#unwrittenrules",     # brand tag — discoverability corpus over time
-    "#dailylessons",       # mid-volume, on-brand
-    "#mindsetreset",       # mid-volume niche, less competitive than #mindset
-    "#realtalkdaily",      # niche, room to rank
+    "#worklifebalance",    # high-volume, on-brand for 2026 zeitgeist
+    "#careeradvice",       # mid-volume, niche-appropriate
+    "#corporatesurvival",  # niche, room to rank
 ]
 IG_HASHTAGS_BY_MOOD = {
-    # Each pool: 2 niche (small-account ranking opportunity) + 4 mid-volume.
-    "hustle":     ["#quietgrind", "#hustlewisdom", "#discipline", "#selfmade", "#ambition", "#highperformance"],
-    "mindset":    ["#mindsetshift", "#identitywork", "#selfgrowthdaily", "#mindsetreset", "#reinvention", "#becoming"],
-    "resilience": ["#keepgoing", "#stillstanding", "#weatheredwisdom", "#hardthings", "#riseanyway", "#strongmind"],
-    "worth":      ["#knowyourworth", "#protectyourenergy", "#boundariesmatter", "#standardsmatter", "#energymanagement", "#highvaluemindset"],
-    "truth":      ["#harshtruths", "#realtalk", "#hardtruths", "#truthsnobodysays", "#bittermedicine", "#bluntwisdom"],
-    # Office politics: #officepolitics has only ~100K posts = HIGH ranking opportunity.
-    "office":     ["#officepolitics", "#corporatesurvival", "#workplacewisdom", "#careergrowth", "#climbingtheladder", "#managingupward"],
-    # Wisdom: #stoicism (10M) is where Greek/Roman wisdom audiences hang out.
-    "wisdom":     ["#stoicwisdom", "#stoicism", "#timelesstruths", "#ancientwisdom", "#deepthoughts", "#philosophyoflife"],
+    # Each pool: trending-theme tags matching the line content. Mix of high-
+    # volume (broad discovery) and niche (rankable for small accounts).
+    # NOTE: tags here must NOT overlap with IG_HASHTAGS_UNIVERSAL above —
+    # otherwise the final caption ends up with the same hashtag twice, which
+    # IG reads as spam/desperation signal.
+    "worth":      ["#knowyourworth", "#boundaries", "#protectyourpeace", "#toxicworkplace", "#careerwellness", "#boundariesatwork"],
+    "resilience": ["#layoffsurvivor", "#careergrowth", "#careertransition", "#resilience", "#joblossadvice", "#careerresilience"],
+    "mindset":    ["#burnout", "#mentalhealth", "#selfcare", "#worksmarter", "#careerwellness", "#mentalhealthatwork"],
+    "office":     ["#officepolitics", "#ailayoffs", "#quietfiring", "#careerstrategy", "#climbingtheladder", "#workplacewisdom"],
+    "truth":      ["#hustleculture", "#antihustle", "#realtalk", "#burnoutawareness", "#harshtruths", "#hardtruths"],
+    "hustle":     ["#quietgrind", "#discipline", "#highperformance", "#careergrowth", "#ambition", "#selfmade"],
+    "wisdom":     ["#stoicwisdom", "#stoicism", "#philosophyoflife", "#mentalhealth", "#realtalk", "#hardtruths"],
 }
 
 # ---- YOUTUBE (Shorts) caption templates --------------------------------------
@@ -142,15 +150,16 @@ YT_TEMPLATES = [
 # YT Shorts: #shorts is mandatory and goes first. Drop overused #motivation
 # (350M-tag = invisible for small channels) in favor of #unwrittenrules (brand)
 # and #dailylessons (mid-volume, on-brand).
-YT_HASHTAGS_UNIVERSAL = ["#shorts", "#unwrittenrules", "#dailylessons"]
+# YT: 3 universal + 3 mood-specific. Same anti-overlap rule.
+YT_HASHTAGS_UNIVERSAL = ["#shorts", "#unwrittenrules", "#worklifebalance"]
 YT_HASHTAGS_BY_MOOD = {
-    "hustle":     ["#quietgrind", "#discipline", "#highperformance"],
-    "mindset":    ["#mindsetshift", "#identitywork", "#selfgrowth"],
-    "resilience": ["#stillstanding", "#hardthings", "#strongmind"],
-    "worth":      ["#knowyourworth", "#protectyourenergy", "#boundaries"],
-    "truth":      ["#hardtruths", "#bluntwisdom", "#realtalk"],
-    "office":     ["#officepolitics", "#corporatesurvival", "#careergrowth"],
-    "wisdom":     ["#stoicism", "#philosophyoflife", "#timelesstruths"],
+    "worth":      ["#boundaries", "#knowyourworth", "#careerwellness"],
+    "resilience": ["#layoffsurvivor", "#careertransition", "#careergrowth"],
+    "mindset":    ["#burnout", "#mentalhealth", "#selfcare"],
+    "office":     ["#officepolitics", "#careeradvice", "#corporatesurvival"],
+    "truth":      ["#hustleculture", "#antihustle", "#realtalk"],
+    "hustle":     ["#quietgrind", "#discipline", "#careergrowth"],
+    "wisdom":     ["#stoicism", "#philosophyoflife", "#mentalhealth"],
 }
 
 
