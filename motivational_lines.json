@@ -2,9 +2,9 @@
   "lines": [
     { "id": 1,  "text": "Doing your job description is not quiet quitting. It's the job.",                   "mood": "worth" },
     { "id": 2,  "text": "They didn't lay you off. They freed you from a sinking ship.",                       "mood": "resilience" },
-    { "id": 3,  "text": "AI won't take your job. The person using AI will.",                                  "mood": "mindset" },
+    { "id": 3,  "text": "AI won't take your job. The person using AI will.",                                  "mood": "office" },
     { "id": 4,  "text": "Protect your peace like it's the last seat on the lifeboat.",                        "mood": "worth" },
-    { "id": 5,  "text": "Tired is not a personality trait. Take the PTO.",                                    "mood": "resilience" },
+    { "id": 5,  "text": "Tired is not a personality trait. Take the PTO.",                                    "mood": "mindset" },
     { "id": 6,  "text": "Promotions don't go to the busiest person.\nThey go to the most visible one.",       "mood": "office" },
     { "id": 7,  "text": "Your boss is not your friend.\nYour boss has metrics.",                              "mood": "office" },
     { "id": 8,  "text": "The most powerful person in the room\nis the one who can leave.",                    "mood": "worth" },
