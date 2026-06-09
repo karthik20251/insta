@@ -6,13 +6,13 @@
     { "id": 4,  "text": "Protect your peace like it's the last seat on the lifeboat.",                        "mood": "worth" },
     { "id": 5,  "text": "Tired is not a personality trait. Take the PTO.",                                    "mood": "mindset" },
     { "id": 6,  "text": "Promotions don't go to the busiest person.\nThey go to the most visible one.",       "mood": "office" },
-    { "id": 7,  "text": "Your boss is not your friend.\nYour boss has metrics.",                              "mood": "office" },
-    { "id": 8,  "text": "The most powerful person in the room\nis the one who can leave.",                    "mood": "worth" },
+    { "id": 7,  "text": "Your boss isn't your friend.\nYour boss is on the layoff committee.",                "mood": "office" },
+    { "id": 8,  "text": "Six months of savings is more leverage\nthan ten years of loyalty.",                 "mood": "worth" },
     { "id": 9,  "text": "Hustle culture made millionaires of CEOs\nand burnouts of employees.",               "mood": "truth" },
     { "id": 10, "text": "Loyalty to a company that wouldn't replace you in a week\nis not virtue.",           "mood": "office" },
     { "id": 11, "text": "Your value didn't decrease\nthe day they cut your role.",                            "mood": "resilience" },
     { "id": 12, "text": "If your boss stopped asking your opinion,\nupdate your resume.",                     "mood": "office" },
-    { "id": 13, "text": "Any fool can criticize and complain.\nMost do.",                                     "mood": "truth" },
+    { "id": 13, "text": "The complainer in every 1:1\ngets cut first.",                                       "mood": "truth" },
     { "id": 14, "text": "Quiet firing is the new\nperformance review.",                                       "mood": "office" },
     { "id": 15, "text": "Three signs your role is about to be eliminated.\nSave this.",                       "mood": "office" }
   ]
