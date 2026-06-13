@@ -748,25 +748,39 @@ def make_video(intro_path: Path, main_path: Path, example_path: Path, end_path: 
     t_main_to_example = intro_s + main_s - 0.5
     t_example_to_end = intro_s + main_s + example_s - 0.5
 
+    intro_out_frames = int((intro_s + 0.5) * 30)
     main_out_frames = int((main_s + 0.5) * 30)
     example_out_frames = int((example_s + 0.5) * 30)
+    end_out_frames = int((end_s + 0.5) * 30)
 
     # Decide the final video-output label so we can optionally chain a
     # captions burn-in on top: [outv_pre] -> subtitles -> [outv].
     vlabel = "outv" if caption_srt is None else "outv_pre"
+    # 2026-06-13: 4-frame Ken Burns motion upgrade — was 2 of 4 frames with
+    # near-imperceptible 0.0003-0.0004 zoom; user feedback "do we need
+    # animation" surfaced that the static photo pipeline read as cheap.
+    # Bumped to 0.0006-0.0010 (visible but cinematic, not seasick), added
+    # alternating horizontal drift (x oscillates around center) so motion
+    # feels organic rather than zoom-only. Intro + end now also animated
+    # — were locked static, which made hook + payoff frames feel flat.
+    # ALL FREE — ffmpeg zoompan, no API cost, no extra render time.
     vfilter = (
-        # Intro — static
-        f"[0:v]setpts=PTS-STARTPTS[v0];"
-        # Main — slow zoom
+        # Intro — slow zoom + pan left (hook frame, motion draws eye in)
+        f"[0:v]scale={WIDTH * 2}:{HEIGHT * 2},"
+        f"zoompan=z='1+0.0008*on':x='iw/2-(iw/zoom/2)+sin(on/30)*40':y='ih/2-(ih/zoom/2)':"
+        f"d={intro_out_frames}:fps=30:s={WIDTH}x{HEIGHT}[v0];"
+        # Main — zoom in (law reveal, intensifying motion matches the punch)
         f"[1:v]scale={WIDTH * 2}:{HEIGHT * 2},"
-        f"zoompan=z='1+0.0004*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"zoompan=z='1+0.0010*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
         f"d={main_out_frames}:fps=30:s={WIDTH}x{HEIGHT}[v1];"
-        # Example — slow zoom (continues motion)
+        # Example — zoom + pan right (alternate direction = organic feel)
         f"[2:v]scale={WIDTH * 2}:{HEIGHT * 2},"
-        f"zoompan=z='1+0.0003*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"zoompan=z='1+0.0008*on':x='iw/2-(iw/zoom/2)-sin(on/30)*40':y='ih/2-(ih/zoom/2)':"
         f"d={example_out_frames}:fps=30:s={WIDTH}x{HEIGHT}[v2];"
-        # End — static
-        f"[3:v]setpts=PTS-STARTPTS[v3];"
+        # End — gentle zoom (CTA frame, calm close)
+        f"[3:v]scale={WIDTH * 2}:{HEIGHT * 2},"
+        f"zoompan=z='1+0.0006*on':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':"
+        f"d={end_out_frames}:fps=30:s={WIDTH}x{HEIGHT}[v3];"
         # Stitch all four with 0.5-sec crossfades
         f"[v0][v1]xfade=transition=fade:duration=0.5:offset={t_intro_to_main}[ab];"
         f"[ab][v2]xfade=transition=fade:duration=0.5:offset={t_main_to_example}[abc];"
