@@ -17,18 +17,18 @@
     { "id": 15, "text": "Three signs your role is about to be eliminated.\nSave this.",                       "mood": "office" },
     { "id": 16, "text": "Work hard in silence.\nLet your success make the noise.",                            "mood": "office" },
     { "id": 17, "text": "No is a complete sentence.",                                                         "mood": "worth" },
-    { "id": 18, "text": "Rest is productive.",                                                                "mood": "truth" },
+    { "id": 18, "text": "Stop watering dead plants.",                                                         "mood": "resilience" },
     { "id": 19, "text": "What's meant for you\nwon't pass you by.",                                           "mood": "mindset" },
     { "id": 20, "text": "Healing isn't linear.\nAnd look how far you've come.",                               "mood": "resilience" },
     { "id": 21, "text": "Self-respect first.",                                                                "mood": "worth" },
     { "id": 22, "text": "Quiet confidence.",                                                                  "mood": "worth" },
     { "id": 23, "text": "You can't pour from an empty cup.",                                                  "mood": "mindset" },
-    { "id": 24, "text": "Honoring my journey.",                                                               "mood": "mindset" },
+    { "id": 24, "text": "Hurt people hurt people.",                                                           "mood": "truth" },
     { "id": 25, "text": "Romanticize your life.",                                                             "mood": "mindset" },
     { "id": 26, "text": "Your peace is your power.",                                                          "mood": "worth" },
     { "id": 27, "text": "Soft life.\nHard boundaries.",                                                       "mood": "worth" },
-    { "id": 28, "text": "Living my vibe.",                                                                    "mood": "mindset" },
-    { "id": 29, "text": "Finding magic in the little things.",                                                "mood": "resilience" },
+    { "id": 28, "text": "Your vibe attracts your tribe.",                                                     "mood": "mindset" },
+    { "id": 29, "text": "Self love isn't selfish.",                                                           "mood": "worth" },
     { "id": 30, "text": "Confidence unlocked.",                                                               "mood": "resilience" }
   ]
 }
