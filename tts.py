@@ -102,57 +102,54 @@ def _strip_for_speech(text: str) -> str:
 # Each is ~12-15 words, ~5-6 sec at neutral Sonia rate. Frames the cost
 # of NOT acting (Cialdini-correct). All 4 drive save/share — the algo-
 # rewarded signals — no explicit Follow/Like/Subscribe asks anywhere.
+# 2026-06-13: CTAs tightened 12-15w -> 7-9w so the BODY can run in full.
+# User feedback: content was getting truncated mid-sentence. Bodies are
+# the story payoff; CTAs are the action call. Body must win the budget.
 _LOSS_AVERSION_CTAS = [
-    # SAVE — fear of needing it later
-    "Save this before your next one-on-one. Or be the one who needed it, and forgot.",
-    # SAVE — fear of being unprepared for a reorg
-    "Save this. The next reorg announcement won't wait for you to be ready.",
-    # SHARE — fear of a colleague stumbling
-    "Send this to the coworker who's about to learn this the hard way.",
-    # SAVE — fear of the meeting you can't undo
-    "Save this for the meeting you're definitely going to have.",
+    "Save this before your next 1:1.",                                   # 7w
+    "Save this. The next reorg won't wait.",                             # 7w
+    "Send this to the coworker who needs it.",                           # 8w
+    "Save this for the meeting you'll have.",                            # 7w
 ]
 
 
 def narration_script(day: dict) -> str:
-    """Build a ~45-50 word script tuned for the ~19s video at 0% rate
-    (post-2026-06-04 SMM pacing): tease (hook) -> headline (the law) ->
-    one-sentence body -> divisive question (drives comments) -> ONE
-    rotating loss-aversion CTA (drives save/share — no Follow/Like asks
-    after 2026-06-05 algorithm-bait cleanup).
+    """Build a ~45-50 word script tuned for the ~19s video at 0% rate.
 
-    Time landing target (approximate, depends on word count):
-      0-3s    tease (hook)
-      3-10s   headline + body
-      10-15s  comment question
-      15-19s  loss-aversion CTA
+    2026-06-13: REMOVED headline from narration. User feedback "content
+    not so acquirable" — having the headline voiced between tease and
+    body broke the story flow ("She was the only one called back...
+    They wanted her to quit. WHEN RTO MEANS GET OUT. Mandates target...").
+    Headline still RENDERED on the main frame visually — but in voice
+    it interrupted the narrative. Now narration flows:
 
-    The CTA rotates by item index so consecutive posts don't repeat the
-    same line — variety prevents the "this is a bot" sniff that kills
-    reach.
+      0-3s    tease (specific scene hook)
+      3-12s   body (the story unfolds + lesson)
+      12-16s  divisive question (drives comments)
+      16-19s  loss-aversion CTA (drives saves)
+
+    Removing the headline frees ~5 words of budget for body, so the
+    body no longer gets truncated mid-thought.
     """
     tease = _strip_for_speech(day.get("tease", "")).rstrip(".")
-    headline = _strip_for_speech(day.get("headline", "")).rstrip(".")
     body = _strip_for_speech(day.get("body", ""))
     question = _strip_for_speech(day.get("comment_q", "")).rstrip("?") + "?"
-    body_first = body.split(".", 1)[0].strip()
 
     # Loss-aversion CTA rotates 1 of 4 by item index. All 4 drive save/
     # share signals — no Follow/Like asks after the bait cleanup.
     item_idx = int(day.get("item", 1))
     cta = _LOSS_AVERSION_CTAS[(item_idx - 1) % len(_LOSS_AVERSION_CTAS)]
 
-    # Budget: 52 words total ≈ 22s at -10%. Preserve CTA + question + tease +
-    # headline IN FULL (they're load-bearing for engagement). The body is the
-    # only variable-length elastic — it absorbs the overflow. This protects
-    # the CTA from getting mid-word-cut (item 7's "Never Put Too Much Trust
-    # in Friends..." headline used to chop the CTA's final word).
+    # Budget: 52 words total ≈ 22s at 0% rate. Preserve CTA + question +
+    # tease IN FULL — body is elastic and absorbs the overflow. With
+    # headline dropped, body usually fits in full (~17 words) without
+    # needing first-sentence truncation.
     BUDGET = 52
-    fixed_words = len((tease + " " + headline + " " + question + " " + cta).split())
-    body_budget = max(3, BUDGET - fixed_words)
-    body_first = " ".join(body_first.split()[:body_budget]).rstrip(",;:")
+    fixed_words = len((tease + " " + question + " " + cta).split())
+    body_budget = max(5, BUDGET - fixed_words)
+    body_clean = " ".join(body.split()[:body_budget]).rstrip(",;:")
 
-    parts = [p for p in (tease, headline, body_first, question, cta) if p]
+    parts = [p for p in (tease, body_clean, question, cta) if p]
     return ". ".join(parts)
 
 
@@ -348,21 +345,23 @@ def narration_segments(day: dict) -> list[tuple[str, str]]:
     pitch shifts per segment so the narrator's energy modulates through the
     video — excited opening → measured middle → grave authoritative close.
     """
+    # 2026-06-13: dropped headline from voice (same change as narration_script).
+    # User feedback: voiced headline broke the tease->body story flow. Headline
+    # still RENDERED on the main frame visually. Middle segment now is body +
+    # question — body fits in full because the headline word budget freed up.
     tease = _strip_for_speech(day.get("tease", "")).rstrip(".")
-    headline = _strip_for_speech(day.get("headline", "")).rstrip(".")
     body = _strip_for_speech(day.get("body", ""))
     question = _strip_for_speech(day.get("comment_q", "")).rstrip("?") + "?"
-    body_first = body.split(".", 1)[0].strip()
 
     item_idx = int(day.get("item", 1))
     cta = _LOSS_AVERSION_CTAS[(item_idx - 1) % len(_LOSS_AVERSION_CTAS)]
 
     BUDGET = 52
-    fixed_words = len((tease + " " + headline + " " + question + " " + cta).split())
-    body_budget = max(3, BUDGET - fixed_words)
-    body_first = " ".join(body_first.split()[:body_budget]).rstrip(",;:")
+    fixed_words = len((tease + " " + question + " " + cta).split())
+    body_budget = max(5, BUDGET - fixed_words)
+    body_clean = " ".join(body.split()[:body_budget]).rstrip(",;:")
 
-    middle_parts = [p for p in (headline, body_first, question) if p]
+    middle_parts = [p for p in (body_clean, question) if p]
     return [
         (tease + ".", _PITCH_HOOK),
         (". ".join(middle_parts), _PITCH_MIDDLE),
