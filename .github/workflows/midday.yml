@@ -1,14 +1,22 @@
 name: Midday Image (email-only)
 
 on:
-  # 2026-06-08: cron re-added at 2:00 AM IST per user direction. Both auto-
-  # cron AND manual workflow_dispatch advance state/midday_cursor.json by 1.
-  # So a day with the cron + 1 manual click = 2 distinct images emailed.
-  # 2:00 AM IST = 20:30 UTC (previous day). GH Actions cron drifts 15-90
-  # min late, so the email actually lands 2:15-3:30 AM IST — ready in the
-  # user's inbox when they wake up to build the morning post.
+  # 2026-06-13: TWO daily fires per user direction — 02:00 AM IST + 02:30 AM
+  # IST. Each fire advances state/midday_cursor.json by 1, so user gets
+  # TWO DIFFERENT image+caption emails per morning. Concurrency group below
+  # ensures the 02:30 run waits for the 02:00 run's cursor-commit before
+  # picking its line (no race, no duplicate).
+  #
+  # IST timing math: IST = UTC + 5:30
+  #   02:00 IST = 20:30 UTC (previous day)
+  #   02:30 IST = 21:00 UTC (previous day)
+  #
+  # GH Actions cron drifts 15-90 min late under load, so actual landings
+  # are 02:15-03:30 IST (first) and 02:45-04:00 IST (second). Both arrive
+  # well before user's morning posting window (07:00-10:00 IST).
   schedule:
-    - cron: "30 20 * * *"   # 20:30 UTC = 02:00 IST (drift → 02:15-03:30 IST landing)
+    - cron: "30 20 * * *"   # 20:30 UTC = 02:00 IST  (first  morning fire)
+    - cron: "0 21 * * *"    # 21:00 UTC = 02:30 IST  (second morning fire)
   workflow_dispatch:
 
 permissions:
