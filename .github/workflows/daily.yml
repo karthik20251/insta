@@ -1,13 +1,25 @@
 name: Daily 48 Laws Post
 
 on:
-  schedule:
-    # 1 automated post/day — evening peak only.
-    # 2026-06-04: dropped AM/lunch slot per user direction. User now posts
-    # MORNING manually using midday-image email (arrives ~06:00 IST) +
-    # trending audio + CapCut. This workflow handles ONLY the evening post.
-    # GH Actions cron drifts 15-90 min late under load.
-    - cron: "0 14 * * *"     # EVENING slot (14:00 UTC = 19:30 IST; drift -> lands ~19:45-21:00 IST, prime engagement peak)
+  # 2026-06-13: AUTO-CRON PAUSED per user direction.
+  #
+  # Data drove the decision: the auto-rendered video pipeline was earning
+  # 50-145 views/post while the user's manual midday static posts (image
+  # + CapCut + trending audio) were hitting 100-1764 views. ~10x view
+  # gap. The video pipeline taught the algorithm to deprioritize the
+  # account; manual static + trending audio is the format winning in 2026.
+  #
+  # WHAT THIS CHANGE DOES:
+  #   - Disables the schedule trigger (no 14:00 UTC = 19:30 IST auto-fire)
+  #   - KEEPS workflow_dispatch (manual "Run workflow" button still works)
+  #   - KEEPS all code paths (render, voice, captions, IG/YT post) intact
+  #   - REVERSIBLE: uncomment the `schedule:` block below to resume.
+  #
+  # TO RESUME AUTO-POSTING (if the manual-only strategy doesn't lift):
+  #   Restore the two lines under `schedule:` below.
+  #
+  # schedule:
+  #   - cron: "0 14 * * *"   # EVENING slot (14:00 UTC = 19:30 IST)
   workflow_dispatch:
     inputs:
       slot:
