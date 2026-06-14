@@ -29,6 +29,12 @@
     { "id": 27, "text": "Soft life.\nHard boundaries.",                                                       "mood": "worth" },
     { "id": 28, "text": "Your vibe attracts your tribe.",                                                     "mood": "mindset" },
     { "id": 29, "text": "Self love isn't selfish.",                                                           "mood": "worth" },
-    { "id": 30, "text": "Confidence unlocked.",                                                               "mood": "resilience" }
+    { "id": 30, "text": "Confidence unlocked.",                                                               "mood": "resilience" },
+    { "id": 31, "text": "The only way to do great work\nis to love what you do.",                              "mood": "mindset" },
+    { "id": 32, "text": "Don't stop when you're tired.\nStop when you're done.",                               "mood": "truth" },
+    { "id": 33, "text": "Be yourself.\nEveryone else is already taken.",                                       "mood": "worth" },
+    { "id": 34, "text": "Comparison is the thief of joy.",                                                     "mood": "truth" },
+    { "id": 35, "text": "Discipline equals freedom.",                                                          "mood": "truth" },
+    { "id": 36, "text": "She believed she could,\nso she did.",                                                "mood": "resilience" }
   ]
 }
