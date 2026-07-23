@@ -35,6 +35,21 @@
     { "id": 33, "text": "Be yourself.\nEveryone else is already taken.",                                       "mood": "worth" },
     { "id": 34, "text": "Comparison is the thief of joy.",                                                     "mood": "truth" },
     { "id": 35, "text": "Discipline equals freedom.",                                                          "mood": "truth" },
-    { "id": 36, "text": "She believed she could,\nso she did.",                                                "mood": "resilience" }
+    { "id": 36, "text": "She believed she could,\nso she did.",                                                "mood": "resilience" },
+    { "id": 37, "text": "Layoffs don't take the worst performers.\nThey take the most replaceable.",           "mood": "resilience" },
+    { "id": 38, "text": "Working late doesn't mean working smart.\nIt means bad boundaries.",                   "mood": "mindset" },
+    { "id": 39, "text": "The manager who says 'we're all family here'\nis the one who lays you off first.",     "mood": "office" },
+    { "id": 40, "text": "Getting passed over for promotion twice?\nThey're grooming your replacement.",         "mood": "office" },
+    { "id": 41, "text": "Your salary won't grow at the same company.\nYour job market value will.",             "mood": "worth" },
+    { "id": 42, "text": "Stop giving 110 percent.\nYour 100 is what they're paying for.",                       "mood": "worth" },
+    { "id": 43, "text": "The employee of the month\nis usually the first to burn out.",                         "mood": "truth" },
+    { "id": 44, "text": "Success at work is 30 percent skills,\n70 percent who sees your work.",                "mood": "office" },
+    { "id": 45, "text": "If your job requires you to prove your worth every quarter,\nthey don't value you.",   "mood": "worth" },
+    { "id": 46, "text": "Your promotion isn't given.\nIt's negotiated.",                                        "mood": "office" },
+    { "id": 47, "text": "The best career move you'll ever make\nis knowing when to leave.",                     "mood": "resilience" },
+    { "id": 48, "text": "Coffee badging isn't quiet quitting.\nIt's protecting your energy.",                   "mood": "office" },
+    { "id": 49, "text": "Bare minimum Mondays.\nMaximum output when it matters.",                               "mood": "mindset" },
+    { "id": 50, "text": "Rage applying at 2 AM\nis 2026 career maintenance.",                                   "mood": "resilience" },
+    { "id": 51, "text": "If your only value is being cheap,\nyou're replaceable.",                              "mood": "worth" }
   ]
 }
