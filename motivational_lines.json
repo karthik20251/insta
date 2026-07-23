@@ -92,42 +92,42 @@
     },
     {
       "id": 19,
-      "text": "What's meant for you\nwon't pass you by.",
-      "mood": "mindset"
+      "text": "Visibility isn't bragging.\nInvisible work is unpaid work.",
+      "mood": "office"
     },
     {
       "id": 20,
-      "text": "Healing isn't linear.\nAnd look how far you've come.",
-      "mood": "resilience"
+      "text": "Burnout is loyalty\nto everyone except yourself.",
+      "mood": "truth"
     },
     {
       "id": 21,
-      "text": "Hard times create strong people.",
-      "mood": "resilience"
+      "text": "Job titles expire.\nReputations compound.",
+      "mood": "office"
     },
     {
       "id": 22,
-      "text": "Quiet confidence.",
-      "mood": "worth"
+      "text": "Quiet in the meeting.\nLoud in the results.",
+      "mood": "office"
     },
     {
       "id": 23,
-      "text": "You can't pour from an empty cup.",
+      "text": "Your calendar is a confession.\nWhat does it say you value?",
       "mood": "mindset"
     },
     {
       "id": 24,
-      "text": "Hurt people hurt people.",
+      "text": "You can't heal in the same office\nthat's burning you out.",
       "mood": "truth"
     },
     {
       "id": 25,
-      "text": "Romanticize your life.",
-      "mood": "mindset"
+      "text": "Don't chase titles.\nChase leverage.",
+      "mood": "worth"
     },
     {
       "id": 26,
-      "text": "Your peace is your power.",
+      "text": "Peace at work isn't found.\nIt's negotiated.",
       "mood": "worth"
     },
     {
@@ -137,13 +137,13 @@
     },
     {
       "id": 28,
-      "text": "Your vibe attracts your tribe.",
-      "mood": "mindset"
+      "text": "Your network is built in years\nand cashed in days.",
+      "mood": "office"
     },
     {
       "id": 29,
-      "text": "Self love isn't selfish.",
-      "mood": "worth"
+      "text": "The extra project you can't refuse\nis the burnout you scheduled.",
+      "mood": "truth"
     },
     {
       "id": 30,
@@ -152,32 +152,32 @@
     },
     {
       "id": 31,
-      "text": "The only way to do great work\nis to love what you do.",
+      "text": "The only way to do great work\nis to love what you do.\n— Steve Jobs",
       "mood": "mindset"
     },
     {
       "id": 32,
-      "text": "Don't stop when you're tired.\nStop when you're done.",
+      "text": "Don't stop when you're tired.\nStop when you're done.\n— David Goggins",
       "mood": "truth"
     },
     {
       "id": 33,
-      "text": "Be yourself.\nEveryone else is already taken.",
-      "mood": "worth"
+      "text": "Nobody promotes potential.\nThey promote evidence.",
+      "mood": "office"
     },
     {
       "id": 34,
-      "text": "Comparison is the thief of joy.",
+      "text": "Comparison is the thief of joy.\n— Theodore Roosevelt",
       "mood": "truth"
     },
     {
       "id": 35,
-      "text": "Discipline equals freedom.",
+      "text": "Discipline equals freedom.\n— Jocko Willink",
       "mood": "truth"
     },
     {
       "id": 36,
-      "text": "She believed she could,\nso she did.",
+      "text": "She believed she could,\nso she did.\n— R.S. Grey",
       "mood": "resilience"
     },
     {
@@ -372,7 +372,7 @@
     },
     {
       "id": 75,
-      "text": "Job security died in 2020.\nSkill security is the new plan.",
+      "text": "Job security died in 2020.\nSkills are the only pension left.",
       "mood": "resilience"
     },
     {
