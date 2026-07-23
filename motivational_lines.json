@@ -499,6 +499,81 @@
       "id": 100,
       "text": "Work hard.\nBut know exactly who's watching before you do.",
       "mood": "office"
+    },
+    {
+      "id": 101,
+      "text": "Your brand is what people say about you\nwhen you're not in the room.\n— Jeff Bezos",
+      "mood": "office"
+    },
+    {
+      "id": 102,
+      "text": "It takes 20 years to build a reputation\nand five minutes to ruin it.\n— Warren Buffett",
+      "mood": "office"
+    },
+    {
+      "id": 103,
+      "text": "Pressure is a privilege.\n— Billie Jean King",
+      "mood": "worth"
+    },
+    {
+      "id": 104,
+      "text": "Effortless is a myth.\n— Roger Federer",
+      "mood": "truth"
+    },
+    {
+      "id": 105,
+      "text": "The process is more important\nthan the result.\n— M.S. Dhoni",
+      "mood": "mindset"
+    },
+    {
+      "id": 106,
+      "text": "People throw stones at you and you\nconvert them into milestones.\n— Sachin Tendulkar",
+      "mood": "resilience"
+    },
+    {
+      "id": 107,
+      "text": "What stands in the way\nbecomes the way.\n— Marcus Aurelius",
+      "mood": "resilience"
+    },
+    {
+      "id": 108,
+      "text": "Some want it to happen. Some wish it would.\nOthers make it happen.\n— Michael Jordan",
+      "mood": "office"
+    },
+    {
+      "id": 109,
+      "text": "Play long-term games\nwith long-term people.\n— Naval Ravikant",
+      "mood": "office"
+    },
+    {
+      "id": 110,
+      "text": "Enthusiasm is common.\nEndurance is rare.\n— Angela Duckworth",
+      "mood": "truth"
+    },
+    {
+      "id": 111,
+      "text": "Make each day your masterpiece.\n— John Wooden",
+      "mood": "mindset"
+    },
+    {
+      "id": 112,
+      "text": "Ease is a greater threat to progress\nthan hardship.\n— Denzel Washington",
+      "mood": "truth"
+    },
+    {
+      "id": 113,
+      "text": "The worst thing I can be is\nthe same as everybody else.\n— Arnold Schwarzenegger",
+      "mood": "worth"
+    },
+    {
+      "id": 114,
+      "text": "Dream is not what you see while sleeping.\nIt is what does not let you sleep.\n— A.P.J. Abdul Kalam",
+      "mood": "mindset"
+    },
+    {
+      "id": 115,
+      "text": "Talent without working hard\nis nothing.\n— Cristiano Ronaldo",
+      "mood": "truth"
     }
   ]
 }
