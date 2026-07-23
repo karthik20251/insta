@@ -1,104 +1,504 @@
 {
   "lines": [
-    { "id": 1,  "text": "Doing your job description is not quiet quitting. It's the job.",                   "mood": "worth" },
-    { "id": 2,  "text": "They didn't lay you off. They freed you from a sinking ship.",                       "mood": "resilience" },
-    { "id": 3,  "text": "AI won't take your job. The person using AI will.",                                  "mood": "office" },
-    { "id": 4,  "text": "Protect your peace like it's the last seat on the lifeboat.",                        "mood": "worth" },
-    { "id": 5,  "text": "Tired is not a personality trait. Take the PTO.",                                    "mood": "mindset" },
-    { "id": 6,  "text": "Promotions don't go to the busiest person.\nThey go to the most visible one.",       "mood": "office" },
-    { "id": 7,  "text": "Your boss isn't your friend.\nYour boss is on the layoff committee.",                "mood": "office" },
-    { "id": 8,  "text": "Six months of savings is more leverage\nthan ten years of loyalty.",                 "mood": "worth" },
-    { "id": 9,  "text": "Hustle culture made millionaires of CEOs\nand burnouts of employees.",               "mood": "truth" },
-    { "id": 10, "text": "Loyalty to a company that wouldn't replace you in a week\nis not virtue.",           "mood": "office" },
-    { "id": 11, "text": "Your value didn't decrease\nthe day they cut your role.",                            "mood": "resilience" },
-    { "id": 12, "text": "If your boss stopped asking your opinion,\nupdate your resume.",                     "mood": "office" },
-    { "id": 13, "text": "The complainer in every 1:1\ngets cut first.",                                       "mood": "truth" },
-    { "id": 14, "text": "Quiet firing is the new\nperformance review.",                                       "mood": "office" },
-    { "id": 15, "text": "Three signs your role is about to be eliminated.\nSave this.",                       "mood": "office" },
-    { "id": 16, "text": "Work hard in silence.\nLet your success make the noise.",                            "mood": "office" },
-    { "id": 17, "text": "No is a complete sentence.",                                                         "mood": "worth" },
-    { "id": 18, "text": "Stop watering dead plants.",                                                         "mood": "resilience" },
-    { "id": 19, "text": "What's meant for you\nwon't pass you by.",                                           "mood": "mindset" },
-    { "id": 20, "text": "Healing isn't linear.\nAnd look how far you've come.",                               "mood": "resilience" },
-    { "id": 21, "text": "Hard times create strong people.",                                                   "mood": "resilience" },
-    { "id": 22, "text": "Quiet confidence.",                                                                  "mood": "worth" },
-    { "id": 23, "text": "You can't pour from an empty cup.",                                                  "mood": "mindset" },
-    { "id": 24, "text": "Hurt people hurt people.",                                                           "mood": "truth" },
-    { "id": 25, "text": "Romanticize your life.",                                                             "mood": "mindset" },
-    { "id": 26, "text": "Your peace is your power.",                                                          "mood": "worth" },
-    { "id": 27, "text": "Soft life.\nHard boundaries.",                                                       "mood": "worth" },
-    { "id": 28, "text": "Your vibe attracts your tribe.",                                                     "mood": "mindset" },
-    { "id": 29, "text": "Self love isn't selfish.",                                                           "mood": "worth" },
-    { "id": 30, "text": "Don't watch the clock.\nDo what it does. Keep going.",                               "mood": "mindset" },
-    { "id": 31, "text": "The only way to do great work\nis to love what you do.",                              "mood": "mindset" },
-    { "id": 32, "text": "Don't stop when you're tired.\nStop when you're done.",                               "mood": "truth" },
-    { "id": 33, "text": "Be yourself.\nEveryone else is already taken.",                                       "mood": "worth" },
-    { "id": 34, "text": "Comparison is the thief of joy.",                                                     "mood": "truth" },
-    { "id": 35, "text": "Discipline equals freedom.",                                                          "mood": "truth" },
-    { "id": 36, "text": "She believed she could,\nso she did.",                                                "mood": "resilience" },
-    { "id": 37, "text": "Layoffs don't take the worst performers.\nThey take the most replaceable.",           "mood": "resilience" },
-    { "id": 38, "text": "Working late doesn't mean working smart.\nIt means bad boundaries.",                   "mood": "mindset" },
-    { "id": 39, "text": "The manager who says 'we're all family here'\nis the one who lays you off first.",     "mood": "office" },
-    { "id": 40, "text": "Getting passed over for promotion twice?\nThey're grooming your replacement.",         "mood": "office" },
-    { "id": 41, "text": "Your salary won't grow at the same company.\nYour job market value will.",             "mood": "worth" },
-    { "id": 42, "text": "Stop giving 110 percent.\nYour 100 is what they're paying for.",                       "mood": "worth" },
-    { "id": 43, "text": "The employee of the month\nis usually the first to burn out.",                         "mood": "truth" },
-    { "id": 44, "text": "Success at work is 30 percent skills,\n70 percent who sees your work.",                "mood": "office" },
-    { "id": 45, "text": "If your job requires you to prove your worth every quarter,\nthey don't value you.",   "mood": "worth" },
-    { "id": 46, "text": "Your promotion isn't given.\nIt's negotiated.",                                        "mood": "office" },
-    { "id": 47, "text": "The best career move you'll ever make\nis knowing when to leave.",                     "mood": "resilience" },
-    { "id": 48, "text": "Coffee badging isn't quiet quitting.\nIt's protecting your energy.",                   "mood": "office" },
-    { "id": 49, "text": "Bare minimum Mondays.\nMaximum output when it matters.",                               "mood": "mindset" },
-    { "id": 50, "text": "Rage applying at 2 AM\nis 2026 career maintenance.",                                   "mood": "resilience" },
-    { "id": 51, "text": "If your only value is being cheap,\nyou're replaceable.",                              "mood": "worth" },
-    { "id": 52, "text": "Nobody's coming to save your career.\nNobody.",                                        "mood": "truth" },
-    { "id": 53, "text": "You're not underpaid.\nYou're under-negotiated.",                                      "mood": "truth" },
-    { "id": 54, "text": "Your comfort zone is why\nyou're still in the same role.",                             "mood": "truth" },
-    { "id": 55, "text": "They're not ignoring your work.\nYou're hiding it.",                                   "mood": "office" },
-    { "id": 56, "text": "You didn't get passed over.\nYou got out-positioned.",                                 "mood": "office" },
-    { "id": 57, "text": "You've been 'about to update your resume'\nfor two years.",                            "mood": "truth" },
-    { "id": 58, "text": "Scrolling job posts at midnight\nisn't applying.",                                     "mood": "truth" },
-    { "id": 59, "text": "You know exactly what you should do.\nYou're just scared to do it.",                   "mood": "mindset" },
-    { "id": 60, "text": "Being busy is not a personality.\nResults are.",                                       "mood": "office" },
-    { "id": 61, "text": "You're not tired.\nYou're uninspired and staying anyway.",                             "mood": "truth" },
-    { "id": 62, "text": "The raise you're waiting for\nwent to someone who asked.",                             "mood": "office" },
-    { "id": 63, "text": "Nobody remembers who stayed late.\nThey remember who delivered.",                      "mood": "office" },
-    { "id": 64, "text": "Stop rehearsing the resignation speech.\nSend the application.",                       "mood": "mindset" },
-    { "id": 65, "text": "Your network isn't small.\nYou just never message anyone.",                            "mood": "truth" },
-    { "id": 66, "text": "Complaining to coworkers changes nothing.\nDocumenting and leaving does.",             "mood": "office" },
-    { "id": 67, "text": "HR is not your therapist.\nHR protects the company.",                                  "mood": "truth" },
-    { "id": 68, "text": "Your job title is rented.\nYour skills are owned.",                                    "mood": "worth" },
-    { "id": 69, "text": "The office favorite changes every quarter.\nThe skilled one doesn't.",                 "mood": "office" },
-    { "id": 70, "text": "You're one reorg away from\n'we're going in a different direction.'",                  "mood": "truth" },
-    { "id": 71, "text": "Meetings that could've been emails\nare stealing your career hours.",                  "mood": "office" },
-    { "id": 72, "text": "The person who documents\nwins the argument three months later.",                      "mood": "office" },
-    { "id": 73, "text": "'Let's circle back' means no.\nLearn the language.",                                   "mood": "office" },
-    { "id": 74, "text": "Your manager's promise isn't in writing?\nIt doesn't exist.",                          "mood": "truth" },
-    { "id": 75, "text": "Job security died in 2020.\nSkill security is the new plan.",                          "mood": "resilience" },
-    { "id": 76, "text": "They pay you to solve problems,\nnot to be liked.",                                    "mood": "worth" },
-    { "id": 77, "text": "An open-door policy\ndoesn't mean the door is safe.",                                  "mood": "office" },
-    { "id": 78, "text": "Every 'quick favor' unpaid\nis a skill they should be hiring for.",                    "mood": "worth" },
-    { "id": 79, "text": "Overtime is a donation to a company\nthat tracks your sick days.",                     "mood": "truth" },
-    { "id": 80, "text": "The loudest person in the meeting\nis rarely the smartest. Just the most promoted.",   "mood": "office" },
-    { "id": 81, "text": "Never fight for a company\nthat's already interviewing your replacement.",             "mood": "resilience" },
-    { "id": 82, "text": "If everyone likes you at work,\nyou're doing too many favors.",                        "mood": "truth" },
-    { "id": 83, "text": "'We're like a family' means\nunpaid overtime is coming.",                              "mood": "office" },
-    { "id": 84, "text": "The best time to job hunt\nis when you don't need to.",                                "mood": "mindset" },
-    { "id": 85, "text": "Loyalty is a two-way street.\nYours is the only lane open.",                           "mood": "truth" },
-    { "id": 86, "text": "Your burnout won't be mentioned at your farewell.\nYour replacement starts Monday.",   "mood": "truth" },
-    { "id": 87, "text": "Skills get you hired.\nPolitics get you promoted. Learn both.",                        "mood": "office" },
-    { "id": 88, "text": "Stop treating your resume like a diary.\nIt's a sales page.",                          "mood": "mindset" },
-    { "id": 89, "text": "A raise below inflation\nis a pay cut with a thank-you card.",                         "mood": "truth" },
-    { "id": 90, "text": "Your boss's boss doesn't know you exist.\nThat's the actual problem.",                 "mood": "office" },
-    { "id": 91, "text": "Quiet quitting?\nThey quiet fired you first.",                                         "mood": "office" },
-    { "id": 92, "text": "'Other duties as assigned'\nis doing three jobs for one salary.",                      "mood": "truth" },
-    { "id": 93, "text": "Nobody at work needs to know\neverything you're capable of. Yet.",                     "mood": "office" },
-    { "id": 94, "text": "Recognition delayed\nis recognition denied.",                                          "mood": "worth" },
-    { "id": 95, "text": "The exit interview is not the time for honesty.\nThe job hunt was.",                   "mood": "office" },
-    { "id": 96, "text": "You can't out-perform a bad manager.\nYou can only out-leave them.",                   "mood": "resilience" },
-    { "id": 97, "text": "Perfect attendance\nis not a career strategy.",                                        "mood": "mindset" },
-    { "id": 98, "text": "They replaced someone before you.\nThey'll replace someone after you.",                "mood": "truth" },
-    { "id": 99, "text": "The salary band was always negotiable.\nThey just didn't tell you.",                   "mood": "worth" },
-    { "id": 100, "text": "Work hard.\nBut know exactly who's watching before you do.",                          "mood": "office" }
+    {
+      "id": 1,
+      "text": "Doing your job description is not quiet quitting. It's the job.",
+      "mood": "worth"
+    },
+    {
+      "id": 2,
+      "text": "They didn't lay you off. They freed you from a sinking ship.",
+      "mood": "resilience"
+    },
+    {
+      "id": 3,
+      "text": "AI won't take your job. The person using AI will.",
+      "mood": "office"
+    },
+    {
+      "id": 4,
+      "text": "Protect your peace like it's the last seat on the lifeboat.",
+      "mood": "worth"
+    },
+    {
+      "id": 5,
+      "text": "Tired is not a personality trait. Take the PTO.",
+      "mood": "mindset"
+    },
+    {
+      "id": 6,
+      "text": "Promotions don't go to the busiest person.\nThey go to the most visible one.",
+      "mood": "office"
+    },
+    {
+      "id": 7,
+      "text": "Your boss isn't your friend.\nYour boss is on the layoff committee.",
+      "mood": "office"
+    },
+    {
+      "id": 8,
+      "text": "Six months of savings is more leverage\nthan ten years of loyalty.",
+      "mood": "worth"
+    },
+    {
+      "id": 9,
+      "text": "Hustle culture made millionaires of CEOs\nand burnouts of employees.",
+      "mood": "truth"
+    },
+    {
+      "id": 10,
+      "text": "Loyalty to a company that wouldn't replace you in a week\nis not virtue.",
+      "mood": "office"
+    },
+    {
+      "id": 11,
+      "text": "Your value didn't decrease\nthe day they cut your role.",
+      "mood": "resilience"
+    },
+    {
+      "id": 12,
+      "text": "If your boss stopped asking your opinion,\nupdate your resume.",
+      "mood": "office"
+    },
+    {
+      "id": 13,
+      "text": "The complainer in every 1:1\ngets cut first.",
+      "mood": "truth"
+    },
+    {
+      "id": 14,
+      "text": "Quiet firing is the new\nperformance review.",
+      "mood": "office"
+    },
+    {
+      "id": 15,
+      "text": "Three signs your role is about to be eliminated.\nSave this.",
+      "mood": "office"
+    },
+    {
+      "id": 16,
+      "text": "Work hard in silence.\nLet your success make the noise.",
+      "mood": "office"
+    },
+    {
+      "id": 17,
+      "text": "No is a complete sentence.",
+      "mood": "worth"
+    },
+    {
+      "id": 18,
+      "text": "Stop watering dead plants.",
+      "mood": "resilience"
+    },
+    {
+      "id": 19,
+      "text": "What's meant for you\nwon't pass you by.",
+      "mood": "mindset"
+    },
+    {
+      "id": 20,
+      "text": "Healing isn't linear.\nAnd look how far you've come.",
+      "mood": "resilience"
+    },
+    {
+      "id": 21,
+      "text": "Hard times create strong people.",
+      "mood": "resilience"
+    },
+    {
+      "id": 22,
+      "text": "Quiet confidence.",
+      "mood": "worth"
+    },
+    {
+      "id": 23,
+      "text": "You can't pour from an empty cup.",
+      "mood": "mindset"
+    },
+    {
+      "id": 24,
+      "text": "Hurt people hurt people.",
+      "mood": "truth"
+    },
+    {
+      "id": 25,
+      "text": "Romanticize your life.",
+      "mood": "mindset"
+    },
+    {
+      "id": 26,
+      "text": "Your peace is your power.",
+      "mood": "worth"
+    },
+    {
+      "id": 27,
+      "text": "Soft life.\nHard boundaries.",
+      "mood": "worth"
+    },
+    {
+      "id": 28,
+      "text": "Your vibe attracts your tribe.",
+      "mood": "mindset"
+    },
+    {
+      "id": 29,
+      "text": "Self love isn't selfish.",
+      "mood": "worth"
+    },
+    {
+      "id": 30,
+      "text": "Don't watch the clock.\nDo what it does. Keep going.",
+      "mood": "mindset"
+    },
+    {
+      "id": 31,
+      "text": "The only way to do great work\nis to love what you do.",
+      "mood": "mindset"
+    },
+    {
+      "id": 32,
+      "text": "Don't stop when you're tired.\nStop when you're done.",
+      "mood": "truth"
+    },
+    {
+      "id": 33,
+      "text": "Be yourself.\nEveryone else is already taken.",
+      "mood": "worth"
+    },
+    {
+      "id": 34,
+      "text": "Comparison is the thief of joy.",
+      "mood": "truth"
+    },
+    {
+      "id": 35,
+      "text": "Discipline equals freedom.",
+      "mood": "truth"
+    },
+    {
+      "id": 36,
+      "text": "She believed she could,\nso she did.",
+      "mood": "resilience"
+    },
+    {
+      "id": 37,
+      "text": "Layoffs don't take the worst performers.\nThey take the most replaceable.",
+      "mood": "resilience"
+    },
+    {
+      "id": 38,
+      "text": "Working late doesn't mean working smart.\nIt means bad boundaries.",
+      "mood": "mindset"
+    },
+    {
+      "id": 39,
+      "text": "The manager who says 'we're all family here'\nis the one who lays you off first.",
+      "mood": "office"
+    },
+    {
+      "id": 40,
+      "text": "Getting passed over for promotion twice?\nThey're grooming your replacement.",
+      "mood": "office"
+    },
+    {
+      "id": 41,
+      "text": "Your salary won't grow at the same company.\nYour job market value will.",
+      "mood": "worth"
+    },
+    {
+      "id": 42,
+      "text": "Stop giving 110 percent.\nYour 100 is what they're paying for.",
+      "mood": "worth"
+    },
+    {
+      "id": 43,
+      "text": "The employee of the month\nis usually the first to burn out.",
+      "mood": "truth"
+    },
+    {
+      "id": 44,
+      "text": "Success at work is 30 percent skills,\n70 percent who sees your work.",
+      "mood": "office"
+    },
+    {
+      "id": 45,
+      "text": "If your job requires you to prove your worth every quarter,\nthey don't value you.",
+      "mood": "worth"
+    },
+    {
+      "id": 46,
+      "text": "Your promotion isn't given.\nIt's negotiated.",
+      "mood": "office"
+    },
+    {
+      "id": 47,
+      "text": "The best career move you'll ever make\nis knowing when to leave.",
+      "mood": "resilience"
+    },
+    {
+      "id": 48,
+      "text": "Coffee badging isn't quiet quitting.\nIt's protecting your energy.",
+      "mood": "office"
+    },
+    {
+      "id": 49,
+      "text": "Bare minimum Mondays.\nMaximum output when it matters.",
+      "mood": "mindset"
+    },
+    {
+      "id": 50,
+      "text": "Rage applying at 2 AM\nis 2026 career maintenance.",
+      "mood": "resilience"
+    },
+    {
+      "id": 51,
+      "text": "If your only value is being cheap,\nyou're replaceable.",
+      "mood": "worth"
+    },
+    {
+      "id": 52,
+      "text": "Nobody's coming to save your career.\nNobody.",
+      "mood": "truth"
+    },
+    {
+      "id": 53,
+      "text": "You're not underpaid.\nYou're under-negotiated.",
+      "mood": "truth"
+    },
+    {
+      "id": 54,
+      "text": "Your comfort zone is why\nyou're still in the same role.",
+      "mood": "truth"
+    },
+    {
+      "id": 55,
+      "text": "They're not ignoring your work.\nYou're hiding it.",
+      "mood": "office"
+    },
+    {
+      "id": 56,
+      "text": "You didn't get passed over.\nYou got out-positioned.",
+      "mood": "office"
+    },
+    {
+      "id": 57,
+      "text": "You've been 'about to update your resume'\nfor two years.",
+      "mood": "truth"
+    },
+    {
+      "id": 58,
+      "text": "Scrolling job posts at midnight\nisn't applying.",
+      "mood": "truth"
+    },
+    {
+      "id": 59,
+      "text": "You know exactly what you should do.\nYou're just scared to do it.",
+      "mood": "mindset"
+    },
+    {
+      "id": 60,
+      "text": "Being busy is not a personality.\nResults are.",
+      "mood": "office"
+    },
+    {
+      "id": 61,
+      "text": "You're not tired.\nYou're uninspired and staying anyway.",
+      "mood": "truth"
+    },
+    {
+      "id": 62,
+      "text": "The raise you're waiting for\nwent to someone who asked.",
+      "mood": "office"
+    },
+    {
+      "id": 63,
+      "text": "Nobody remembers who stayed late.\nThey remember who delivered.",
+      "mood": "office"
+    },
+    {
+      "id": 64,
+      "text": "Stop rehearsing the resignation speech.\nSend the application.",
+      "mood": "mindset"
+    },
+    {
+      "id": 65,
+      "text": "Your network isn't small.\nYou just never message anyone.",
+      "mood": "truth"
+    },
+    {
+      "id": 66,
+      "text": "Complaining to coworkers changes nothing.\nDocumenting and leaving does.",
+      "mood": "office"
+    },
+    {
+      "id": 67,
+      "text": "HR is not your therapist.\nHR protects the company.",
+      "mood": "truth"
+    },
+    {
+      "id": 68,
+      "text": "Your job title is rented.\nYour skills are owned.",
+      "mood": "worth"
+    },
+    {
+      "id": 69,
+      "text": "Act your wage.\nExtra effort is a paid feature.",
+      "mood": "office"
+    },
+    {
+      "id": 70,
+      "text": "You're one reorg away from\n'we're going in a different direction.'",
+      "mood": "truth"
+    },
+    {
+      "id": 71,
+      "text": "Career cushioning isn't disloyalty.\nIt's a seatbelt.",
+      "mood": "resilience"
+    },
+    {
+      "id": 72,
+      "text": "The person who documents\nwins the argument three months later.",
+      "mood": "office"
+    },
+    {
+      "id": 73,
+      "text": "'Let's circle back' means no.\nLearn the language.",
+      "mood": "office"
+    },
+    {
+      "id": 74,
+      "text": "Your manager's promise isn't in writing?\nIt doesn't exist.",
+      "mood": "truth"
+    },
+    {
+      "id": 75,
+      "text": "Job security died in 2020.\nSkill security is the new plan.",
+      "mood": "resilience"
+    },
+    {
+      "id": 76,
+      "text": "They pay you to solve problems,\nnot to be liked.",
+      "mood": "worth"
+    },
+    {
+      "id": 77,
+      "text": "Resenteeism: staying at a job\nyou already quit in your head.",
+      "mood": "truth"
+    },
+    {
+      "id": 78,
+      "text": "Every 'quick favor' unpaid\nis a skill they should be hiring for.",
+      "mood": "worth"
+    },
+    {
+      "id": 79,
+      "text": "Overtime is a donation to a company\nthat tracks your sick days.",
+      "mood": "truth"
+    },
+    {
+      "id": 80,
+      "text": "The loudest person in the meeting\nis rarely the smartest. Just the most promoted.",
+      "mood": "office"
+    },
+    {
+      "id": 81,
+      "text": "Never fight for a company\nthat's already interviewing your replacement.",
+      "mood": "resilience"
+    },
+    {
+      "id": 82,
+      "text": "Job hugging a role you hate\nis still a dead end.",
+      "mood": "truth"
+    },
+    {
+      "id": 83,
+      "text": "'We're like a family' means\nunpaid overtime is coming.",
+      "mood": "office"
+    },
+    {
+      "id": 84,
+      "text": "The best time to job hunt\nis when you don't need to.",
+      "mood": "mindset"
+    },
+    {
+      "id": 85,
+      "text": "Loyalty is a two-way street.\nYours is the only lane open.",
+      "mood": "truth"
+    },
+    {
+      "id": 86,
+      "text": "Your burnout won't be mentioned at your farewell.\nYour replacement starts Monday.",
+      "mood": "truth"
+    },
+    {
+      "id": 87,
+      "text": "Skills get you hired.\nPolitics get you promoted. Learn both.",
+      "mood": "office"
+    },
+    {
+      "id": 88,
+      "text": "Stop treating your resume like a diary.\nIt's a sales page.",
+      "mood": "mindset"
+    },
+    {
+      "id": 89,
+      "text": "A raise below inflation\nis a pay cut with a thank-you card.",
+      "mood": "truth"
+    },
+    {
+      "id": 90,
+      "text": "Your boss's boss doesn't know you exist.\nThat's the actual problem.",
+      "mood": "office"
+    },
+    {
+      "id": 91,
+      "text": "Quiet quitting?\nThey quiet fired you first.",
+      "mood": "office"
+    },
+    {
+      "id": 92,
+      "text": "'Other duties as assigned'\nis doing three jobs for one salary.",
+      "mood": "truth"
+    },
+    {
+      "id": 93,
+      "text": "Nobody at work needs to know\neverything you're capable of. Yet.",
+      "mood": "office"
+    },
+    {
+      "id": 94,
+      "text": "Recognition delayed\nis recognition denied.",
+      "mood": "worth"
+    },
+    {
+      "id": 95,
+      "text": "The exit interview is not the time for honesty.\nThe job hunt was.",
+      "mood": "office"
+    },
+    {
+      "id": 96,
+      "text": "You can't out-perform a bad manager.\nYou can only out-leave them.",
+      "mood": "resilience"
+    },
+    {
+      "id": 97,
+      "text": "The 'lazy girl job' trend isn't lazy.\nIt's correctly priced work.",
+      "mood": "worth"
+    },
+    {
+      "id": 98,
+      "text": "They replaced someone before you.\nThey'll replace someone after you.",
+      "mood": "truth"
+    },
+    {
+      "id": 99,
+      "text": "The salary band was always negotiable.\nThey just didn't tell you.",
+      "mood": "worth"
+    },
+    {
+      "id": 100,
+      "text": "Work hard.\nBut know exactly who's watching before you do.",
+      "mood": "office"
+    }
   ]
 }
