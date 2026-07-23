@@ -187,8 +187,8 @@
     },
     {
       "id": 38,
-      "text": "Working late doesn't mean working smart.\nIt means bad boundaries.",
-      "mood": "mindset"
+      "text": "Working late doesn't mean working smart.\nIt means free labor.",
+      "mood": "truth"
     },
     {
       "id": 39,
@@ -197,12 +197,12 @@
     },
     {
       "id": 40,
-      "text": "Getting passed over for promotion twice?\nThey're grooming your replacement.",
+      "text": "Passed over twice isn't bad luck.\nIt's a decision.",
       "mood": "office"
     },
     {
       "id": 41,
-      "text": "Your salary won't grow at the same company.\nYour job market value will.",
+      "text": "Salaries grow 3 percent by staying.\n30 percent by leaving.",
       "mood": "worth"
     },
     {
@@ -212,7 +212,7 @@
     },
     {
       "id": 43,
-      "text": "The employee of the month\nis usually the first to burn out.",
+      "text": "The employee of the month\nis the first to burn out.",
       "mood": "truth"
     },
     {
@@ -222,7 +222,7 @@
     },
     {
       "id": 45,
-      "text": "If your job requires you to prove your worth every quarter,\nthey don't value you.",
+      "text": "If you have to re-earn your job every quarter,\nyou never had it.",
       "mood": "worth"
     },
     {
@@ -252,7 +252,7 @@
     },
     {
       "id": 51,
-      "text": "If your only value is being cheap,\nyou're replaceable.",
+      "text": "If being cheap is your only edge,\nsomeone cheaper is coming.",
       "mood": "worth"
     },
     {
@@ -267,7 +267,7 @@
     },
     {
       "id": 54,
-      "text": "Your comfort zone is why\nyou're still in the same role.",
+      "text": "Your comfort zone pays exactly\nwhat it paid three years ago.",
       "mood": "truth"
     },
     {
@@ -297,7 +297,7 @@
     },
     {
       "id": 60,
-      "text": "Being busy is not a personality.\nResults are.",
+      "text": "Busy is not an achievement.\nDelivered is.",
       "mood": "office"
     },
     {
@@ -387,7 +387,7 @@
     },
     {
       "id": 78,
-      "text": "Every 'quick favor' unpaid\nis a skill they should be hiring for.",
+      "text": "Every 'quick favor' is a job\nthey didn't want to pay for.",
       "mood": "worth"
     },
     {
@@ -412,7 +412,7 @@
     },
     {
       "id": 83,
-      "text": "'We're like a family' means\nunpaid overtime is coming.",
+      "text": "'Fast-paced environment' means understaffed.\nLearn the translation.",
       "mood": "office"
     },
     {
@@ -472,7 +472,7 @@
     },
     {
       "id": 95,
-      "text": "The exit interview is not the time for honesty.\nThe job hunt was.",
+      "text": "Exit interviews change nothing.\nExits do.",
       "mood": "office"
     },
     {
