@@ -47,7 +47,7 @@
     },
     {
       "id": 10,
-      "text": "Loyalty to a company that wouldn't replace you in a week\nis not virtue.",
+      "text": "Loyalty to a company that would replace you in a week\nis not virtue.",
       "mood": "office"
     },
     {
@@ -72,7 +72,7 @@
     },
     {
       "id": 15,
-      "text": "Three signs your role is about to be eliminated.\nSave this.",
+      "text": "Your role isn't eliminated in the meeting.\nIt's eliminated months before, quietly.",
       "mood": "office"
     },
     {
@@ -147,7 +147,7 @@
     },
     {
       "id": 30,
-      "text": "Don't watch the clock.\nDo what it does. Keep going.",
+      "text": "Don't watch the clock.\nDo what it does. Keep going.\n— Sam Levenson",
       "mood": "mindset"
     },
     {
@@ -412,7 +412,7 @@
     },
     {
       "id": 83,
-      "text": "'Fast-paced environment' means understaffed.\nLearn the translation.",
+      "text": "'Fast-paced environment' means understaffed.\nJob posts are written in code.",
       "mood": "office"
     },
     {
