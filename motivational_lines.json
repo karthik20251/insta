@@ -27,7 +27,7 @@
     },
     {
       "id": 6,
-      "text": "Promotions don't go to the busiest person.\nThey go to the most visible one.",
+      "text": "Promotions don't go to the busiest.\nThey go to the most visible.",
       "mood": "office"
     },
     {
@@ -72,7 +72,7 @@
     },
     {
       "id": 15,
-      "text": "Your role isn't eliminated in the meeting.\nIt's eliminated months before, quietly.",
+      "text": "Roles aren't cut in the meeting.\nThey're cut months in advance.",
       "mood": "office"
     },
     {
@@ -182,7 +182,7 @@
     },
     {
       "id": 37,
-      "text": "Layoffs don't take the worst performers.\nThey take the most replaceable.",
+      "text": "Layoffs don't take the worst.\nThey take the most replaceable.",
       "mood": "resilience"
     },
     {
@@ -192,7 +192,7 @@
     },
     {
       "id": 39,
-      "text": "The manager who says 'we're all family here'\nis the one who lays you off first.",
+      "text": "The 'we're all family' manager\nis the one who cuts you first.",
       "mood": "office"
     },
     {
@@ -327,7 +327,7 @@
     },
     {
       "id": 66,
-      "text": "Complaining to coworkers changes nothing.\nDocumenting and leaving does.",
+      "text": "Complaining changes nothing.\nDocumenting and leaving does.",
       "mood": "office"
     },
     {
@@ -397,7 +397,7 @@
     },
     {
       "id": 80,
-      "text": "The loudest person in the meeting\nis rarely the smartest. Just the most promoted.",
+      "text": "The loudest voice isn't the smartest.\nJust the most promoted.",
       "mood": "office"
     },
     {
@@ -427,7 +427,7 @@
     },
     {
       "id": 86,
-      "text": "Your burnout won't be mentioned at your farewell.\nYour replacement starts Monday.",
+      "text": "Burnout gets no farewell mail.\nYour replacement starts Monday.",
       "mood": "truth"
     },
     {
@@ -462,7 +462,7 @@
     },
     {
       "id": 93,
-      "text": "Nobody at work needs to know\neverything you're capable of. Yet.",
+      "text": "Nobody needs to know everything\nyou're capable of. Yet.",
       "mood": "office"
     },
     {
@@ -487,7 +487,7 @@
     },
     {
       "id": 98,
-      "text": "They replaced someone before you.\nThey'll replace someone after you.",
+      "text": "They replaced people before you.\nThey'll replace people after.",
       "mood": "truth"
     },
     {
@@ -502,7 +502,7 @@
     },
     {
       "id": 101,
-      "text": "Your brand is what people say about you\nwhen you're not in the room.\n— Jeff Bezos",
+      "text": "Your brand is what other people say about you\nwhen you're not in the room.\n— Jeff Bezos",
       "mood": "office"
     },
     {
@@ -537,7 +537,7 @@
     },
     {
       "id": 108,
-      "text": "Some want it to happen. Some wish it would.\nOthers make it happen.\n— Michael Jordan",
+      "text": "Some people want it to happen, some wish it would happen,\nothers make it happen.\n— Michael Jordan",
       "mood": "office"
     },
     {
@@ -567,7 +567,7 @@
     },
     {
       "id": 114,
-      "text": "Dream is not what you see while sleeping.\nIt is what does not let you sleep.\n— A.P.J. Abdul Kalam",
+      "text": "Dream is not that which you see while sleeping, it is\nsomething that does not let you sleep.\n— A.P.J. Abdul Kalam",
       "mood": "mindset"
     },
     {
@@ -602,7 +602,7 @@
     },
     {
       "id": 121,
-      "text": "Success comes down to focus and effort.\nWe control both.\n— Dwayne Johnson",
+      "text": "Success at anything will always come down to this:\nfocus and effort. And we control both.\n— Dwayne Johnson",
       "mood": "mindset"
     },
     {
@@ -617,7 +617,7 @@
     },
     {
       "id": 124,
-      "text": "I'd rather regret the risks that didn't work\nthan the chances I didn't take.\n— Simone Biles",
+      "text": "I'd rather regret the risks that didn't work out\nthan the chances I didn't take at all.\n— Simone Biles",
       "mood": "resilience"
     },
     {

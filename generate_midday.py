@@ -445,6 +445,19 @@ def render(line: dict, out_png: Path) -> None:
     if not text:
         raise ValueError(f"Line id={line_id} has empty 'text'")
 
+    # 2026-06-21: attribution bylines. A final line starting with an em-dash
+    # ("— Name") is NOT part of the quote — it renders separately below the
+    # quote block in smaller gold type. Two reasons: (1) verbatim integrity —
+    # legend quotes must never be trimmed to fit, and pulling the byline out
+    # of the wrap budget gives the quote the full 3-line allowance at large
+    # font; (2) design — an attribution should read as a byline, not as a
+    # fourth quote line.
+    byline = None
+    _parts = text.split("\n")
+    if len(_parts) > 1 and _parts[-1].lstrip().startswith("—"):
+        byline = _parts[-1].strip()
+        text = "\n".join(_parts[:-1]).strip()
+
     font, wrapped = _fit_font(text, draw, max_w, max_lines=3)
 
     line_gap = 18
@@ -453,7 +466,15 @@ def render(line: dict, out_png: Path) -> None:
         b = draw.textbbox((0, 0), s, font=font)
         return b[3] - b[1]
 
-    total_h = sum(lh(s) for s in wrapped) + line_gap * max(0, len(wrapped) - 1)
+    byline_font = pick_font(["Cinzel.ttf"], 34, weight=700) if byline else None
+    byline_gap = 30
+    byline_h = 0
+    if byline:
+        bb = draw.textbbox((0, 0), byline, font=byline_font)
+        byline_h = (bb[3] - bb[1]) + byline_gap
+
+    total_h = (sum(lh(s) for s in wrapped)
+               + line_gap * max(0, len(wrapped) - 1) + byline_h)
     y = (HEIGHT - total_h) // 2
 
     for s in wrapped:
@@ -461,6 +482,11 @@ def render(line: dict, out_png: Path) -> None:
         x = (WIDTH - (b[2] - b[0])) // 2
         draw.text((x, y), s, fill=WHITE, font=font)
         y += lh(s) + line_gap
+
+    if byline:
+        bb = draw.textbbox((0, 0), byline, font=byline_font)
+        bx = (WIDTH - (bb[2] - bb[0])) // 2
+        draw.text((bx, y + byline_gap - line_gap), byline, fill=GOLD, font=byline_font)
 
     # Dual-handle gold watermark at bottom — both IG and YT handles with short
     # platform labels so viewers know which is which. Image stays usable on
