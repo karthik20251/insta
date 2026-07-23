@@ -153,6 +153,50 @@
 49. The room respects what you finish, not what you announce. — ORIGINAL
 50. Mastery is patience wearing work clothes. — ORIGINAL
 
+## Popular Legends — Wave 2 (verified additions)
+
+51. "Everyone has a plan until they get punched in the mouth."
+    — Mike Tyson (pre-fight remarks, 1987, documented)
+
+52. "I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times."
+    — Bruce Lee
+
+53. "You're getting off first, or I'm going to die on that treadmill."
+    — Will Smith (on-record interview, 2007 — the treadmill work-ethic quote)
+
+54. "Turn your wounds into wisdom."
+    — Oprah Winfrey
+
+55. "Failure is a feeling long before it becomes an actual result."
+    — Michelle Obama, Becoming
+
+56. "Success at anything will always come down to this: focus and effort. And we control both."
+    — Dwayne Johnson
+
+57. "You wanna know which ring is my favorite? The next one."
+    — Tom Brady
+
+58. "You can't put a limit on anything. The more you dream, the farther you get."
+    — Michael Phelps
+
+59. "I'd rather regret the risks that didn't work out than the chances I didn't take at all."
+    — Simone Biles
+
+60. "Rest at the end, not in the middle."
+    — Kobe Bryant
+
+61. "All my life I had a choice of hate and love. I chose love, and I'm here."
+    — A.R. Rahman (Oscar acceptance speech, 2009 — on video)
+
+62. "Wear your failure as a badge of honor."
+    — Sundar Pichai
+
+63. "I have not failed. I've just found 10,000 ways that won't work."
+    — Thomas Edison (traditionally attributed; documented lineage to early-1900s interviews)
+
+64. "The way to get started is to quit talking and begin doing."
+    — Walt Disney (traditionally attributed; used in Disney corporate materials)
+
 ## ⚠️ EXCLUDED — Famous but Misattributed (never post these with these names)
 
 - "Success is not final, failure is not fatal..." — NOT Churchill (no record; Churchill Society disclaims it)
@@ -163,3 +207,6 @@
 - "Hard work beats talent when talent doesn't work hard." — origin contested (commonly credited to Tim Notke, a high-school coach, without primary documentation)
 - Most viral "Virat Kohli quotes" — no primary sources; quotes ABOUT him get reworded into quotes BY him
 - "I trained 4 years to run 9 seconds." — Usain Bolt attribution has no documented source
+- "I don't take right decisions. I take decisions and make them right." — Ratan Tata PERSONALLY DENIED this on video (HEC Paris 2015; Business Today 2022): "It's a statement made by Facebook or Twitter." Fact-checked false by The Quint and NewsMeter.
+- "If you don't build your dream, someone will hire you to build theirs." — commonly attributed to Dhirubhai Ambani; no documented source (also floats under Tony Gaskins)
+- Most viral "Einstein" motivation quotes — Einstein is the most misattributed person on the internet; skip unless sourced to his papers
